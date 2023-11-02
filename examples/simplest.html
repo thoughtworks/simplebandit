@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Fruit Example</title>
+  </head>
+  <body>
+    <h1>Simplest Fruit Bandit</h1>
+    <p>
+      This is the simplest example of a bandit that is learning the preference
+      among three types of fruit: apple, pear or orange. 
+    </p>
+    <p>
+      We are only learning which fruit is preferred from eating or not eating, 
+      without regards to context and without regards to similarity
+      in features between actions.
+    </p>
+    <p>
+      Decide which fruit you like and then only eat that fruit. The bandit will
+      learn which fruit you like and will recommend it to you. Then change your
+      mind and see how quickly the bandit picks up on your new preference. 
+    </p>
+
+    <h2>Fruit probabilities:</h2>
+    <div id="action-probabilities"></div>
+
+    <h2>Recommended fruit:</h2>
+    <div id="recommended-fruit"></div>
+
+    <button id="eat-button">Eat</button>
+    <button id="dont-eat-button">Don't eat</button>
+
+    <script src="../simpleBandit.js"></script>
+    <script>
+      let bandit = SimpleBandit.fromActionIds(
+        ["apple", "pear", "orange"],
+        (softmaxBeta = 5.0),
+        (learningRate = 1.0)
+      );
+      let recommendation;
+
+      function generateNewRecommendation() {
+        recommendation = bandit.makeRecommendation();
+        document.getElementById("recommended-fruit").innerText =
+          recommendation.actionId;
+        let scoredActions = bandit.getScoredActions()
+        document.getElementById("action-probabilities").innerText =
+          scoredActions.map(function (scoredAction) {
+            return (
+              scoredAction.actionId +
+              " (" +
+              (scoredAction.probability * 100).toFixed(1) +
+              "%)"
+            );
+          }).join(", ");
+      }
+
+      generateNewRecommendation();
+
+      document
+        .getElementById("eat-button")
+        .addEventListener("click", async function () {
+          await bandit.acceptRecommendation(recommendation);
+          generateNewRecommendation();
+        });
+
+      document
+        .getElementById("dont-eat-button")
+        .addEventListener("click", async function () {
+          await bandit.rejectRecommendation(recommendation);
+          generateNewRecommendation();
+        });
+    </script>
+  </body>
+</html>

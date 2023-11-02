@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Fruit Example</title>
+  </head>
+  <body>
+    <h1>Simple Fruit Bandit</h1>
+    <p>
+      This is the simplest example of a bandit that is learning the preference
+      among three types of fruit: apple, pear or orange.
+    </p>
+    <p>
+      We are only learning which fruit is preferred from eating or not eating,
+      without regards to context and without regards to similarity in features
+      between actions.
+    </p>
+    <p>
+      Decide which fruit you like and then only eat that fruit. The bandit will
+      learn which fruit you like and will recommend it to you. Then change your
+      mind and see how quickly the bandit picks up on your new preference.
+    </p>
+    <p>
+      We add a learning rate and softmax controls plus a bunch more debug
+      information compared to simplest.html
+    </p>
+
+    <h2>Learning Rate:</h2>
+    <p>
+      Higher learning rates mean that the bandit will learn faster, but will
+      also forget faster.
+    </p>
+    <input type="number" id="learning-rate" value="1.0" step="0.1" />
+
+    <h2>Softmax Beta:</h2>
+    <p>
+      Higher softmax betas mean that the bandit will be more likely to choose
+      the action with the highest score.
+    </p>
+    <input type="number" id="softmax-beta" value="5.0" step="0.1" />
+
+    <h2>All action probabilities:</h2>
+    <div id="action-probabilities"></div>
+
+    <h2>Recommendation JSON:</h2>
+    <div id="recommendation-json"></div>
+
+    <h2>Recommended fruit:</h2>
+    <div id="recommended-fruit"></div>
+
+    <button id="eat-button">Eat</button>
+    <button id="dont-eat-button">Don't eat</button>
+
+    <h2>Training Data</h2>
+    <div id="training-data"></div>
+
+    <h2>JSON serialized bandit</h2>
+    <div id="serialized-bandit"></div>
+
+    <script src="../simpleBandit.js"></script>
+    <script>
+      let learningRateInput = document.getElementById("learning-rate");
+      let softmaxBetaInput = document.getElementById("softmax-beta");
+      let learningRate = parseFloat(learningRateInput.value);
+      let softmaxBeta = parseFloat(softmaxBetaInput.value);
+
+      let bandit = SimpleBandit.fromActionIds(
+        ["apple", "pear", "orange"],
+        (softmaxBeta = softmaxBeta),
+        (learningRate = learningRate)
+      );
+      let recommendation;
+      let trainingData = [];
+
+      learningRateInput.addEventListener("change", function () {
+        learningRate = parseFloat(learningRateInput.value);
+        bandit.oracle.learningRate = learningRate;
+      });
+      softmaxBetaInput.addEventListener("change", function () {
+        softmaxBeta = parseFloat(softmaxBetaInput.value);
+        bandit.softmaxBeta = softmaxBeta;
+        document.getElementById("action-probabilities").innerText =
+          JSON.stringify(bandit.getScoredActions());
+      });
+
+      function generateNewRecommendation() {
+        recommendation = bandit.makeRecommendation();
+        document.getElementById("recommended-fruit").innerText =
+          recommendation.actionId;
+        document.getElementById("recommendation-json").innerText =
+          JSON.stringify(recommendation);
+        document.getElementById("action-probabilities").innerText =
+          JSON.stringify(bandit.getScoredActions());
+      }
+
+      generateNewRecommendation();
+
+      document
+        .getElementById("eat-button")
+        .addEventListener("click", async function () {
+          newTrainingData = await bandit.acceptRecommendation(recommendation);
+          trainingData = trainingData.concat(newTrainingData);
+          document.getElementById("training-data").innerText =
+            JSON.stringify(trainingData);
+          document.getElementById("serialized-bandit").innerText =
+            bandit.toJSON();
+          generateNewRecommendation();
+        });
+
+      document
+        .getElementById("dont-eat-button")
+        .addEventListener("click", async function () {
+          newTrainingData = await bandit.rejectRecommendation(recommendation);
+          trainingData = trainingData.concat(newTrainingData);
+          document.getElementById("training-data").innerText =
+            JSON.stringify(trainingData);
+          document.getElementById("serialized-bandit").innerText =
+            bandit.toJSON();
+          generateNewRecommendation();
+        });
+    </script>
+  </body>
+</html>
