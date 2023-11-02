@@ -1,59 +1,66 @@
-# simpleBandit
-
-An npm library for contextual bandits called simpleBandit.
+# SimpleBandit
+SimpleBandit is a TypeScript library for contextual bandits. It provides classes and interfaces to create and manage bandit models, make recommendations, and train your models.
 
 ## Installation
 
-```bash
-npm install simpleBandit
+```sh
+npm install .
 ```
 
-## Usage
+## Usage Typescript
 
-```javascript
-const SimpleBandit = require('simpleBandit');
+```typescript
+import { SimpleBandit, SimpleOracle, IAction } from 'simplebandit';
 
-// Create a new bandit instance
-const bandit = new SimpleBandit(options);
+// Define your actions
+const actions: IAction[] = [
+  { actionId: 'apple', features: { fruit: 1 } },
+  { actionId: 'pear', features: { fruit: 1 } },
+  { actionId: 'chocolate', features: { fruit: 0 } },
+];
 
-// Update the bandit state
-bandit.updateState(newState);
+// Create an oracle
+const oracle = new SimpleOracle({
+  actionIds: ['apple', 'pear', 'chocolate'],
+  context: ['morning'],
+  actionFeatures: ['fruit'],
+  learningRate: 1.0,
+});
 
-// Select an action based on the current state
-const action = bandit.selectAction();
+// Create a bandit
+const bandit = new SimpleBandit(oracle, actions, 5.0);
 
-// Update the bandit based on the selected action and reward
-bandit.updateBandit(action, reward);
+// Make a recommendation
+const context = { morning: 1 };
+const recommendation = bandit.makeRecommendation(context);
+console.log(recomendation.actionId)
+// Accepting a recommendation makes the actionId more likely in the future
+bandit.acceptRecommendation(recommendation)
+
+const context2 = { morning: 0 };
+const recommendation2 = bandit.makeRecommendation(context);
+bandit.rejectRecommendation(recommendation)
+
 ```
 
-## API
+## Usage javascript
 
-### SimpleBandit(options)
+There are several pure javascript examples provided in the `examples/` directory:
 
-Constructor for SimpleBandit class.
+- `simplest.html`: only actions no debug info
+- `simple.html`: adds a lot more debug info to see what's going on
+- `actionfeatures.html`: An example of a bandit that uses action features to make recommendations.
+- `contextfeatures.html`: An example of a bandit that uses context features to make recommendations.
+- `multi.html`: An example of a MultiBandit that generates a slate of multiple recommendations.
 
-- `options` (object): Options for the bandit.
 
-### bandit.updateState(newState)
 
-Method to update the bandit state.
+## Testing
 
-- `newState` (object): New state to update.
+```sh
+npm run test
+```
 
-### bandit.selectAction()
+## Contributing
 
-Method to select an action based on the current state.
-
-Returns the selected action (string).
-
-### bandit.updateBandit(action, reward)
-
-Method to update the bandit based on the selected action and reward.
-
-- `action` (string): Selected action.
-- `reward` (number): Reward for the selected action.
-
-## License
-
-ISC
-
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
