@@ -21,7 +21,7 @@ import { SimpleBandit } from 'simplebandit';
 
 bandit = SimpleBandit.fromActionIds(['apple', 'pear']);
 
-recommendation = bandit.makeRecommendation();
+let recommendation = bandit.makeRecommendation();
 bandit.acceptRecommendation(recomendation);
 
 recommendation2 = bandit.makeRecommendation();
@@ -38,7 +38,7 @@ const actions: IAction[] = [
   { actionId: 'chocolate', features: { fruit: 0 } },
 ];
 
-bandit = SimpleBandit.fromActions(actions)
+const bandit = new SimpleBandit.fromActions(actions)
 ```
 
 ### Adding context
@@ -48,7 +48,7 @@ We can also learn preferences depending on a context, for example whether it is 
 
 const bandit = new SimpleBandit.fromContextAndActionIds(['rain'], ['apple', 'pear'])
 // const bandit = new SimpleBandit.fromContextAndActions(["rain"], actions])
-recommendation = bandit.makeRecommendation({rain:1})
+let recommendation = bandit.makeRecommendation({rain:1})
 ```
 
 ### Configuring learning rate and temperature
@@ -66,9 +66,9 @@ In order to get multiple recommendation (or a 'slate') you use `MultiBandit`:
 ```typescript
 import {MultiBandit} from 'simplebandit'
 
-bandit = new MultiBandit.fromActionIds(['apple', 'pear', 'banana'], (nRecommendations:2))
-recommendation = bandit.makeRecommendation()
-bandit.chooseAction(recommendation, 'apple')
+let bandit = new MultiBandit.fromActionIds(['apple', 'pear', 'banana'], (nRecommendations:2))
+let recommendations = bandit.makeRecommendation()
+bandit.chooseAction(recommendations, 'apple')
 //bandit.rejectAll(recommendation)
 ```
 
