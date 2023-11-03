@@ -25,7 +25,7 @@ import { SimpleBandit } from "simplebandit";
 const bandit = SimpleBandit.fromActionIds({actionIds:["apple", "pear"]});
 
 let recommendation = bandit.recommend();
-bandit.accept(recomendation);
+bandit.accept(recommendation);
 
 recommendation2 = bandit.recommend();
 bandit.reject(recommendation2);
@@ -36,7 +36,6 @@ bandit.reject(recommendation2);
 By defining action features we can also learn across actions: by choosing a fruit we make other fruits also more likely for the next recomendation.
 
 ```typescript
-// Define your actions
 const actions: IAction[] = [
   { actionId: "apple", features: { fruit: 1 } },
   { actionId: "pear", features: { fruit: 1 } },
@@ -92,7 +91,7 @@ const bandit2 = SimpleBandit.fromJSON(bandit1.toJSON())
 
 ### Retaining training data
 
-The `accept` and `choose`, etc, methods also return a `trainingData` object. 
+The `accept`, `reject` and `choose` methods also return a `trainingData` object. 
 These can be stored so that you can re-train the bandit at a later point (perhaps with e.g. a different learningRate, or with different initial weights):
 
 ```typescript
