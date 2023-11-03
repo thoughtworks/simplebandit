@@ -21,6 +21,7 @@ export class SimpleOracle {
   useInversePropensityWeighting: boolean;
   negativeClassWeight: number;
   targetLabel: string;
+  strictFeatures: boolean;
   weights!: number[];
 
   allInputFeatures!: string[];
@@ -38,6 +39,7 @@ export class SimpleOracle {
     useInversePropensityWeighting = true,
     negativeClassWeight = DEFAULT_NEGATIVE_CLASS_WEIGHT,
     targetLabel = "label",
+    strictFeatures = true,
     weights = {},
   }: SimpleOracleOptions = {}) {
     if (
@@ -57,10 +59,11 @@ export class SimpleOracle {
     if (
       typeof contextActionIdInteractions !== "boolean" ||
       typeof contextActionFeatureInteractions !== "boolean" ||
-      typeof useInversePropensityWeighting !== "boolean"
+      typeof useInversePropensityWeighting !== "boolean" ||
+      typeof strictFeatures !== "boolean"
     ) {
       throw new Error(
-        "contextActionIdInteractions, contextActionFeatureInteractions, useInversePropensityWeighting must be booleans.",
+        "contextActionIdInteractions, contextActionFeatureInteractions, useInversePropensityWeighting, strictFeatures must be booleans.",
       );
     }
     this.addIntercept = true;
@@ -76,6 +79,7 @@ export class SimpleOracle {
     this.learningRate = learningRate;
     this.useInversePropensityWeighting = useInversePropensityWeighting;
     this.negativeClassWeight = negativeClassWeight;
+    this.strictFeatures = strictFeatures;
   }
 
   public getOracleState(): ISimpleOracleState {
@@ -89,6 +93,7 @@ export class SimpleOracle {
       useInversePropensityWeighting: this.useInversePropensityWeighting,
       negativeClassWeight: this.negativeClassWeight,
       targetLabel: this.targetLabel,
+      strictFeatures: this.strictFeatures,
       weights: this.getWeightsHash(),
     };
   }
@@ -105,6 +110,7 @@ export class SimpleOracle {
       useInversePropensityWeighting: oracleState.useInversePropensityWeighting,
       negativeClassWeight: oracleState.negativeClassWeight,
       targetLabel: oracleState.targetLabel,
+      strictFeatures: oracleState.strictFeatures,
       weights: oracleState.weights,
     } as SimpleOracleOptions);
   }
@@ -292,7 +298,14 @@ export class SimpleOracle {
           missingFeatures.push(feature);
         }
       });
-      throw new Error(`Missing features in inputsHash: ${missingFeatures}`);
+      if (this.strictFeatures) {
+        throw new Error(`Missing features in inputsHash: ${missingFeatures}`);
+      } else {
+        // add missing features with value 0:
+        missingFeatures.forEach((feature) => {
+          inputsHash[feature] = 0;
+        });
+      }
     }
     inputsHash = this._addActionIdFeatures(inputsHash, actionId);
     inputsHash = this._addInteractionFeatures(inputsHash);

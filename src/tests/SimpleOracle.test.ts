@@ -14,6 +14,7 @@ describe("SimpleOracle", () => {
   const contextActionFeatureInteractions = true;
   const useInversePropensityWeighting = false;
   const targetLabel = "label";
+  const strictFeatures = true;
   const weights = {
     intercept: 0,
     action1: 0.1,
@@ -27,16 +28,7 @@ describe("SimpleOracle", () => {
   it("should throw error if context is not an array", () => {
     expect(() => {
       new SimpleOracle({
-        actionIds: actionIds,
         context: "context" as any,
-        actionFeatures: actionFeatures,
-        learningRate: learningRate,
-        contextActionIdInteractions: contextActionIdInteractions,
-        contextActionFeatureInteractions: contextActionFeatureInteractions,
-        useInversePropensityWeighting: useInversePropensityWeighting,
-        negativeClassWeight: 1.0,
-        targetLabel: targetLabel,
-        weights: weights,
       } as SimpleOracleOptions);
     }).toThrow("actionIds, context, actionFeatures must be arrays.");
   });
@@ -44,16 +36,7 @@ describe("SimpleOracle", () => {
   it("should throw error if actionFeatures is not an array", () => {
     expect(() => {
       new SimpleOracle({
-        actionIds: actionIds,
-        context: context,
         actionFeatures: "actionFeatures" as any,
-        learningRate: learningRate,
-        contextActionIdInteractions: contextActionIdInteractions,
-        contextActionFeatureInteractions: contextActionFeatureInteractions,
-        useInversePropensityWeighting: useInversePropensityWeighting,
-        negativeClassWeight: 1.0,
-        targetLabel: targetLabel,
-        weights: weights,
       } as SimpleOracleOptions);
     }).toThrow("actionIds, context, actionFeatures must be arrays.");
   });
@@ -62,15 +45,6 @@ describe("SimpleOracle", () => {
     expect(() => {
       new SimpleOracle({
         actionIds: "actionIds" as any,
-        context: context,
-        actionFeatures: actionFeatures,
-        learningRate: learningRate,
-        contextActionIdInteractions: contextActionIdInteractions,
-        contextActionFeatureInteractions: contextActionFeatureInteractions,
-        useInversePropensityWeighting: useInversePropensityWeighting,
-        negativeClassWeight: 1.0,
-        targetLabel: targetLabel,
-        weights: weights,
       } as SimpleOracleOptions);
     }).toThrow("actionIds, context, actionFeatures must be arrays.");
   });
@@ -78,16 +52,7 @@ describe("SimpleOracle", () => {
   it("should throw error if learningRate is not a number", () => {
     expect(() => {
       new SimpleOracle({
-        actionIds: actionIds,
-        context: context,
-        actionFeatures: actionFeatures,
         learningRate: "learningRate" as any,
-        contextActionIdInteractions: contextActionIdInteractions,
-        contextActionFeatureInteractions: contextActionFeatureInteractions,
-        useInversePropensityWeighting: useInversePropensityWeighting,
-        negativeClassWeight: 1.0,
-        targetLabel: targetLabel,
-        weights: weights,
       } as SimpleOracleOptions);
     }).toThrow("Invalid argument: learningRate must be a positive number.");
   });
@@ -95,22 +60,33 @@ describe("SimpleOracle", () => {
   it("should throw error if contextInteractions is not an array", () => {
     expect(() => {
       new SimpleOracle({
-        actionIds: actionIds,
-        context: context,
-        actionFeatures: actionFeatures,
-        learningRate: learningRate,
         contextActionIdInteractions: "contextActionIdInteractions" as any,
-        contextActionFeatureInteractions: contextActionFeatureInteractions,
-        useInversePropensityWeighting: useInversePropensityWeighting,
-        negativeClassWeight: 1.0,
-        targetLabel: targetLabel,
-        weights: weights,
       } as SimpleOracleOptions);
     }).toThrow(
-      "contextActionIdInteractions, contextActionFeatureInteractions, useInversePropensityWeighting must be booleans.",
+      "contextActionIdInteractions, contextActionFeatureInteractions, useInversePropensityWeighting, strictFeatures must be booleans.",
     );
   });
 
+  it("should not throw an error for missing features if strictFeatures is false", () => {
+    const nonstrict_oracle = new SimpleOracle({
+      actionIds: actionIds,
+      context: context,
+      actionFeatures: actionFeatures,
+      strictFeatures: false,
+    } as SimpleOracleOptions);
+    nonstrict_oracle.setFeaturesAndUpdateWeights(
+      undefined,
+      undefined,
+      undefined,
+      true,
+      true,
+    );
+    expect(() =>
+      nonstrict_oracle._getOrderedInputsArray("action2", {"context1":1}, {"feature1":1}),
+    ).not.toThrow("Missing features in inputsHash: ");
+  });
+
+  
   beforeEach(() => {
     oracle = new SimpleOracle({
       actionIds: actionIds,
@@ -122,6 +98,7 @@ describe("SimpleOracle", () => {
       useInversePropensityWeighting: useInversePropensityWeighting,
       negativeClassWeight: 1.0,
       targetLabel: targetLabel,
+      strictFeatures: strictFeatures,
       weights: weights,
     } as SimpleOracleOptions);
   });
@@ -159,6 +136,7 @@ describe("SimpleOracle", () => {
         useInversePropensityWeighting,
         negativeClassWeight: 1.0,
         targetLabel,
+        strictFeatures,
         weights: {
           intercept: 0,
           "context1*feature1": 0,
@@ -188,6 +166,7 @@ describe("SimpleOracle", () => {
         useInversePropensityWeighting,
         negativeClassWeight: 1.0,
         targetLabel,
+        strictFeatures,
         weights: {
           intercept: 0,
           "context1*feature1": 0,
@@ -372,7 +351,7 @@ describe("SimpleOracle", () => {
   describe("toJSON", () => {
     it("should return a JSON object with the correct properties", () => {
       expect(oracle.toJSON()).toEqual(
-        '{"actionIds":["action1","action2"],"context":["context1","context2"],"actionFeatures":["feature1","feature2"],"learningRate":0.1,"contextActionIdInteractions":false,"contextActionFeatureInteractions":true,"useInversePropensityWeighting":false,"negativeClassWeight":1,"targetLabel":"label","weights":{"intercept":0,"action1":0.1,"action2":0.2,"feature1":0.3,"feature2":0.4,"context1*feature1":0,"context1*feature2":0,"context2*feature1":0,"context2*feature2":0}}',
+        '{"actionIds":["action1","action2"],"context":["context1","context2"],"actionFeatures":["feature1","feature2"],"learningRate":0.1,"contextActionIdInteractions":false,"contextActionFeatureInteractions":true,"useInversePropensityWeighting":false,"negativeClassWeight":1,"targetLabel":"label","strictFeatures":true,"weights":{"intercept":0,"action1":0.1,"action2":0.2,"feature1":0.3,"feature2":0.4,"context1*feature1":0,"context1*feature2":0,"context2*feature1":0,"context2*feature2":0}}',
       );
     });
   });

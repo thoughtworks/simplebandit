@@ -11,6 +11,7 @@ export type ISimpleOracleState = {
   useInversePropensityWeighting: boolean;
   negativeClassWeight: number;
   targetLabel: string;
+  strictFeatures: boolean;
   weights: WeightsHash;
 };
 
@@ -24,5 +25,6 @@ export interface SimpleOracleOptions {
   useInversePropensityWeighting?: boolean;
   negativeClassWeight?: number;
   targetLabel?: string;
+  strictFeatures?: boolean;
   weights?: WeightsHash;
 }
