@@ -1,5 +1,5 @@
-export type WeightsHash = {[feature: string]: number};
-export type FeaturesHash = {[feature: string]: number};
+export type WeightsHash = { [feature: string]: number };
+export type FeaturesHash = { [feature: string]: number };
 
 export type ISimpleOracleState = {
   actionIds: string[];
@@ -15,14 +15,14 @@ export type ISimpleOracleState = {
 };
 
 export interface SimpleOracleOptions {
-    actionIds?: string[];
-    context?: string[];
-    actionFeatures?: string[];
-    learningRate?: number;
-    contextActionIdInteractions?: boolean;
-    contextActionFeatureInteractions?: boolean;
-    useInversePropensityWeighting?: boolean;
-    negativeClassWeight?: number;
-    targetLabel?: string;
-    weights?: WeightsHash;
-  }
+  actionIds?: string[];
+  context?: string[];
+  actionFeatures?: string[];
+  learningRate?: number;
+  contextActionIdInteractions?: boolean;
+  contextActionFeatureInteractions?: boolean;
+  useInversePropensityWeighting?: boolean;
+  negativeClassWeight?: number;
+  targetLabel?: string;
+  weights?: WeightsHash;
+}

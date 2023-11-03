@@ -1,5 +1,6 @@
 "use strict";
-const { BanditOracle, SimpleBandit } = require('./src');
+const { SimpleOracle, SimpleBandit, MultiBandit } = require("./src");
+window.SimpleOracle = SimpleOracle;
 window.SimpleBandit = SimpleBandit;
-window.BanditOracle = BanditOracle;
-module.exports = { SimpleBandit, BanditOracle };
+window.MultiBandit = MultiBandit;
+module.exports = { SimpleOracle, SimpleBandit, MultiBandit };

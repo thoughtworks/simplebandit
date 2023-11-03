@@ -1,19 +1,19 @@
 import { FeaturesHash } from "./ISimpleOracle";
 
 export interface IRecommendation {
-    context: FeaturesHash;
-    actionId: string;
-    score: number;
-    probability: number;
-  };
+  context: FeaturesHash;
+  actionId: string;
+  score: number;
+  probability: number;
+}
 
 export interface IRecommendedAction {
-    actionId: string,
-    score: number,
-    probability: number,
-  }
+  actionId: string;
+  score: number;
+  probability: number;
+}
 
 export interface IMultiRecommendation {
-    context: FeaturesHash;
-    recommendedActions: Array<IRecommendedAction>;
-  };
+  context: FeaturesHash;
+  recommendedActions: Array<IRecommendedAction>;
+}

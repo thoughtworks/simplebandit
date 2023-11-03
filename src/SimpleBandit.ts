@@ -1,12 +1,9 @@
-
-import { IAction, IScoredAction } from "./interfaces/IAction"; 
+import { IAction, IScoredAction } from "./interfaces/IAction";
 import {
   IRecommendation,
   IRecommendedAction,
 } from "./interfaces/IRecommendation";
-import {
-  ISimpleBanditState, ISimpleBandit,
-} from "./interfaces/ISimpleBandit";
+import { ISimpleBanditState, ISimpleBandit } from "./interfaces/ISimpleBandit";
 import {
   ConvertScoresToProbabilityDistribution,
   SampleFromProbabilityDistribution,
@@ -14,7 +11,6 @@ import {
 import { ITrainingData } from "./interfaces/ITrainingData";
 import { FeaturesHash } from "./interfaces/ISimpleOracle";
 import { SimpleOracle } from "./SimpleOracle";
-
 
 export class SimpleBandit implements ISimpleBandit {
   oracle: SimpleOracle;
@@ -34,83 +30,104 @@ export class SimpleBandit implements ISimpleBandit {
     this.temperature = temperature;
   }
 
-  static fromContextAndActions(
-    context: string[],
-    actions: IAction[],
-    temperature: number = 5.0,
-    learningRate: number = 1.0,
-  ): ISimpleBandit {
-    const actionFeatures = [...new Set(actions.flatMap((action) => Object.keys(action.features)))];
+  static fromContextAndActions({
+    context,
+    actions,
+    temperature = 5.0,
+    learningRate = 1.0,
+  }: {
+    context: string[];
+    actions: IAction[];
+    temperature?: number;
+    learningRate?: number;
+  }): ISimpleBandit {
+    const actionFeatures = [
+      ...new Set(actions.flatMap((action) => Object.keys(action.features))),
+    ];
     const actionIds = actions.map((action) => action.actionId);
     const banditOracle = new SimpleOracle({
-      actionIds:actionIds, context:context, actionFeatures:actionFeatures, learningRate:learningRate});
-    return new SimpleBandit(
-      banditOracle,
-      actions,
-      temperature,
-    );
+      actionIds: actionIds,
+      context: context,
+      actionFeatures: actionFeatures,
+      learningRate: learningRate,
+    });
+    return new SimpleBandit(banditOracle, actions, temperature);
   }
 
-  static fromContextAndActionIds(
-    context: string[],
-    actionIds: string[],
-    temperature: number = 5.0,
-    learningRate: number = 1.0,
-  ): ISimpleBandit {
+  static fromContextAndActionIds({
+    context,
+    actionIds,
+    temperature = 5.0,
+    learningRate = 1.0,
+  }: {
+    context: string[];
+    actionIds: string[];
+    temperature?: number;
+    learningRate?: number;
+  }): ISimpleBandit {
     const actions = actionIds.map((actionId) => ({
       actionId: actionId,
       features: {},
     }));
-    return SimpleBandit.fromContextAndActions(context, actions, temperature, learningRate);
+    return SimpleBandit.fromContextAndActions({
+      context,
+      actions,
+      temperature,
+      learningRate,
+    });
   }
 
-  static fromActions(
-    actions: IAction[],
-    temperature: number = 5.0,
-    learningRate: number = 1.0,
-  ): ISimpleBandit {
-    const actionFeatures = [...new Set(actions.flatMap((action) => Object.keys(action.features)))];
+  static fromActions({
+    actions,
+    temperature = 5.0,
+    learningRate = 1.0,
+  }: {
+    actions: IAction[];
+    temperature?: number;
+    learningRate?: number;
+  }): ISimpleBandit {
+    const actionFeatures = [
+      ...new Set(actions.flatMap((action) => Object.keys(action.features))),
+    ];
     const actionIds = actions.map((action) => action.actionId);
-    const banditOracle = new SimpleOracle({actionIds:actionIds, context:[], actionFeatures:actionFeatures, learningRate:learningRate});
-    return new SimpleBandit(
-      banditOracle,
-      actions,
-      temperature,
-    );
+    const banditOracle = new SimpleOracle({
+      actionIds: actionIds,
+      context: [],
+      actionFeatures: actionFeatures,
+      learningRate: learningRate,
+    });
+    return new SimpleBandit(banditOracle, actions, temperature);
   }
 
-  static fromActionIds(
-    actionIds: string[],
-    temperature: number = 5.0,
-    learningRate: number = 1.0,
-  ): ISimpleBandit {
+  static fromActionIds({
+    actionIds,
+    temperature = 5.0,
+    learningRate = 1.0,
+  }: {
+    actionIds: string[];
+    temperature?: number;
+    learningRate?: number;
+  }): ISimpleBandit {
     const actions = actionIds.map((actionId) => ({
       actionId: actionId,
       features: {},
     }));
-    return SimpleBandit.fromActions(actions, temperature, learningRate);
+    return SimpleBandit.fromActions({ actions, temperature, learningRate });
   }
 
-  static fromJSON(
-    json: string,
-    actions: IAction[]
-  ): ISimpleBandit {
-    const state = JSON.parse(json) as ISimpleBanditState; 
+  static fromJSON(json: string, actions: IAction[]): ISimpleBandit {
+    const state = JSON.parse(json) as ISimpleBanditState;
     return SimpleBandit.fromSimpleBanditState(state, actions);
   }
 
   static fromSimpleBanditState(
     state: ISimpleBanditState,
-    actions: IAction[]
+    actions: IAction[],
   ): ISimpleBandit {
     const banditOracle = SimpleOracle.fromOracleState(state.oracleState);
 
     const temperature = state.temperature;
-    return new SimpleBandit(
-      banditOracle,
-      actions,
-      temperature,
-    );
+    return new SimpleBandit(banditOracle, actions, temperature);
   }
 
   getSimpleBanditState(): ISimpleBanditState {
@@ -128,7 +145,7 @@ export class SimpleBandit implements ISimpleBandit {
     const scores = actionScores.map((ex) => ex.score);
     const probabilities = ConvertScoresToProbabilityDistribution(
       scores,
-      this.temperature
+      this.temperature,
     );
     const sampleIndex = SampleFromProbabilityDistribution(probabilities);
     return sampleIndex;
@@ -155,7 +172,7 @@ export class SimpleBandit implements ISimpleBandit {
     }
     let SoftmaxDenominator = scoredActions.reduce(
       (a, b) => a + b.probability,
-      0
+      0,
     );
     scoredActions = scoredActions.map((ex) => ({
       actionId: ex.actionId,
@@ -165,12 +182,11 @@ export class SimpleBandit implements ISimpleBandit {
     return scoredActions;
   }
 
-
   makeRecommendation(context: FeaturesHash = {}): IRecommendation {
-    let scoredActions= this.getScoredActions(context);
+    let scoredActions = this.getScoredActions(context);
     const sampleIndex = this._sampleFromActionScores(scoredActions);
-    const recommendedAction = scoredActions[sampleIndex]
-    
+    const recommendedAction = scoredActions[sampleIndex];
+
     const recommendation: IRecommendation = {
       context: context,
       actionId: recommendedAction.actionId,
@@ -182,7 +198,7 @@ export class SimpleBandit implements ISimpleBandit {
 
   _generateOracleTrainingData(
     recommendation: IRecommendation,
-    selectedActionId: string | undefined = undefined
+    selectedActionId: string | undefined = undefined,
   ): ITrainingData[] {
     let trainingData: ITrainingData[] = [
       {
@@ -191,7 +207,7 @@ export class SimpleBandit implements ISimpleBandit {
         context: recommendation.context,
         label: recommendation.actionId === selectedActionId ? 1 : 0,
         probability: recommendation.probability,
-      }
+      },
     ];
     return trainingData;
   }
@@ -203,7 +219,7 @@ export class SimpleBandit implements ISimpleBandit {
       try {
         const trainingData = this._generateOracleTrainingData(
           recommendation,
-          recommendation.actionId
+          recommendation.actionId,
         );
         this.oracle.fitMany(trainingData);
         resolve(trainingData);
@@ -220,7 +236,7 @@ export class SimpleBandit implements ISimpleBandit {
       try {
         const trainingData = this._generateOracleTrainingData(
           recommendation,
-          undefined
+          undefined,
         );
         this.oracle.fitMany(trainingData);
         resolve(trainingData);

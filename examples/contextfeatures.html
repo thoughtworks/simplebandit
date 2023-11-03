@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <title>Fruit Example</title>
@@ -66,7 +66,7 @@
         ["sunny", "rainy"],
         ["apple", "pear", "orange"],
         (temperature = temperature),
-        (learningRate = learningRate)
+        (learningRate = learningRate),
       );
       document.getElementById("serialized-bandit").innerText = bandit.toJSON();
 
@@ -87,7 +87,8 @@
 
       function generateNewRecommendation() {
         const weather = ["sunny", "rainy"][Math.floor(Math.random() * 2)];
-        context = (weather == "sunny") ? { "sunny": 1, "rainy": 0} : { "sunny": 0, "rainy": 1};
+        context =
+          weather == "sunny" ? { sunny: 1, rainy: 0 } : { sunny: 0, rainy: 1 };
         recommendation = bandit.makeRecommendation(context);
 
         document.getElementById("weather").innerText = weather;

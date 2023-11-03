@@ -43,12 +43,12 @@ describe("SimpleBandit", () => {
 
   describe("fromContextAndActions", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
-      const bandit = SimpleBandit.fromContextAndActions(
-        ["morning"],
-        actions,
-        5.0,
-        1.0
-      );
+      const bandit = SimpleBandit.fromContextAndActions({
+        context: ["morning"],
+        actions: actions,
+        temperature: 5.0,
+        learningRate: 1.0,
+      });
       expect(bandit.oracle).toBeDefined();
       expect(bandit.temperature).toEqual(5.0);
     });
@@ -56,29 +56,40 @@ describe("SimpleBandit", () => {
 
   describe("fromContextAndActionIds", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
-      const bandit = SimpleBandit.fromContextAndActionIds(
-        ["morning"],
-        actionIds,
-        5.0,
-        1.0
-      );
+      const bandit = SimpleBandit.fromContextAndActionIds({
+        context: ["morning"],
+        actionIds: actionIds,
+        learningRate: 1.0,
+        temperature: 5.0,
+      });
       expect(bandit.oracle).toBeDefined();
+      expect(bandit.oracle.learningRate).toEqual(1.0);
       expect(bandit.temperature).toEqual(5.0);
     });
   });
 
   describe("fromActions", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
-      const bandit = SimpleBandit.fromActions(actions, 5.0, 1.0);
+      const bandit = SimpleBandit.fromActions({
+        actions: actions,
+        learningRate: 1.0,
+        temperature: 5.0,
+      });
       expect(bandit.oracle).toBeDefined();
+      expect(bandit.oracle.learningRate).toEqual(1.0);
       expect(bandit.temperature).toEqual(5.0);
     });
   });
 
   describe("fromActionIds", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
-      const bandit = SimpleBandit.fromActionIds(actionIds, 5.0, 1.0);
+      const bandit = SimpleBandit.fromActionIds({
+        actionIds: actionIds,
+        learningRate: 1.0,
+        temperature: 5.0,
+      });
       expect(bandit.oracle).toBeDefined();
+      expect(bandit.oracle.learningRate).toEqual(1.0);
       expect(bandit.temperature).toEqual(5.0);
     });
   });

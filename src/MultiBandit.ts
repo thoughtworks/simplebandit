@@ -1,11 +1,9 @@
-import { IAction } from "./interfaces/IAction"; 
+import { IAction } from "./interfaces/IAction";
 import {
   IMultiRecommendation,
   IRecommendedAction,
 } from "./interfaces/IRecommendation";
-import {
-  IMultiBanditState, IMultiBandit,
-} from "./interfaces/IMultiBandit";
+import { IMultiBanditState, IMultiBandit } from "./interfaces/IMultiBandit";
 import {
   ConvertScoresToProbabilityDistribution,
   SampleFromProbabilityDistribution,
@@ -14,8 +12,7 @@ import { ITrainingData } from "./interfaces/ITrainingData";
 import { FeaturesHash } from "./interfaces/ISimpleOracle";
 import { SimpleOracle } from "./SimpleOracle";
 
-
-export class MultiBandit implements IMultiBandit{
+export class MultiBandit implements IMultiBandit {
   oracle: SimpleOracle;
   actionsMap: Record<string, IAction>;
   temperature: number;
@@ -25,7 +22,7 @@ export class MultiBandit implements IMultiBandit{
     oracle: SimpleOracle,
     actions: IAction[],
     temperature: number = 5.0,
-    nRecommendations: number = 3
+    nRecommendations: number = 3,
   ) {
     this.oracle = oracle;
     this.actionsMap = actions.reduce((acc, obj) => {
@@ -36,90 +33,118 @@ export class MultiBandit implements IMultiBandit{
     this.nRecommendations = nRecommendations;
   }
 
-  static fromContextAndActions(
-    context: string[],
-    actions: IAction[],
-    temperature: number = 5.0,
-    learningRate: number = 1.0,
-    nRecommendations: number = 3
-  ): IMultiBandit {
-    const actionFeatures = [...new Set(actions.flatMap((action) => Object.keys(action.features)))];
+  static fromContextAndActions({
+    context,
+    actions,
+    temperature = 5.0,
+    learningRate = 1.0,
+    nRecommendations = 3,
+  }: {
+    context: string[];
+    actions: IAction[];
+    temperature?: number;
+    learningRate?: number;
+    nRecommendations?: number;
+  }): IMultiBandit {
+    const actionFeatures = [
+      ...new Set(actions.flatMap((action) => Object.keys(action.features))),
+    ];
     const actionIds = actions.map((action) => action.actionId);
-    const oracle = new SimpleOracle({actionIds:actionIds, context:context, actionFeatures:actionFeatures, learningRate:learningRate});
-    return new MultiBandit(
-      oracle,
-      actions,
-      temperature,
-      nRecommendations
-    );
+    const oracle = new SimpleOracle({
+      actionIds: actionIds,
+      context: context,
+      actionFeatures: actionFeatures,
+      learningRate: learningRate,
+    });
+    return new MultiBandit(oracle, actions, temperature, nRecommendations);
   }
 
-  static fromContextAndActionIds(
-    context: string[],
-    actionIds: string[],
-    temperature: number = 5.0,
-    learningRate: number = 1.0,
-    nRecommendations: number = 3
-  ): IMultiBandit {
+  static fromContextAndActionIds({
+    context,
+    actionIds,
+    temperature = 5.0,
+    learningRate = 1.0,
+    nRecommendations = 3,
+  }: {
+    context: string[];
+    actionIds: string[];
+    temperature?: number;
+    learningRate?: number;
+    nRecommendations?: number;
+  }): IMultiBandit {
     const actions = actionIds.map((actionId) => ({
       actionId: actionId,
       features: {},
     }));
-    return MultiBandit.fromContextAndActions(context, actions, temperature, learningRate, nRecommendations);
+    return MultiBandit.fromContextAndActions({
+      context: context,
+      actions: actions,
+      temperature: temperature,
+      learningRate: learningRate,
+      nRecommendations: nRecommendations,
+    });
   }
 
-  static fromActions(
-    actions: IAction[],
-    temperature: number = 5.0,
-    learningRate: number = 1.0,
-    nRecommendations: number = 3
-  ): IMultiBandit {
-    const actionFeatures = [...new Set(actions.flatMap((action) => Object.keys(action.features)))];
+  static fromActions({
+    actions,
+    temperature = 5.0,
+    learningRate = 1.0,
+    nRecommendations = 3,
+  }: {
+    actions: IAction[];
+    temperature?: number;
+    learningRate?: number;
+    nRecommendations?: number;
+  }): IMultiBandit {
+    const actionFeatures = [
+      ...new Set(actions.flatMap((action) => Object.keys(action.features))),
+    ];
     const actionIds = actions.map((action) => action.actionId);
-    const oracle = new SimpleOracle({actionIds:actionIds, actionFeatures:actionFeatures, learningRate:learningRate});
-    return new MultiBandit(
-      oracle,
-      actions,
-      temperature,
-      nRecommendations
-    );
+    const oracle = new SimpleOracle({
+      actionIds: actionIds,
+      actionFeatures: actionFeatures,
+      learningRate: learningRate,
+    });
+    return new MultiBandit(oracle, actions, temperature, nRecommendations);
   }
 
-  static fromActionIds(
-    actionsIds: string[],
-    temperature: number = 5.0,
-    learningRate: number = 1.0,
-    nRecommendations: number = 3
-  ): IMultiBandit {
-    const actions = actionsIds.map((actionId) => ({
+  static fromActionIds({
+    actionIds,
+    temperature = 5.0,
+    learningRate = 1.0,
+    nRecommendations = 3,
+  }: {
+    actionIds: string[];
+    temperature?: number;
+    learningRate?: number;
+    nRecommendations?: number;
+  }): IMultiBandit {
+    const actions = actionIds.map((actionId) => ({
       actionId: actionId,
       features: {},
     }));
-    return MultiBandit.fromActions(actions, temperature, learningRate, nRecommendations);
+    return MultiBandit.fromActions({
+      actions: actions,
+      temperature: temperature,
+      learningRate: learningRate,
+      nRecommendations: nRecommendations,
+    });
   }
 
-  static fromJSON(
-    json: string,
-    actions: IAction[]
-  ): IMultiBandit {
-    const state = JSON.parse(json) as IMultiBanditState; 
+  static fromJSON(json: string, actions: IAction[]): IMultiBandit {
+    const state = JSON.parse(json) as IMultiBanditState;
     return MultiBandit.fromMultiBanditState(state, actions);
   }
 
   static fromMultiBanditState(
     state: IMultiBanditState,
-    actions: IAction[]
+    actions: IAction[],
   ): IMultiBandit {
     const oracle = SimpleOracle.fromOracleState(state.oracleState);
 
     const temperature = state.temperature;
     const nRecommendations = state.nRecommendations;
-    return new MultiBandit(
-      oracle,
-      actions,
-      temperature,
-      nRecommendations
-    );
+    return new MultiBandit(oracle, actions, temperature, nRecommendations);
   }
 
   getMultiBanditState(): IMultiBanditState {
@@ -138,7 +163,7 @@ export class MultiBandit implements IMultiBandit{
     const scores = actionScores.map((ex) => ex.score);
     const probabilities = ConvertScoresToProbabilityDistribution(
       scores,
-      this.temperature
+      this.temperature,
     );
     const sampleIndex = SampleFromProbabilityDistribution(probabilities);
     return sampleIndex;
@@ -155,7 +180,6 @@ export class MultiBandit implements IMultiBandit{
         action.actionId,
         context,
         action.features,
-        
       );
       const softmaxNumerator = Math.exp(this.temperature * actionScore);
       scoredActions.push({
@@ -166,7 +190,7 @@ export class MultiBandit implements IMultiBandit{
     }
     let SoftmaxDenominator = scoredActions.reduce(
       (a, b) => a + b.probability,
-      0
+      0,
     );
     scoredActions = scoredActions.map((ex) => ({
       actionId: ex.actionId,
@@ -177,7 +201,7 @@ export class MultiBandit implements IMultiBandit{
   }
 
   makeRecommendation(context: FeaturesHash = {}): IMultiRecommendation {
-    let scoredActions= this.getScoredActions(context);
+    let scoredActions = this.getScoredActions(context);
 
     let recommendedActions: IRecommendedAction[] = [];
     for (let index = 0; index < this.nRecommendations; index++) {
@@ -194,7 +218,7 @@ export class MultiBandit implements IMultiBandit{
 
   private _generateOracleTrainingData(
     recommendation: IMultiRecommendation,
-    selectedActionId: string | undefined = undefined
+    selectedActionId: string | undefined = undefined,
   ): ITrainingData[] {
     let trainingData: ITrainingData[] = [];
     for (
@@ -206,29 +230,33 @@ export class MultiBandit implements IMultiBandit{
       const recommendedAction = this.actionsMap[actionId];
       if (!recommendedAction) {
         throw new Error(
-          `Failed to generate training data for recommended exercise at index ${index}.`
+          `Failed to generate training data for recommended exercise at index ${index}.`,
         );
       }
       const context = recommendation.context;
       const actionFeatures = recommendedAction.features;
-      const label =
-        recommendedAction.actionId === selectedActionId ? 1 : 0;
-      const probability =
-        recommendation.recommendedActions[index].probability;
-      trainingData.push({ actionId,  actionFeatures, context: context, label, probability });
+      const label = recommendedAction.actionId === selectedActionId ? 1 : 0;
+      const probability = recommendation.recommendedActions[index].probability;
+      trainingData.push({
+        actionId: actionId,
+        actionFeatures: actionFeatures,
+        context: context,
+        label: label,
+        probability: probability,
+      });
     }
     return trainingData;
   }
 
   chooseAction(
     recommendation: IMultiRecommendation,
-    actionId: string | undefined
+    actionId: string | undefined,
   ): Promise<ITrainingData[]> {
     return new Promise((resolve, reject) => {
       try {
         const trainingData = this._generateOracleTrainingData(
           recommendation,
-          actionId
+          actionId,
         );
         this.oracle.fitMany(trainingData);
         resolve(trainingData);
@@ -238,10 +266,8 @@ export class MultiBandit implements IMultiBandit{
     });
   }
 
-  rejectAll(
-    recommendation: IMultiRecommendation,
-  ): Promise<ITrainingData[]> {
-    return this.chooseAction(recommendation, undefined)
+  rejectAll(recommendation: IMultiRecommendation): Promise<ITrainingData[]> {
+    return this.chooseAction(recommendation, undefined);
   }
 
   train(trainingData: ITrainingData[]): Promise<void> {
@@ -255,4 +281,3 @@ export class MultiBandit implements IMultiBandit{
     });
   }
 }
-

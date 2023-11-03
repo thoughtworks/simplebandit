@@ -1,9 +1,10 @@
 # SimpleBandit
-SimpleBandit is a convenient typescript/javascript library for contextual bandits, with no external dependencies, transpiling to <1000 lines of javascript. 
 
-It provides classes and interfaces to create and manage bandit models, generate recommendations, select actions, and update your models. 
+SimpleBandit is a convenient typescript/javascript library for contextual bandits, with no external dependencies, transpiling to <1000 lines of javascript.
 
-Under the hood it's a logistic regression oracle with softmax exploration. 
+It provides classes and interfaces to create and manage bandit models, generate recommendations, select actions, and update your models.
+
+Under the hood it's a logistic regression oracle with softmax exploration.
 
 ## Installation
 
@@ -13,13 +14,14 @@ npm install .
 
 ## Usage
 
-In the simplest case you are simply learning a preference over a list of possible actions, without context or action features. By accepting a recommendation you make the recommended action more likely in the future. By rejecting it, you make it less likely. The bandit learns from your feedback. 
+In the simplest case you are simply learning a preference over a list of possible actions, without context or action features. By accepting a recommendation you make the recommended action more likely in the future. By rejecting it, you make it less likely. The bandit learns from your feedback.
 
 ### With actionIds only
-```typescript
-import { SimpleBandit } from 'simplebandit';
 
-bandit = SimpleBandit.fromActionIds(['apple', 'pear']);
+```typescript
+import { SimpleBandit } from "simplebandit";
+
+bandit = SimpleBandit.fromActionIds(["apple", "pear"]);
 
 let recommendation = bandit.makeRecommendation();
 bandit.acceptRecommendation(recomendation);
@@ -27,28 +29,33 @@ bandit.acceptRecommendation(recomendation);
 recommendation2 = bandit.makeRecommendation();
 bandit.rejectRecommendation(recommendation2);
 ```
+
 ### With action features
-By defining action features we can also learn across actions: by choosing a fruit we make other fruits also more likely for the next recomendation. 
+
+By defining action features we can also learn across actions: by choosing a fruit we make other fruits also more likely for the next recomendation.
 
 ```typescript
 // Define your actions
 const actions: IAction[] = [
-  { actionId: 'apple', features: { fruit: 1 } },
-  { actionId: 'pear', features: { fruit: 1 } },
-  { actionId: 'chocolate', features: { fruit: 0 } },
+  { actionId: "apple", features: { fruit: 1 } },
+  { actionId: "pear", features: { fruit: 1 } },
+  { actionId: "chocolate", features: { fruit: 0 } },
 ];
 
-const bandit = new SimpleBandit.fromActions(actions)
+const bandit = new SimpleBandit.fromActions(actions);
 ```
 
 ### Adding context
-We can also learn preferences depending on a context, for example whether it is raining or not. 
+
+We can also learn preferences depending on a context, for example whether it is raining or not.
 
 ```typescript
-
-const bandit = new SimpleBandit.fromContextAndActionIds(['rain'], ['apple', 'pear'])
-// const bandit = new SimpleBandit.fromContextAndActions(["rain"], actions])
-let recommendation = bandit.makeRecommendation({rain:1})
+const bandit = new SimpleBandit.fromContextAndActionIds(
+  ["rain"],
+  ["apple", "pear"],
+);
+// const bandit = new SimpleBandit.fromContextAndActions(["rain"], actions)
+let recommendation = bandit.makeRecommendation({ rain: 1 });
 ```
 
 ### Configuring learning rate and temperature
@@ -64,14 +71,13 @@ const bandit = new SimpleBandit.fromActionIds(['apple', 'pear'], (learningRate:1
 In order to get multiple recommendation (or a 'slate') you use `MultiBandit`:
 
 ```typescript
-import {MultiBandit} from 'simplebandit'
+import { MultiBandit } from 'simplebandit'
 
 let bandit = new MultiBandit.fromActionIds(['apple', 'pear', 'banana'], (nRecommendations:2))
 let recommendations = bandit.makeRecommendation()
 bandit.chooseAction(recommendations, 'apple')
-//bandit.rejectAll(recommendation)
+//bandit.rejectAll(recommendations)
 ```
-
 
 ## Usage javascript
 
@@ -82,8 +88,6 @@ There are several pure javascript examples provided in the `examples/` directory
 - `actionfeatures.html`: adds action features.
 - `contextfeatures.html`: adds context features
 - `multi.html`: multiple recommendations (slate)
-
-
 
 ## Testing
 
