@@ -86,13 +86,13 @@
         },
       ];
 
-      let bandit = MultiBandit.fromContextAndActions(
-        ["sunny", "rainy"],
-        actions,
-        (temperature = temperature),
-        (learningRate = learningRate),
-        (nRecommendations = 3),
-      );
+      let bandit = MultiBandit.fromContextAndActions({
+        context: ["sunny", "rainy"],
+        actions: actions,
+        temperature: temperature,
+        learningRate: learningRate,
+        nRecommendations: 3,
+      });
       let recommendation;
       let trainingData = [];
       let context;

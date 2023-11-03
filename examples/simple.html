@@ -63,11 +63,11 @@
       let learningRate = parseFloat(learningRateInput.value);
       let temperature = parseFloat(temperatureInput.value);
 
-      let bandit = SimpleBandit.fromActionIds(
-        ["apple", "pear", "orange"],
-        (temperature = temperature),
-        (learningRate = learningRate),
-      );
+      let bandit = SimpleBandit.fromActionIds({
+        actionIds: ["apple", "pear", "orange"],
+        temperature: temperature,
+        learningRate: learningRate,
+      });
       let recommendation;
       let trainingData = [];
 

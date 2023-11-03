@@ -31,11 +31,9 @@
 
     <script src="../simpleBandit.js"></script>
     <script>
-      let bandit = SimpleBandit.fromActionIds(
-        ["apple", "pear", "orange"],
-        (temperature = 5.0),
-        (learningRate = 1.0),
-      );
+      let bandit = SimpleBandit.fromActionIds({
+        actionIds: ["apple", "pear", "orange"],
+      });
       let recommendation;
 
       function generateNewRecommendation() {

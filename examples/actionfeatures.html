@@ -77,11 +77,11 @@
           features: { fruit: 0, treat: 1 },
         },
       ];
-      let bandit = SimpleBandit.fromActions(
-        actions,
-        (temperature = temperature),
-        (learningRate = learningRate),
-      );
+      let bandit = SimpleBandit.fromActions({
+        actions: actions,
+        temperature: temperature,
+        learningRate: learningRate,
+      });
       let recommendation;
       let recommendedAction;
       let trainingData = [];
