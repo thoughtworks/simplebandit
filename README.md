@@ -53,7 +53,7 @@ recommendation = bandit.makeRecommendation({rain:1})
 
 ### Configuring learning rate and temperature
 
-You can adjust how quick the bandit learns (and forgets) with the `learningRate`. You can adjust how much it exploits (higher probability for higher scoring actions) or exploits (higher probability for lower scoring actions) with `temperature`:
+You can adjust how quick the bandit learns (and forgets) with the `learningRate`. You can adjust how much it exploits (higher probability for higher scoring actions) or explores (higher probability for lower scoring actions) with `temperature`:
 
 ```typescript
 const bandit = new SimpleBandit.fromActionIds(['apple', 'pear'], (learningRate:1.0), (temperature:5.0))
