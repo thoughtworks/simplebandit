@@ -8,5 +8,6 @@ browserify:
 format:
 	npx prettier --write .
 
-dist:
+distro:
 	tsc
+	npx browserify index.ts -p [ tsify --noImplicitAny ] > simpleBandit.js
