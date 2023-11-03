@@ -17,12 +17,12 @@ function weightedHarmonicMean(numbers, weights) {
     return sumWeights / sumWeightedValues;
 }
 exports.weightedHarmonicMean = weightedHarmonicMean;
-const ConvertScoresToProbabilityDistribution = (scores, softmaxBeta) => {
+const ConvertScoresToProbabilityDistribution = (scores, temperature) => {
     if (scores.length === 0) {
         throw new Error('scores array must not be empty');
     }
-    if (softmaxBeta <= 0) {
-        throw new Error('softmaxBeta must be greater than zero');
+    if (temperature <= 0) {
+        throw new Error('temperature must be greater than zero');
     }
     const maxScore = Math.max(...scores);
     if (maxScore === -Infinity) {
@@ -36,7 +36,7 @@ const ConvertScoresToProbabilityDistribution = (scores, softmaxBeta) => {
         if (!Number.isFinite(score)) {
             throw new Error(`score at index ${i} must be a finite number`);
         }
-        const softmaxNumerator = Math.exp(softmaxBeta * (score - maxScore));
+        const softmaxNumerator = Math.exp(temperature * (score - maxScore));
         softmaxDenominator += softmaxNumerator;
         softmaxNumerators.push(softmaxNumerator);
     }

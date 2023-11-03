@@ -18,13 +18,13 @@ import { SimpleOracle } from "./SimpleOracle";
 export class MultiBandit implements IMultiBandit{
   oracle: SimpleOracle;
   actionsMap: Record<string, IAction>;
-  softmaxBeta: number;
+  temperature: number;
   nRecommendations: number;
 
   constructor(
     oracle: SimpleOracle,
     actions: IAction[],
-    softmaxBeta: number = 5.0,
+    temperature: number = 5.0,
     nRecommendations: number = 3
   ) {
     this.oracle = oracle;
@@ -32,14 +32,14 @@ export class MultiBandit implements IMultiBandit{
       (acc as any)[obj.actionId] = obj;
       return acc;
     }, {});
-    this.softmaxBeta = softmaxBeta;
+    this.temperature = temperature;
     this.nRecommendations = nRecommendations;
   }
 
   static fromContextAndActions(
     context: string[],
     actions: IAction[],
-    softmaxBeta: number = 5.0,
+    temperature: number = 5.0,
     learningRate: number = 1.0,
     nRecommendations: number = 3
   ): IMultiBandit {
@@ -49,7 +49,7 @@ export class MultiBandit implements IMultiBandit{
     return new MultiBandit(
       oracle,
       actions,
-      softmaxBeta,
+      temperature,
       nRecommendations
     );
   }
@@ -57,7 +57,7 @@ export class MultiBandit implements IMultiBandit{
   static fromContextAndActionIds(
     context: string[],
     actionIds: string[],
-    softmaxBeta: number = 5.0,
+    temperature: number = 5.0,
     learningRate: number = 1.0,
     nRecommendations: number = 3
   ): IMultiBandit {
@@ -65,12 +65,12 @@ export class MultiBandit implements IMultiBandit{
       actionId: actionId,
       features: {},
     }));
-    return MultiBandit.fromContextAndActions(context, actions, softmaxBeta, learningRate, nRecommendations);
+    return MultiBandit.fromContextAndActions(context, actions, temperature, learningRate, nRecommendations);
   }
 
   static fromActions(
     actions: IAction[],
-    softmaxBeta: number = 5.0,
+    temperature: number = 5.0,
     learningRate: number = 1.0,
     nRecommendations: number = 3
   ): IMultiBandit {
@@ -80,14 +80,14 @@ export class MultiBandit implements IMultiBandit{
     return new MultiBandit(
       oracle,
       actions,
-      softmaxBeta,
+      temperature,
       nRecommendations
     );
   }
 
   static fromActionIds(
     actionsIds: string[],
-    softmaxBeta: number = 5.0,
+    temperature: number = 5.0,
     learningRate: number = 1.0,
     nRecommendations: number = 3
   ): IMultiBandit {
@@ -95,7 +95,7 @@ export class MultiBandit implements IMultiBandit{
       actionId: actionId,
       features: {},
     }));
-    return MultiBandit.fromActions(actions, softmaxBeta, learningRate, nRecommendations);
+    return MultiBandit.fromActions(actions, temperature, learningRate, nRecommendations);
   }
 
   static fromJSON(
@@ -112,12 +112,12 @@ export class MultiBandit implements IMultiBandit{
   ): IMultiBandit {
     const oracle = SimpleOracle.fromOracleState(state.oracleState);
 
-    const softmaxBeta = state.softmaxBeta;
+    const temperature = state.temperature;
     const nRecommendations = state.nRecommendations;
     return new MultiBandit(
       oracle,
       actions,
-      softmaxBeta,
+      temperature,
       nRecommendations
     );
   }
@@ -125,7 +125,7 @@ export class MultiBandit implements IMultiBandit{
   getMultiBanditState(): IMultiBanditState {
     return {
       oracleState: this.oracle.getOracleState(),
-      softmaxBeta: this.softmaxBeta,
+      temperature: this.temperature,
       nRecommendations: this.nRecommendations,
     };
   }
@@ -138,7 +138,7 @@ export class MultiBandit implements IMultiBandit{
     const scores = actionScores.map((ex) => ex.score);
     const probabilities = ConvertScoresToProbabilityDistribution(
       scores,
-      this.softmaxBeta
+      this.temperature
     );
     const sampleIndex = SampleFromProbabilityDistribution(probabilities);
     return sampleIndex;
@@ -157,7 +157,7 @@ export class MultiBandit implements IMultiBandit{
         action.features,
         
       );
-      const softmaxNumerator = Math.exp(this.softmaxBeta * actionScore);
+      const softmaxNumerator = Math.exp(this.temperature * actionScore);
       scoredActions.push({
         actionId: actionId,
         score: actionScore,

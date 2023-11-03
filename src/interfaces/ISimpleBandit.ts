@@ -7,13 +7,13 @@ import {IScoredAction} from './IAction';
 
 export type ISimpleBanditState = {
   oracleState: ISimpleOracleState;
-  softmaxBeta: number;
+  temperature: number;
 };
 
 
 export interface ISimpleBandit {
   oracle: SimpleOracle;
-  softmaxBeta: number;
+  temperature: number;
 
   getSimpleBanditState(): ISimpleBanditState;
   toJSON(): string;

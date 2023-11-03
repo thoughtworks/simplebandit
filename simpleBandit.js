@@ -26,12 +26,12 @@ function weightedHarmonicMean(numbers, weights) {
     return sumWeights / sumWeightedValues;
 }
 exports.weightedHarmonicMean = weightedHarmonicMean;
-const ConvertScoresToProbabilityDistribution = (scores, softmaxBeta) => {
+const ConvertScoresToProbabilityDistribution = (scores, temperature) => {
     if (scores.length === 0) {
         throw new Error('scores array must not be empty');
     }
-    if (softmaxBeta <= 0) {
-        throw new Error('softmaxBeta must be greater than zero');
+    if (temperature <= 0) {
+        throw new Error('temperature must be greater than zero');
     }
     const maxScore = Math.max(...scores);
     if (maxScore === -Infinity) {
@@ -45,7 +45,7 @@ const ConvertScoresToProbabilityDistribution = (scores, softmaxBeta) => {
         if (!Number.isFinite(score)) {
             throw new Error(`score at index ${i} must be a finite number`);
         }
-        const softmaxNumerator = Math.exp(softmaxBeta * (score - maxScore));
+        const softmaxNumerator = Math.exp(temperature * (score - maxScore));
         softmaxDenominator += softmaxNumerator;
         softmaxNumerators.push(softmaxNumerator);
     }
@@ -113,40 +113,40 @@ exports.MultiBandit = void 0;
 const MathService_1 = require("./MathService");
 const SimpleOracle_1 = require("./SimpleOracle");
 class MultiBandit {
-    constructor(oracle, actions, softmaxBeta = 5.0, nRecommendations = 3) {
+    constructor(oracle, actions, temperature = 5.0, nRecommendations = 3) {
         this.oracle = oracle;
         this.actionsMap = actions.reduce((acc, obj) => {
             acc[obj.actionId] = obj;
             return acc;
         }, {});
-        this.softmaxBeta = softmaxBeta;
+        this.temperature = temperature;
         this.nRecommendations = nRecommendations;
     }
-    static fromContextAndActions(context, actions, softmaxBeta = 5.0, learningRate = 1.0, nRecommendations = 3) {
+    static fromContextAndActions(context, actions, temperature = 5.0, learningRate = 1.0, nRecommendations = 3) {
         const actionFeatures = [...new Set(actions.flatMap((action) => Object.keys(action.features)))];
         const actionIds = actions.map((action) => action.actionId);
         const oracle = new SimpleOracle_1.SimpleOracle({ actionIds: actionIds, context: context, actionFeatures: actionFeatures, learningRate: learningRate });
-        return new MultiBandit(oracle, actions, softmaxBeta, nRecommendations);
+        return new MultiBandit(oracle, actions, temperature, nRecommendations);
     }
-    static fromContextAndActionIds(context, actionIds, softmaxBeta = 5.0, learningRate = 1.0, nRecommendations = 3) {
+    static fromContextAndActionIds(context, actionIds, temperature = 5.0, learningRate = 1.0, nRecommendations = 3) {
         const actions = actionIds.map((actionId) => ({
             actionId: actionId,
             features: {},
         }));
-        return MultiBandit.fromContextAndActions(context, actions, softmaxBeta, learningRate, nRecommendations);
+        return MultiBandit.fromContextAndActions(context, actions, temperature, learningRate, nRecommendations);
     }
-    static fromActions(actions, softmaxBeta = 5.0, learningRate = 1.0, nRecommendations = 3) {
+    static fromActions(actions, temperature = 5.0, learningRate = 1.0, nRecommendations = 3) {
         const actionFeatures = [...new Set(actions.flatMap((action) => Object.keys(action.features)))];
         const actionIds = actions.map((action) => action.actionId);
         const oracle = new SimpleOracle_1.SimpleOracle({ actionIds: actionIds, actionFeatures: actionFeatures, learningRate: learningRate });
-        return new MultiBandit(oracle, actions, softmaxBeta, nRecommendations);
+        return new MultiBandit(oracle, actions, temperature, nRecommendations);
     }
-    static fromActionIds(actionsIds, softmaxBeta = 5.0, learningRate = 1.0, nRecommendations = 3) {
+    static fromActionIds(actionsIds, temperature = 5.0, learningRate = 1.0, nRecommendations = 3) {
         const actions = actionsIds.map((actionId) => ({
             actionId: actionId,
             features: {},
         }));
-        return MultiBandit.fromActions(actions, softmaxBeta, learningRate, nRecommendations);
+        return MultiBandit.fromActions(actions, temperature, learningRate, nRecommendations);
     }
     static fromJSON(json, actions) {
         const state = JSON.parse(json);
@@ -154,14 +154,14 @@ class MultiBandit {
     }
     static fromMultiBanditState(state, actions) {
         const oracle = SimpleOracle_1.SimpleOracle.fromOracleState(state.oracleState);
-        const softmaxBeta = state.softmaxBeta;
+        const temperature = state.temperature;
         const nRecommendations = state.nRecommendations;
-        return new MultiBandit(oracle, actions, softmaxBeta, nRecommendations);
+        return new MultiBandit(oracle, actions, temperature, nRecommendations);
     }
     getMultiBanditState() {
         return {
             oracleState: this.oracle.getOracleState(),
-            softmaxBeta: this.softmaxBeta,
+            temperature: this.temperature,
             nRecommendations: this.nRecommendations,
         };
     }
@@ -170,7 +170,7 @@ class MultiBandit {
     }
     _sampleFromActionScores(actionScores) {
         const scores = actionScores.map((ex) => ex.score);
-        const probabilities = (0, MathService_1.ConvertScoresToProbabilityDistribution)(scores, this.softmaxBeta);
+        const probabilities = (0, MathService_1.ConvertScoresToProbabilityDistribution)(scores, this.temperature);
         const sampleIndex = (0, MathService_1.SampleFromProbabilityDistribution)(probabilities);
         return sampleIndex;
     }
@@ -181,7 +181,7 @@ class MultiBandit {
             const actionId = actionIds[i];
             const action = this.actionsMap[actionId];
             const actionScore = this.oracle.predict(action.actionId, context, action.features);
-            const softmaxNumerator = Math.exp(this.softmaxBeta * actionScore);
+            const softmaxNumerator = Math.exp(this.temperature * actionScore);
             scoredActions.push({
                 actionId: actionId,
                 score: actionScore,
@@ -262,41 +262,41 @@ exports.SimpleBandit = void 0;
 const MathService_1 = require("./MathService");
 const SimpleOracle_1 = require("./SimpleOracle");
 class SimpleBandit {
-    constructor(oracle, actions, softmaxBeta = 1.0) {
+    constructor(oracle, actions, temperature = 1.0) {
         this.oracle = oracle;
         this.actionsMap = actions.reduce((acc, obj) => {
             acc[obj.actionId] = obj;
             return acc;
         }, {});
-        this.softmaxBeta = softmaxBeta;
+        this.temperature = temperature;
     }
-    static fromContextAndActions(context, actions, softmaxBeta = 5.0, learningRate = 1.0) {
+    static fromContextAndActions(context, actions, temperature = 5.0, learningRate = 1.0) {
         const actionFeatures = [...new Set(actions.flatMap((action) => Object.keys(action.features)))];
         const actionIds = actions.map((action) => action.actionId);
         const banditOracle = new SimpleOracle_1.SimpleOracle({
             actionIds: actionIds, context: context, actionFeatures: actionFeatures, learningRate: learningRate
         });
-        return new SimpleBandit(banditOracle, actions, softmaxBeta);
+        return new SimpleBandit(banditOracle, actions, temperature);
     }
-    static fromContextAndActionIds(context, actionIds, softmaxBeta = 5.0, learningRate = 1.0) {
+    static fromContextAndActionIds(context, actionIds, temperature = 5.0, learningRate = 1.0) {
         const actions = actionIds.map((actionId) => ({
             actionId: actionId,
             features: {},
         }));
-        return SimpleBandit.fromContextAndActions(context, actions, softmaxBeta, learningRate);
+        return SimpleBandit.fromContextAndActions(context, actions, temperature, learningRate);
     }
-    static fromActions(actions, softmaxBeta = 5.0, learningRate = 1.0) {
+    static fromActions(actions, temperature = 5.0, learningRate = 1.0) {
         const actionFeatures = [...new Set(actions.flatMap((action) => Object.keys(action.features)))];
         const actionIds = actions.map((action) => action.actionId);
         const banditOracle = new SimpleOracle_1.SimpleOracle({ actionIds: actionIds, context: [], actionFeatures: actionFeatures, learningRate: learningRate });
-        return new SimpleBandit(banditOracle, actions, softmaxBeta);
+        return new SimpleBandit(banditOracle, actions, temperature);
     }
-    static fromActionIds(actionIds, softmaxBeta = 5.0, learningRate = 1.0) {
+    static fromActionIds(actionIds, temperature = 5.0, learningRate = 1.0) {
         const actions = actionIds.map((actionId) => ({
             actionId: actionId,
             features: {},
         }));
-        return SimpleBandit.fromActions(actions, softmaxBeta, learningRate);
+        return SimpleBandit.fromActions(actions, temperature, learningRate);
     }
     static fromJSON(json, actions) {
         const state = JSON.parse(json);
@@ -304,13 +304,13 @@ class SimpleBandit {
     }
     static fromSimpleBanditState(state, actions) {
         const banditOracle = SimpleOracle_1.SimpleOracle.fromOracleState(state.oracleState);
-        const softmaxBeta = state.softmaxBeta;
-        return new SimpleBandit(banditOracle, actions, softmaxBeta);
+        const temperature = state.temperature;
+        return new SimpleBandit(banditOracle, actions, temperature);
     }
     getSimpleBanditState() {
         return {
             oracleState: this.oracle.getOracleState(),
-            softmaxBeta: this.softmaxBeta,
+            temperature: this.temperature,
         };
     }
     toJSON() {
@@ -318,7 +318,7 @@ class SimpleBandit {
     }
     _sampleFromActionScores(actionScores) {
         const scores = actionScores.map((ex) => ex.score);
-        const probabilities = (0, MathService_1.ConvertScoresToProbabilityDistribution)(scores, this.softmaxBeta);
+        const probabilities = (0, MathService_1.ConvertScoresToProbabilityDistribution)(scores, this.temperature);
         const sampleIndex = (0, MathService_1.SampleFromProbabilityDistribution)(probabilities);
         return sampleIndex;
     }
@@ -329,7 +329,7 @@ class SimpleBandit {
             const actionId = actionIds[i];
             const action = this.actionsMap[actionId];
             const actionScore = this.oracle.predict(action.actionId, context, action.features);
-            const softmaxNumerator = Math.exp(this.softmaxBeta * actionScore);
+            const softmaxNumerator = Math.exp(this.temperature * actionScore);
             scoredActions.push({
                 actionId: actionId,
                 score: actionScore,

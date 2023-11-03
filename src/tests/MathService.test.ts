@@ -36,9 +36,9 @@ import {
   describe('ConvertScoresToProbabilityDistribution', () => {
     it('should correctly calculate probabilities with positive scores', () => {
       const scores = [0.2, 0.6, 0.8];
-      const softmaxBeta = 1;
+      const temperature = 1;
       const expectedProbabilities = [0.2318, 0.3458, 0.4223];
-      const result = ConvertScoresToProbabilityDistribution(scores, softmaxBeta);
+      const result = ConvertScoresToProbabilityDistribution(scores, temperature);
       for (let i = 0; i < result.length; i++) {
         expect(result[i]).toBeCloseTo(expectedProbabilities[i], 3);
       }
@@ -46,9 +46,9 @@ import {
   
     it('should correctly calculate probabilities with negative scores', () => {
       const scores = [-1, -3, -5];
-      const softmaxBeta = 1;
+      const temperature = 1;
       const expectedProbabilities = [0.8668, 0.1173, 0.0158];
-      const result = ConvertScoresToProbabilityDistribution(scores, softmaxBeta);
+      const result = ConvertScoresToProbabilityDistribution(scores, temperature);
       for (let i = 0; i < result.length; i++) {
         expect(result[i]).toBeCloseTo(expectedProbabilities[i], 3);
       }
@@ -56,43 +56,43 @@ import {
   
     it('should correctly calculate probabilities with mixed scores', () => {
       const scores = [1, -2, 3];
-      const softmaxBeta = 2;
+      const temperature = 2;
       const expectedProbabilities = [0.0179, 0.0, 0.9819];
-      const result = ConvertScoresToProbabilityDistribution(scores, softmaxBeta);
+      const result = ConvertScoresToProbabilityDistribution(scores, temperature);
       for (let i = 0; i < result.length; i++) {
         expect(result[i]).toBeCloseTo(expectedProbabilities[i], 3);
       }
     });
   
-    it('should throw an error when softmaxBeta is 0', () => {
+    it('should throw an error when temperature is 0', () => {
       const scores = [1, 2, 3];
-      const softmaxBeta = 0;
+      const temperature = 0;
       expect(() => {
-        ConvertScoresToProbabilityDistribution(scores, softmaxBeta);
-      }).toThrowError('softmaxBeta must be greater than zero');
+        ConvertScoresToProbabilityDistribution(scores, temperature);
+      }).toThrowError('temperature must be greater than zero');
     });
   
     it('should throw an error when scores array is empty', () => {
       const scores: number[] = [];
-      const softmaxBeta = 1;
+      const temperature = 1;
       expect(() => {
-        ConvertScoresToProbabilityDistribution(scores, softmaxBeta);
+        ConvertScoresToProbabilityDistribution(scores, temperature);
       }).toThrowError('scores array must not be empty');
     });
   
     it('should throw an error when there only negative infinities in the scores array', () => {
       const scores = [-Infinity, -Infinity, -Infinity];
-      const softmaxBeta = 1;
+      const temperature = 1;
       expect(() => {
-        ConvertScoresToProbabilityDistribution(scores, softmaxBeta);
+        ConvertScoresToProbabilityDistribution(scores, temperature);
       }).toThrowError('scores array must contain at least one finite number');
     });
   
     it('should throw an error when there are infinite scores', () => {  
       const scores = [1, 2, Infinity];
-      const softmaxBeta = 1;
+      const temperature = 1;
       expect(() => {
-        ConvertScoresToProbabilityDistribution(scores, softmaxBeta);
+        ConvertScoresToProbabilityDistribution(scores, temperature);
       }).toThrowError(`score at index 2 must be a finite number`);
     });
   });

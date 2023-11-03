@@ -37,7 +37,7 @@ describe("SimpleBandit", () => {
   describe("constructor", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
       expect(bandit.oracle).toEqual(oracle);
-      expect(bandit.softmaxBeta).toEqual(5.0);
+      expect(bandit.temperature).toEqual(5.0);
     });
   });
 
@@ -50,7 +50,7 @@ describe("SimpleBandit", () => {
         1.0
       );
       expect(bandit.oracle).toBeDefined();
-      expect(bandit.softmaxBeta).toEqual(5.0);
+      expect(bandit.temperature).toEqual(5.0);
     });
   });
 
@@ -63,7 +63,7 @@ describe("SimpleBandit", () => {
         1.0
       );
       expect(bandit.oracle).toBeDefined();
-      expect(bandit.softmaxBeta).toEqual(5.0);
+      expect(bandit.temperature).toEqual(5.0);
     });
   });
 
@@ -71,7 +71,7 @@ describe("SimpleBandit", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
       const bandit = SimpleBandit.fromActions(actions, 5.0, 1.0);
       expect(bandit.oracle).toBeDefined();
-      expect(bandit.softmaxBeta).toEqual(5.0);
+      expect(bandit.temperature).toEqual(5.0);
     });
   });
 
@@ -79,7 +79,7 @@ describe("SimpleBandit", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
       const bandit = SimpleBandit.fromActionIds(actionIds, 5.0, 1.0);
       expect(bandit.oracle).toBeDefined();
-      expect(bandit.softmaxBeta).toEqual(5.0);
+      expect(bandit.temperature).toEqual(5.0);
     });
   });
 
@@ -87,7 +87,7 @@ describe("SimpleBandit", () => {
     it("should return the correct state", () => {
       const state: ISimpleBanditState = {
         oracleState: oracle.getOracleState(),
-        softmaxBeta: 5.0,
+        temperature: 5.0,
       };
       expect(bandit.getSimpleBanditState()).toEqual(state);
     });
@@ -97,7 +97,7 @@ describe("SimpleBandit", () => {
     it("should return the correct JSON string", () => {
       const state: ISimpleBanditState = {
         oracleState: oracle.getOracleState(),
-        softmaxBeta: 5.0,
+        temperature: 5.0,
       };
       expect(bandit.toJSON()).toEqual(JSON.stringify(state));
     });
@@ -107,7 +107,7 @@ describe("SimpleBandit", () => {
     it("should return the correct instance", () => {
       const state: ISimpleBanditState = {
         oracleState: oracle.getOracleState(),
-        softmaxBeta: 5.0,
+        temperature: 5.0,
       };
       const bandit2 = SimpleBandit.fromJSON(JSON.stringify(state), actions);
       expect(bandit2).toEqual(bandit);

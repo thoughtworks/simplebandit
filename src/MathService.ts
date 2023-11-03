@@ -16,12 +16,12 @@ export function weightedHarmonicMean(numbers: number[], weights: number[]): numb
     return sumWeights / sumWeightedValues;
   }
 
-export const ConvertScoresToProbabilityDistribution = (scores: number[], softmaxBeta: number): number[] => {
+export const ConvertScoresToProbabilityDistribution = (scores: number[], temperature: number): number[] => {
     if (scores.length === 0) {
       throw new Error('scores array must not be empty');
     }
-    if (softmaxBeta <= 0) {
-      throw new Error('softmaxBeta must be greater than zero');
+    if (temperature <= 0) {
+      throw new Error('temperature must be greater than zero');
     }
   
     const maxScore = Math.max(...scores);
@@ -38,7 +38,7 @@ export const ConvertScoresToProbabilityDistribution = (scores: number[], softmax
         throw new Error(`score at index ${i} must be a finite number`);
       }
   
-      const softmaxNumerator = Math.exp(softmaxBeta * (score - maxScore));
+      const softmaxNumerator = Math.exp(temperature * (score - maxScore));
       softmaxDenominator += softmaxNumerator;
       softmaxNumerators.push(softmaxNumerator);
     }

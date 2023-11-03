@@ -5,7 +5,7 @@ import {ITrainingData} from './ITrainingData';
 
 export type IMultiBanditState = {
     oracleState: ISimpleOracleState;
-    softmaxBeta: number;
+    temperature: number;
     nRecommendations: number;
   };
   
@@ -13,7 +13,7 @@ export type IMultiBanditState = {
 export interface IMultiBandit {
   
     oracle: SimpleOracle;
-    softmaxBeta: number;
+    temperature: number;
   
     getMultiBanditState(): IMultiBanditState;
     toJSON(): string;

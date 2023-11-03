@@ -4,33 +4,33 @@ exports.SimpleBandit = void 0;
 const MathService_1 = require("./MathService");
 const BanditOracle_1 = require("./BanditOracle");
 class SimpleBandit {
-    constructor(oracle, actions, softmaxBeta = 1, nRecommendations = 1) {
+    constructor(oracle, actions, temperature = 1, nRecommendations = 1) {
         this.oracle = oracle;
         this.actions = actions.reduce((acc, obj) => {
             acc[obj.ActionId] = obj;
             return acc;
         }, {});
-        this.softmaxBeta = softmaxBeta;
+        this.temperature = temperature;
         this.nRecommendations = nRecommendations;
     }
-    static fromContextAndActions(context, actions, softmaxBeta = 1, nRecommendations = 1) {
+    static fromContextAndActions(context, actions, temperature = 1, nRecommendations = 1) {
         const actionFeatures = [...new Set(actions.flatMap((action) => Object.keys(action.Features)))];
         const actionIds = actions.map((action) => action.ActionId);
         const banditOracle = new BanditOracle_1.BanditOracle(context, actionFeatures, actionIds);
-        return new SimpleBandit(banditOracle, actions, softmaxBeta, nRecommendations);
+        return new SimpleBandit(banditOracle, actions, temperature, nRecommendations);
     }
-    static fromActions(actions, softmaxBeta = 1, nRecommendations = 1) {
+    static fromActions(actions, temperature = 1, nRecommendations = 1) {
         const actionFeatures = [...new Set(actions.flatMap((action) => Object.keys(action.Features)))];
         const actionIds = actions.map((action) => action.ActionId);
         const banditOracle = new BanditOracle_1.BanditOracle(actionIds, [], actionFeatures);
-        return new SimpleBandit(banditOracle, actions, softmaxBeta, nRecommendations);
+        return new SimpleBandit(banditOracle, actions, temperature, nRecommendations);
     }
-    static fromActionIds(actionsIds, softmaxBeta = 1, nRecommendations = 1) {
+    static fromActionIds(actionsIds, temperature = 1, nRecommendations = 1) {
         const actions = actionsIds.map((actionId) => ({
             ActionId: actionId,
             Features: {},
         }));
-        return SimpleBandit.fromActions(actions, softmaxBeta, nRecommendations);
+        return SimpleBandit.fromActions(actions, temperature, nRecommendations);
     }
     static fromJSON(json, actions) {
         const state = JSON.parse(json);
@@ -38,14 +38,14 @@ class SimpleBandit {
     }
     static fromRecommendationEngineState(state, actions) {
         const banditOracle = BanditOracle_1.BanditOracle.fromOracleState(state.oracleState);
-        const softmaxBeta = state.softmaxBeta;
+        const temperature = state.temperature;
         const nRecommendations = state.nRecommendations;
-        return new SimpleBandit(banditOracle, actions, softmaxBeta, nRecommendations);
+        return new SimpleBandit(banditOracle, actions, temperature, nRecommendations);
     }
     getRecommendationEngineState() {
         return {
             oracleState: this.oracle.getOracleState(),
-            softmaxBeta: this.softmaxBeta,
+            temperature: this.temperature,
             nRecommendations: this.nRecommendations,
         };
     }
@@ -54,7 +54,7 @@ class SimpleBandit {
     }
     _sampleFromActionScores(actionScores) {
         const scores = actionScores.map((ex) => ex.score);
-        const probabilities = (0, MathService_1.ConvertScoresToProbabilityDistribution)(scores, this.softmaxBeta);
+        const probabilities = (0, MathService_1.ConvertScoresToProbabilityDistribution)(scores, this.temperature);
         const sampleIndex = (0, MathService_1.SampleFromProbabilityDistribution)(probabilities);
         return sampleIndex;
     }
@@ -65,7 +65,7 @@ class SimpleBandit {
             const actionId = actionIds[i];
             const action = this.actions[actionId];
             const actionScore = this.oracle.predict(context, action.Features, action.ActionId);
-            const softmaxNumerator = Math.exp(this.softmaxBeta * actionScore);
+            const softmaxNumerator = Math.exp(this.temperature * actionScore);
             scoredActions.push({
                 actionId: actionId,
                 score: actionScore,

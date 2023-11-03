@@ -45,7 +45,7 @@ describe("MultiBandit", () => {
   describe("constructor", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
       expect(bandit.oracle).toEqual(oracle);
-      expect(bandit.softmaxBeta).toEqual(5.0);
+      expect(bandit.temperature).toEqual(5.0);
       expect(bandit.nRecommendations).toEqual(2);
     });
   });
@@ -59,7 +59,7 @@ describe("MultiBandit", () => {
           1.0
         );
         expect(bandit.oracle).toBeDefined();
-        expect(bandit.softmaxBeta).toEqual(5.0);
+        expect(bandit.temperature).toEqual(5.0);
       });
     });
 
@@ -72,7 +72,7 @@ describe("MultiBandit", () => {
           1.0
         );
         expect(bandit.oracle).toBeDefined();
-        expect(bandit.softmaxBeta).toEqual(5.0);
+        expect(bandit.temperature).toEqual(5.0);
       });
     });
 
@@ -80,7 +80,7 @@ describe("MultiBandit", () => {
       it("should create an instance of MultiBandit with the correct properties", () => {
         const bandit = MultiBandit.fromActions(actions, 5.0, 1.0, 2);
         expect(bandit.oracle).toBeDefined();
-        expect(bandit.softmaxBeta).toEqual(5.0);
+        expect(bandit.temperature).toEqual(5.0);
       });
     });
 
@@ -88,7 +88,7 @@ describe("MultiBandit", () => {
       it("should create an instance of MultiBandit with the correct properties", () => {
         const bandit = MultiBandit.fromActionIds(actionIds, 5.0, 1.0, 2);
         expect(bandit.oracle).toBeDefined();
-        expect(bandit.softmaxBeta).toEqual(5.0);
+        expect(bandit.temperature).toEqual(5.0);
       });
     });
 
@@ -96,7 +96,7 @@ describe("MultiBandit", () => {
       it("should return the correct state", () => {
         const state: IMultiBanditState = {
           oracleState: oracle.getOracleState(),
-          softmaxBeta: 5.0,
+          temperature: 5.0,
           nRecommendations: 2,
         };
         expect(bandit.getMultiBanditState()).toEqual(state);
@@ -107,7 +107,7 @@ describe("MultiBandit", () => {
       it("should return the correct JSON string", () => {
         const state: IMultiBanditState = {
           oracleState: oracle.getOracleState(),
-          softmaxBeta: 5.0,
+          temperature: 5.0,
           nRecommendations: 2,
         };
         expect(bandit.toJSON()).toEqual(JSON.stringify(state));
@@ -118,7 +118,7 @@ describe("MultiBandit", () => {
       it("should return the correct instance", () => {
         const state: IMultiBanditState = {
           oracleState: oracle.getOracleState(),
-          softmaxBeta: 5.0,
+          temperature: 5.0,
           nRecommendations: 2,
         };
         const bandit2 = MultiBandit.fromJSON(JSON.stringify(state), actions);

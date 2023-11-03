@@ -58,14 +58,14 @@
     <script src="../simpleBandit.js"></script>
     <script>
       let learningRateInput = document.getElementById("learning-rate");
-      let softmaxBetaInput = document.getElementById("softmax-beta");
+      let temperatureInput = document.getElementById("softmax-beta");
       let learningRate = parseFloat(learningRateInput.value);
-      let softmaxBeta = parseFloat(softmaxBetaInput.value);
+      let temperature = parseFloat(temperatureInput.value);
 
       let bandit = SimpleBandit.fromContextAndActionIds(
         ["sunny", "rainy"],
         ["apple", "pear", "orange"],
-        (softmaxBeta = softmaxBeta),
+        (temperature = temperature),
         (learningRate = learningRate)
       );
       document.getElementById("serialized-bandit").innerText = bandit.toJSON();
@@ -78,9 +78,9 @@
         learningRate = parseFloat(learningRateInput.value);
         bandit.oracle.learningRate = learningRate;
       });
-      softmaxBetaInput.addEventListener("change", function () {
-        softmaxBeta = parseFloat(softmaxBetaInput.value);
-        bandit.softmaxBeta = softmaxBeta;
+      temperatureInput.addEventListener("change", function () {
+        temperature = parseFloat(temperatureInput.value);
+        bandit.temperature = temperature;
         document.getElementById("action-probabilities").innerText =
           JSON.stringify(bandit.getScoredActions(context));
       });

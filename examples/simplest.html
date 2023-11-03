@@ -33,7 +33,7 @@
     <script>
       let bandit = SimpleBandit.fromActionIds(
         ["apple", "pear", "orange"],
-        (softmaxBeta = 5.0),
+        (temperature = 5.0),
         (learningRate = 1.0)
       );
       let recommendation;
