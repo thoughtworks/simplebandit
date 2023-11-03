@@ -80,6 +80,26 @@ bandit.chooseAction(recommendations, 'apple')
 //bandit.rejectAll(recommendations)
 ```
 
+### Serializing and storing bandits
+
+You can serialize bandits to JSON and load them from JSON. So you can store e.g. a personalized bandit
+for each user and load them on demand. 
+
+```typescript
+const bandit2 = SimpleBandit.fromJSON(bandit1.toJSON())
+```
+
+### Retaining training data
+
+The `acceptRecommendation` and `chooseAction`, etc, methods also return a `trainingData` object. 
+These can be stored so that you can re-train the bandit at a later point (perhaps with e.g. a different learningRate, or with different initial weights):
+
+```typescript
+const trainingData = bandit.acceptRecommendation(recommendation)
+const bandit2 = bandit.fromActionIds({actionIds: ['apple', 'pear']})
+bandit2.train([trainingData])
+```
+
 ## Usage javascript
 
 There are several pure javascript examples provided in the `examples/` directory:
