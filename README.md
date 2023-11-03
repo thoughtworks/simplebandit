@@ -21,7 +21,7 @@ In the simplest case you are simply learning a preference over a list of possibl
 ```typescript
 import { SimpleBandit } from "simplebandit";
 
-bandit = SimpleBandit.fromActionIds(["apple", "pear"]);
+const bandit = SimpleBandit.fromActionIds({actionIds:["apple", "pear"]});
 
 let recommendation = bandit.makeRecommendation();
 bandit.acceptRecommendation(recomendation);
@@ -42,7 +42,7 @@ const actions: IAction[] = [
   { actionId: "chocolate", features: { fruit: 0 } },
 ];
 
-const bandit = new SimpleBandit.fromActions(actions);
+const bandit = SimpleBandit.fromActions({actions:actions});
 ```
 
 ### Adding context
@@ -51,10 +51,11 @@ We can also learn preferences depending on a context, for example whether it is 
 
 ```typescript
 const bandit = new SimpleBandit.fromContextAndActionIds(
-  ["rain"],
-  ["apple", "pear"],
+  {
+    context:["rain"],
+    actionIds: ["apple", "pear"],
+  }
 );
-// const bandit = new SimpleBandit.fromContextAndActions(["rain"], actions)
 let recommendation = bandit.makeRecommendation({ rain: 1 });
 ```
 
@@ -63,7 +64,7 @@ let recommendation = bandit.makeRecommendation({ rain: 1 });
 You can adjust how quick the bandit learns (and forgets) with the `learningRate`. You can adjust how much it exploits (higher probability for higher scoring actions) or explores (higher probability for lower scoring actions) with `temperature`:
 
 ```typescript
-const bandit = new SimpleBandit.fromActionIds(['apple', 'pear'], (learningRate:1.0), (temperature:5.0))
+const bandit = SimpleBandit.fromActionIds({actionIds: ['apple', 'pear'], learningRate:1.0, temperature:5.0})
 ```
 
 ### Getting multiple recommendations
@@ -73,7 +74,7 @@ In order to get multiple recommendation (or a 'slate') you use `MultiBandit`:
 ```typescript
 import { MultiBandit } from 'simplebandit'
 
-let bandit = new MultiBandit.fromActionIds(['apple', 'pear', 'banana'], (nRecommendations:2))
+const bandit = MultiBandit.fromActionIds({actionIds:['apple', 'pear', 'banana'], nRecommendations:2})
 let recommendations = bandit.makeRecommendation()
 bandit.chooseAction(recommendations, 'apple')
 //bandit.rejectAll(recommendations)
