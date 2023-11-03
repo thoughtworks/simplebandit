@@ -37,7 +37,7 @@
       let recommendation;
 
       function generateNewRecommendation() {
-        recommendation = bandit.makeRecommendation();
+        recommendation = bandit.recommend();
         document.getElementById("recommended-fruit").innerText =
           recommendation.actionId;
         let scoredActions = bandit.getScoredActions();
@@ -59,14 +59,14 @@
       document
         .getElementById("eat-button")
         .addEventListener("click", async function () {
-          await bandit.acceptRecommendation(recommendation);
+          await bandit.accept(recommendation);
           generateNewRecommendation();
         });
 
       document
         .getElementById("dont-eat-button")
         .addEventListener("click", async function () {
-          await bandit.rejectRecommendation(recommendation);
+          await bandit.reject(recommendation);
           generateNewRecommendation();
         });
     </script>

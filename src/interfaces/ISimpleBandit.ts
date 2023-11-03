@@ -17,11 +17,11 @@ export interface ISimpleBandit {
   toJSON(): string;
 
   getScoredActions(context: FeaturesHash): IScoredAction[];
-  makeRecommendation(context: FeaturesHash): IRecommendation;
-  acceptRecommendation(
+  recommend(context: FeaturesHash): IRecommendation;
+  accept(
     recommendation: IRecommendation,
   ): Promise<ITrainingData[]>;
-  rejectRecommendation(
+  reject(
     recommendation: IRecommendation,
   ): Promise<ITrainingData[]>;
 

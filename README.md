@@ -14,20 +14,21 @@ npm install .
 
 ## Usage
 
-In the simplest case you are simply learning a preference over a list of possible actions, without context or action features. By accepting a recommendation you make the recommended action more likely in the future. By rejecting it, you make it less likely. The bandit learns from your feedback.
 
 ### With actionIds only
+
+In the simplest case you are simply learning a preference over a list of possible actions, without context or action features. By accepting a recommendation you make the recommended action more likely in the future. By rejecting it, you make it less likely. The bandit learns from your feedback.
 
 ```typescript
 import { SimpleBandit } from "simplebandit";
 
 const bandit = SimpleBandit.fromActionIds({actionIds:["apple", "pear"]});
 
-let recommendation = bandit.makeRecommendation();
-bandit.acceptRecommendation(recomendation);
+let recommendation = bandit.recommend();
+bandit.accept(recomendation);
 
-recommendation2 = bandit.makeRecommendation();
-bandit.rejectRecommendation(recommendation2);
+recommendation2 = bandit.recommend();
+bandit.reject(recommendation2);
 ```
 
 ### With action features
@@ -56,7 +57,7 @@ const bandit = new SimpleBandit.fromContextAndActionIds(
     actionIds: ["apple", "pear"],
   }
 );
-let recommendation = bandit.makeRecommendation({ rain: 1 });
+let recommendation = bandit.recommend({ rain: 1 });
 ```
 
 ### Configuring learning rate and temperature
@@ -75,8 +76,8 @@ In order to get multiple recommendation (or a 'slate') you use `MultiBandit`:
 import { MultiBandit } from 'simplebandit'
 
 const bandit = MultiBandit.fromActionIds({actionIds:['apple', 'pear', 'banana'], nRecommendations:2})
-let recommendations = bandit.makeRecommendation()
-bandit.chooseAction(recommendations, 'apple')
+let recommendations = bandit.recommend()
+bandit.choose(recommendations, 'apple')
 //bandit.rejectAll(recommendations)
 ```
 
@@ -91,11 +92,11 @@ const bandit2 = SimpleBandit.fromJSON(bandit1.toJSON())
 
 ### Retaining training data
 
-The `acceptRecommendation` and `chooseAction`, etc, methods also return a `trainingData` object. 
+The `accept` and `choose`, etc, methods also return a `trainingData` object. 
 These can be stored so that you can re-train the bandit at a later point (perhaps with e.g. a different learningRate, or with different initial weights):
 
 ```typescript
-const trainingData = bandit.acceptRecommendation(recommendation)
+const trainingData = bandit.accept(recommendation)
 const bandit2 = bandit.fromActionIds({actionIds: ['apple', 'pear']})
 bandit2.train([trainingData])
 ```

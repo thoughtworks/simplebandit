@@ -112,7 +112,7 @@
         const weather = ["sunny", "rainy"][Math.floor(Math.random() * 2)];
         context =
           weather == "sunny" ? { sunny: 1, rainy: 0 } : { sunny: 0, rainy: 1 };
-        recommendation = bandit.makeRecommendation(context);
+        recommendation = bandit.recommend(context);
 
         let recommendedActionsString = "";
         for (let i = 0; i < recommendation.recommendedActions.length; i++) {
@@ -147,7 +147,7 @@
         .getElementById("eat-1")
         .addEventListener("click", async function () {
           actionId = recommendation.recommendedActions[0].actionId;
-          newTrainingData = await bandit.chooseAction(recommendation, actionId);
+          newTrainingData = await bandit.choose(recommendation, actionId);
           trainingData = trainingData.concat(newTrainingData);
           document.getElementById("training-data").innerText =
             JSON.stringify(trainingData);
@@ -159,7 +159,7 @@
         .getElementById("eat-2")
         .addEventListener("click", async function () {
           actionId = recommendation.recommendedActions[1].actionId;
-          newTrainingData = await bandit.chooseAction(recommendation, actionId);
+          newTrainingData = await bandit.choose(recommendation, actionId);
           trainingData = trainingData.concat(newTrainingData);
           document.getElementById("training-data").innerText =
             JSON.stringify(trainingData);
@@ -171,7 +171,7 @@
         .getElementById("eat-3")
         .addEventListener("click", async function () {
           actionId = recommendation.recommendedActions[2].actionId;
-          newTrainingData = await bandit.chooseAction(recommendation, actionId);
+          newTrainingData = await bandit.choose(recommendation, actionId);
           trainingData = trainingData.concat(newTrainingData);
           document.getElementById("training-data").innerText =
             JSON.stringify(trainingData);

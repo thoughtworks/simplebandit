@@ -200,7 +200,7 @@ export class MultiBandit implements IMultiBandit {
     return scoredActions;
   }
 
-  makeRecommendation(context: FeaturesHash = {}): IMultiRecommendation {
+  recommend(context: FeaturesHash = {}): IMultiRecommendation {
     let scoredActions = this.getScoredActions(context);
 
     let recommendedActions: IRecommendedAction[] = [];
@@ -248,7 +248,7 @@ export class MultiBandit implements IMultiBandit {
     return trainingData;
   }
 
-  chooseAction(
+  choose(
     recommendation: IMultiRecommendation,
     actionId: string | undefined,
   ): Promise<ITrainingData[]> {
@@ -267,7 +267,7 @@ export class MultiBandit implements IMultiBandit {
   }
 
   rejectAll(recommendation: IMultiRecommendation): Promise<ITrainingData[]> {
-    return this.chooseAction(recommendation, undefined);
+    return this.choose(recommendation, undefined);
   }
 
   train(trainingData: ITrainingData[]): Promise<void> {

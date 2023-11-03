@@ -89,7 +89,7 @@
         const weather = ["sunny", "rainy"][Math.floor(Math.random() * 2)];
         context =
           weather == "sunny" ? { sunny: 1, rainy: 0 } : { sunny: 0, rainy: 1 };
-        recommendation = bandit.makeRecommendation(context);
+        recommendation = bandit.recommend(context);
 
         document.getElementById("weather").innerText = weather;
         document.getElementById("recommended-fruit").innerText =
@@ -105,7 +105,7 @@
       document
         .getElementById("eat-button")
         .addEventListener("click", async function () {
-          newTrainingData = await bandit.acceptRecommendation(recommendation);
+          newTrainingData = await bandit.accept(recommendation);
           trainingData = trainingData.concat(newTrainingData);
           document.getElementById("training-data").innerText =
             JSON.stringify(trainingData);
@@ -117,7 +117,7 @@
       document
         .getElementById("dont-eat-button")
         .addEventListener("click", async function () {
-          newTrainingData = await bandit.rejectRecommendation(recommendation);
+          newTrainingData = await bandit.reject(recommendation);
           trainingData = trainingData.concat(newTrainingData);
           document.getElementById("training-data").innerText =
             JSON.stringify(trainingData);

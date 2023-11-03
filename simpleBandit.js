@@ -223,7 +223,7 @@ class MultiBandit {
         }));
         return scoredActions;
     }
-    makeRecommendation(context = {}) {
+    recommend(context = {}) {
         let scoredActions = this.getScoredActions(context);
         let recommendedActions = [];
         for (let index = 0; index < this.nRecommendations; index++) {
@@ -259,7 +259,7 @@ class MultiBandit {
         }
         return trainingData;
     }
-    chooseAction(recommendation, actionId) {
+    choose(recommendation, actionId) {
         return new Promise((resolve, reject) => {
             try {
                 const trainingData = this._generateOracleTrainingData(recommendation, actionId);
@@ -272,7 +272,7 @@ class MultiBandit {
         });
     }
     rejectAll(recommendation) {
-        return this.chooseAction(recommendation, undefined);
+        return this.choose(recommendation, undefined);
     }
     train(trainingData) {
         return new Promise((resolve, reject) => {
@@ -394,7 +394,7 @@ class SimpleBandit {
         }));
         return scoredActions;
     }
-    makeRecommendation(context = {}) {
+    recommend(context = {}) {
         let scoredActions = this.getScoredActions(context);
         const sampleIndex = this._sampleFromActionScores(scoredActions);
         const recommendedAction = scoredActions[sampleIndex];
@@ -418,7 +418,7 @@ class SimpleBandit {
         ];
         return trainingData;
     }
-    acceptRecommendation(recommendation) {
+    accept(recommendation) {
         return new Promise((resolve, reject) => {
             try {
                 const trainingData = this._generateOracleTrainingData(recommendation, recommendation.actionId);
@@ -430,7 +430,7 @@ class SimpleBandit {
             }
         });
     }
-    rejectRecommendation(recommendation) {
+    reject(recommendation) {
         return new Promise((resolve, reject) => {
             try {
                 const trainingData = this._generateOracleTrainingData(recommendation, undefined);

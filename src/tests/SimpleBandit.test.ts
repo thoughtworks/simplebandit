@@ -177,11 +177,11 @@ describe("SimpleBandit", () => {
     });
   });
 
-  describe("makeRecommendation", () => {
+  describe("recommend", () => {
     const context: { [feature: string]: number } = { morning: 1 };
     let recommendation: IRecommendation;
     beforeEach(() => {
-      recommendation = bandit.makeRecommendation(context);
+      recommendation = bandit.recommend(context);
     });
 
     it("recommendation context should equal input context", () => {
@@ -192,17 +192,17 @@ describe("SimpleBandit", () => {
       expect(recommendation.score).toBeDefined();
       expect(recommendation.probability).toBeDefined();
     });
-    describe("AcceptRecommendation", () => {
+    describe("accept", () => {
       it("the weights of the oracle should be changed", () => {
         const oldWeights = bandit.oracle.weights.slice();
-        bandit.acceptRecommendation(recommendation);
+        bandit.accept(recommendation);
         expect(bandit.oracle.weights).not.toEqual(oldWeights);
       });
     });
-    describe("rejectRecommendation", () => {
+    describe("reject", () => {
       it("the weights of the oracle should be changed", () => {
         const oldWeights = bandit.oracle.weights.slice();
-        bandit.rejectRecommendation(recommendation);
+        bandit.reject(recommendation);
         expect(bandit.oracle.weights).not.toEqual(oldWeights);
       });
     });

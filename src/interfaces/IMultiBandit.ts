@@ -16,8 +16,8 @@ export interface IMultiBandit {
   getMultiBanditState(): IMultiBanditState;
   toJSON(): string;
 
-  makeRecommendation(context: FeaturesHash): IMultiRecommendation;
-  chooseAction(
+  recommend(context: FeaturesHash): IMultiRecommendation;
+  choose(
     recommendation: IMultiRecommendation,
     actionId: string | undefined,
   ): Promise<ITrainingData[]>;

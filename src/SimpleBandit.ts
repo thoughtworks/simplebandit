@@ -182,7 +182,7 @@ export class SimpleBandit implements ISimpleBandit {
     return scoredActions;
   }
 
-  makeRecommendation(context: FeaturesHash = {}): IRecommendation {
+  recommend(context: FeaturesHash = {}): IRecommendation {
     let scoredActions = this.getScoredActions(context);
     const sampleIndex = this._sampleFromActionScores(scoredActions);
     const recommendedAction = scoredActions[sampleIndex];
@@ -212,7 +212,7 @@ export class SimpleBandit implements ISimpleBandit {
     return trainingData;
   }
 
-  acceptRecommendation(
+  accept(
     recommendation: IRecommendation,
   ): Promise<ITrainingData[]> {
     return new Promise((resolve, reject) => {
@@ -229,7 +229,7 @@ export class SimpleBandit implements ISimpleBandit {
     });
   }
 
-  rejectRecommendation(
+  reject(
     recommendation: IRecommendation,
   ): Promise<ITrainingData[]> {
     return new Promise((resolve, reject) => {

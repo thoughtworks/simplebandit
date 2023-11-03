@@ -188,11 +188,11 @@ describe("MultiBandit", () => {
     });
   });
 
-  describe("makeRecommendation", () => {
+  describe("recommend", () => {
     const context: { [feature: string]: number } = { morning: 1 };
     let recommendation: IMultiRecommendation;
     beforeEach(() => {
-      recommendation = bandit.makeRecommendation(context);
+      recommendation = bandit.recommend(context);
     });
 
     it("recommendation context should equal input context", () => {
@@ -206,10 +206,10 @@ describe("MultiBandit", () => {
         expect(action.probability).toBeDefined();
       });
     });
-    describe("chooseAction", () => {
+    describe("choose", () => {
       it("the weights of the oracle should be changed", () => {
         const oldWeights = bandit.oracle.weights.slice();
-        bandit.chooseAction(recommendation, "apple");
+        bandit.choose(recommendation, "apple");
         expect(bandit.oracle.weights).not.toEqual(oldWeights);
       });
     });
