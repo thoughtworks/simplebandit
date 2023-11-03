@@ -1,7 +1,7 @@
 {
   "name": "simplebandit",
   "version": "1.0.0",
-  "description": "An npm library for contextual bandits called simpleBandit",
+  "description": "An npm library for contextual bandits",
   "main": "index.js",
   "scripts": {
     "test": "jest"
@@ -13,7 +13,7 @@
     "library"
   ],
   "author": "Oege Dijk",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "directories": {
     "example": "examples"
   },
