@@ -1,12 +1,13 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
-const { SimpleOracle, SimpleBandit, MultiBandit } = require("./src");
+const { SimpleOracle, SimpleBandit, MultiBandit, WeightedMultiBandit } = require("./src");
 window.SimpleOracle = SimpleOracle;
 window.SimpleBandit = SimpleBandit;
 window.MultiBandit = MultiBandit;
-module.exports = { SimpleOracle, SimpleBandit, MultiBandit };
+window.WeightedMultiBandit = WeightedMultiBandit;
+module.exports = { SimpleOracle, SimpleBandit, MultiBandit, WeightedMultiBandit };
 
-},{"./src":6}],2:[function(require,module,exports){
+},{"./src":7}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CosineSimilarity = exports.SampleFromProbabilityDistribution = exports.ConvertScoresToProbabilityDistribution = exports.weightedHarmonicMean = void 0;
@@ -201,14 +202,18 @@ class MultiBandit {
         const sampleIndex = (0, MathService_1.SampleFromProbabilityDistribution)(probabilities);
         return sampleIndex;
     }
+    _getActionScore(actionId, context, features) {
+        const actionScore = this.oracle.predict(actionId, context, features);
+        return actionScore;
+    }
     getScoredActions(context = {}) {
         let scoredActions = [];
         const actionIds = Object.keys(this.actionsMap);
         for (let i = 0; i < actionIds.length; i++) {
             const actionId = actionIds[i];
             const action = this.actionsMap[actionId];
-            const actionScore = this.oracle.predict(action.actionId, context, action.features);
-            const softmaxNumerator = Math.exp(this.temperature * actionScore);
+            const actionScore = this._getActionScore(action.actionId, context, action.features);
+            const softmaxNumerator = Math.exp(actionScore / this.temperature);
             scoredActions.push({
                 actionId: actionId,
                 score: actionScore,
@@ -247,13 +252,13 @@ class MultiBandit {
             }
             const context = recommendation.context;
             const actionFeatures = recommendedAction.features;
-            const label = recommendedAction.actionId === selectedActionId ? 1 : 0;
+            const click = recommendedAction.actionId === selectedActionId ? 1 : 0;
             const probability = recommendation.recommendedActions[index].probability;
             trainingData.push({
                 actionId: actionId,
                 actionFeatures: actionFeatures,
                 context: context,
-                label: label,
+                click: click,
                 probability: probability,
             });
         }
@@ -263,7 +268,7 @@ class MultiBandit {
         return new Promise((resolve, reject) => {
             try {
                 const trainingData = this._generateOracleTrainingData(recommendation, actionId);
-                this.oracle.fitMany(trainingData);
+                this.train(trainingData);
                 resolve(trainingData);
             }
             catch (error) {
@@ -372,14 +377,18 @@ class SimpleBandit {
         const sampleIndex = (0, MathService_1.SampleFromProbabilityDistribution)(probabilities);
         return sampleIndex;
     }
+    _getActionScore(actionId, context, features) {
+        const actionScore = this.oracle.predict(actionId, context, features);
+        return actionScore;
+    }
     getScoredActions(context = {}) {
         let scoredActions = [];
         const actionIds = Object.keys(this.actionsMap);
         for (let i = 0; i < actionIds.length; i++) {
             const actionId = actionIds[i];
             const action = this.actionsMap[actionId];
-            const actionScore = this.oracle.predict(action.actionId, context, action.features);
-            const softmaxNumerator = Math.exp(this.temperature * actionScore);
+            const actionScore = this._getActionScore(action.actionId, context, action.features);
+            const softmaxNumerator = Math.exp(actionScore / this.temperature);
             scoredActions.push({
                 actionId: actionId,
                 score: actionScore,
@@ -412,7 +421,7 @@ class SimpleBandit {
                 actionId: recommendation.actionId,
                 actionFeatures: this.actionsMap[recommendation.actionId].features,
                 context: recommendation.context,
-                label: recommendation.actionId === selectedActionId ? 1 : 0,
+                click: recommendation.actionId === selectedActionId ? 1 : 0,
                 probability: recommendation.probability,
             },
         ];
@@ -465,7 +474,7 @@ const DEFAULT_LEARNING_RATE = 0.5;
 const DEFAULT_NEGATIVE_CLASS_WEIGHT = 1.0;
 class SimpleOracle {
     constructor({ actionIds = [], context = [], actionFeatures = [], learningRate = DEFAULT_LEARNING_RATE, // example default value
-    contextActionIdInteractions = true, contextActionFeatureInteractions = true, useInversePropensityWeighting = true, negativeClassWeight = DEFAULT_NEGATIVE_CLASS_WEIGHT, targetLabel = "label", weights = {}, } = {}) {
+    contextActionIdInteractions = true, contextActionFeatureInteractions = true, useInversePropensityWeighting = true, negativeClassWeight = DEFAULT_NEGATIVE_CLASS_WEIGHT, targetLabel = "click", strictFeatures = true, weights = {}, } = {}) {
         if (!Array.isArray(actionIds) ||
             !Array.isArray(context) ||
             !Array.isArray(actionFeatures)) {
@@ -476,8 +485,9 @@ class SimpleOracle {
         }
         if (typeof contextActionIdInteractions !== "boolean" ||
             typeof contextActionFeatureInteractions !== "boolean" ||
-            typeof useInversePropensityWeighting !== "boolean") {
-            throw new Error("contextActionIdInteractions, contextActionFeatureInteractions, useInversePropensityWeighting must be booleans.");
+            typeof useInversePropensityWeighting !== "boolean" ||
+            typeof strictFeatures !== "boolean") {
+            throw new Error("contextActionIdInteractions, contextActionFeatureInteractions, useInversePropensityWeighting, strictFeatures must be booleans.");
         }
         this.addIntercept = true;
         this.setFeaturesAndUpdateWeights(actionIds, context, actionFeatures, contextActionIdInteractions, contextActionFeatureInteractions, weights);
@@ -485,6 +495,7 @@ class SimpleOracle {
         this.learningRate = learningRate;
         this.useInversePropensityWeighting = useInversePropensityWeighting;
         this.negativeClassWeight = negativeClassWeight;
+        this.strictFeatures = strictFeatures;
     }
     getOracleState() {
         return {
@@ -497,6 +508,7 @@ class SimpleOracle {
             useInversePropensityWeighting: this.useInversePropensityWeighting,
             negativeClassWeight: this.negativeClassWeight,
             targetLabel: this.targetLabel,
+            strictFeatures: this.strictFeatures,
             weights: this.getWeightsHash(),
         };
     }
@@ -511,6 +523,7 @@ class SimpleOracle {
             useInversePropensityWeighting: oracleState.useInversePropensityWeighting,
             negativeClassWeight: oracleState.negativeClassWeight,
             targetLabel: oracleState.targetLabel,
+            strictFeatures: oracleState.strictFeatures,
             weights: oracleState.weights,
         });
     }
@@ -665,7 +678,15 @@ class SimpleOracle {
                     missingFeatures.push(feature);
                 }
             });
-            throw new Error(`Missing features in inputsHash: ${missingFeatures}`);
+            if (this.strictFeatures) {
+                throw new Error(`Missing features in inputsHash: ${missingFeatures}`);
+            }
+            else {
+                // add missing features with value 0:
+                missingFeatures.forEach((feature) => {
+                    inputsHash[feature] = 0;
+                });
+            }
         }
         inputsHash = this._addActionIdFeatures(inputsHash, actionId);
         inputsHash = this._addInteractionFeatures(inputsHash);
@@ -714,7 +735,6 @@ class SimpleOracle {
         }
         else {
             // Handle missing or incorrect target label
-            console.error(`Missing or undefined target label: ${this.targetLabel}`);
         }
     }
     fitMany(trainingDataList) {
@@ -726,6 +746,304 @@ class SimpleOracle {
 exports.SimpleOracle = SimpleOracle;
 
 },{}],6:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.WeightedMultiBandit = void 0;
+const MathService_1 = require("./MathService");
+const SimpleOracle_1 = require("./SimpleOracle");
+class WeightedMultiBandit {
+    constructor(weightedOracles, actions, temperature = 0.2, nRecommendations = 3) {
+        this.weightedOracles = weightedOracles;
+        const oracleWeights = Object.values(weightedOracles).map((oracle) => oracle.weight);
+        if (oracleWeights.some((weight) => weight < 0)) {
+            throw new Error("All weights in oracles must be positive numbers.");
+        }
+        this.targetLabels = Object.values(weightedOracles).map((oracle) => oracle.oracle.targetLabel);
+        this.actionsMap = actions.reduce((acc, obj) => {
+            acc[obj.actionId] = obj;
+            return acc;
+        }, {});
+        this.temperature = temperature;
+        this.nRecommendations = nRecommendations;
+    }
+    //   static fromContextAndActions({
+    //     context,
+    //     actions,
+    //     temperature = 5.0,
+    //     learningRate = 1.0,
+    //     nRecommendations = 3,
+    //   }: {
+    //     context: string[];
+    //     actions: IAction[];
+    //     temperature?: number;
+    //     learningRate?: number;
+    //     nRecommendations?: number;
+    //   }): IMultiBandit {
+    //     const actionFeatures = [
+    //       ...new Set(actions.flatMap((action) => Object.keys(action.features))),
+    //     ];
+    //     const actionIds = actions.map((action) => action.actionId);
+    //     const oracle = new SimpleOracle({
+    //       actionIds: actionIds,
+    //       context: context,
+    //       actionFeatures: actionFeatures,
+    //       learningRate: learningRate,
+    //     });
+    //     return new MultiBandit(oracle, actions, temperature, nRecommendations);
+    //   }
+    //   static fromContextAndActionIds({
+    //     context,
+    //     actionIds,
+    //     temperature = 5.0,
+    //     learningRate = 1.0,
+    //     nRecommendations = 3,
+    //   }: {
+    //     context: string[];
+    //     actionIds: string[];
+    //     temperature?: number;
+    //     learningRate?: number;
+    //     nRecommendations?: number;
+    //   }): IMultiBandit {
+    //     const actions = actionIds.map((actionId) => ({
+    //       actionId: actionId,
+    //       features: {},
+    //     }));
+    //     return MultiBandit.fromContextAndActions({
+    //       context: context,
+    //       actions: actions,
+    //       temperature: temperature,
+    //       learningRate: learningRate,
+    //       nRecommendations: nRecommendations,
+    //     });
+    //   }
+    //   static fromActions({
+    //     actions,
+    //     temperature = 5.0,
+    //     learningRate = 1.0,
+    //     nRecommendations = 3,
+    //   }: {
+    //     actions: IAction[];
+    //     temperature?: number;
+    //     learningRate?: number;
+    //     nRecommendations?: number;
+    //   }): IMultiBandit {
+    //     const actionFeatures = [
+    //       ...new Set(actions.flatMap((action) => Object.keys(action.features))),
+    //     ];
+    //     const actionIds = actions.map((action) => action.actionId);
+    //     const oracle = new SimpleOracle({
+    //       actionIds: actionIds,
+    //       actionFeatures: actionFeatures,
+    //       learningRate: learningRate,
+    //     });
+    //     return new MultiBandit(oracle, actions, temperature, nRecommendations);
+    //   }
+    //   static fromActionIds({
+    //     actionIds,
+    //     temperature = 5.0,
+    //     learningRate = 1.0,
+    //     nRecommendations = 3,
+    //   }: {
+    //     actionIds: string[];
+    //     temperature?: number;
+    //     learningRate?: number;
+    //     nRecommendations?: number;
+    //   }): IMultiBandit {
+    //     const actions = actionIds.map((actionId) => ({
+    //       actionId: actionId,
+    //       features: {},
+    //     }));
+    //     return MultiBandit.fromActions({
+    //       actions: actions,
+    //       temperature: temperature,
+    //       learningRate: learningRate,
+    //       nRecommendations: nRecommendations,
+    //     });
+    //   }
+    static fromJSON(json, actions) {
+        const state = JSON.parse(json);
+        return WeightedMultiBandit.fromWeightedMultiBanditState(state, actions);
+    }
+    static fromWeightedMultiBanditState(state, actions) {
+        const oracles = [];
+        for (const oracle of state.oraclesStates) {
+            oracles.push({
+                oracle: SimpleOracle_1.SimpleOracle.fromOracleState(oracle.oracleState),
+                weight: oracle.weight,
+            });
+        }
+        const temperature = state.temperature;
+        const nRecommendations = state.nRecommendations;
+        return new WeightedMultiBandit(oracles, actions, temperature, nRecommendations);
+    }
+    getWeightedMultiBanditState() {
+        const oraclesStates = [];
+        for (const weightedOracle of this.weightedOracles) {
+            oraclesStates.push({
+                weight: weightedOracle.weight,
+                oracleState: weightedOracle.oracle.getOracleState(),
+            });
+        }
+        return {
+            oraclesStates: oraclesStates,
+            temperature: this.temperature,
+            nRecommendations: this.nRecommendations,
+        };
+    }
+    toJSON() {
+        return JSON.stringify(this.getWeightedMultiBanditState());
+    }
+    _sampleFromActionScores(actionScores) {
+        const scores = actionScores.map((ex) => ex.score);
+        const probabilities = (0, MathService_1.ConvertScoresToProbabilityDistribution)(scores, this.temperature);
+        const sampleIndex = (0, MathService_1.SampleFromProbabilityDistribution)(probabilities);
+        return sampleIndex;
+    }
+    _getActionScore(actionId, context, features) {
+        let actionScore = 0;
+        for (const weightedOracle of this.weightedOracles) {
+            actionScore +=
+                weightedOracle.weight *
+                    weightedOracle.oracle.predict(actionId, context, features);
+        }
+        return actionScore;
+    }
+    getScoredActions(context = {}) {
+        let scoredActions = [];
+        const actionIds = Object.keys(this.actionsMap);
+        for (let i = 0; i < actionIds.length; i++) {
+            const actionId = actionIds[i];
+            const action = this.actionsMap[actionId];
+            const actionScore = this._getActionScore(action.actionId, context, action.features);
+            const softmaxNumerator = Math.exp(actionScore / this.temperature);
+            scoredActions.push({
+                actionId: actionId,
+                score: actionScore,
+                probability: softmaxNumerator,
+            });
+        }
+        let SoftmaxDenominator = scoredActions.reduce((a, b) => a + b.probability, 0);
+        scoredActions = scoredActions.map((ex) => ({
+            actionId: ex.actionId,
+            score: ex.score,
+            probability: ex.probability / SoftmaxDenominator,
+        }));
+        return scoredActions;
+    }
+    getActionScoresPerOracle(context = {}) {
+        let actionScoresPerOracle = [];
+        for (const [actionId, action] of Object.entries(this.actionsMap)) {
+            for (const weightedOracle of this.weightedOracles) {
+                const score = weightedOracle.oracle.predict(actionId, context, action.features);
+                actionScoresPerOracle.push({
+                    actionId: actionId,
+                    [weightedOracle.oracle.targetLabel]: score,
+                    weight: weightedOracle.weight,
+                });
+            }
+        }
+        return actionScoresPerOracle;
+    }
+    recommend(context = {}) {
+        let scoredActions = this.getScoredActions(context);
+        let recommendedActions = [];
+        for (let index = 0; index < this.nRecommendations; index++) {
+            const sampleIndex = this._sampleFromActionScores(scoredActions);
+            recommendedActions[index] = scoredActions[sampleIndex];
+            scoredActions.splice(sampleIndex, 1);
+        }
+        const recommendation = {
+            context: context,
+            recommendedActions: recommendedActions,
+        };
+        return recommendation;
+    }
+    _generateOracleTrainingData(recommendation, selectedActionId = undefined) {
+        let trainingData = [];
+        for (let index = 0; index < recommendation.recommendedActions.length; index++) {
+            const actionId = recommendation.recommendedActions[index].actionId;
+            const recommendedAction = this.actionsMap[actionId];
+            if (!recommendedAction) {
+                throw new Error(`Failed to generate training data for recommended exercise at index ${index}.`);
+            }
+            const context = recommendation.context;
+            const actionFeatures = recommendedAction.features;
+            const click = recommendedAction.actionId === selectedActionId ? 1 : 0;
+            const probability = recommendation.recommendedActions[index].probability;
+            trainingData.push({
+                actionId: actionId,
+                actionFeatures: actionFeatures,
+                context: context,
+                click: click,
+                probability: probability,
+            });
+        }
+        return trainingData;
+    }
+    choose(recommendation, actionId) {
+        return new Promise((resolve, reject) => {
+            try {
+                const trainingData = this._generateOracleTrainingData(recommendation, actionId);
+                this.train(trainingData);
+                resolve(trainingData);
+            }
+            catch (error) {
+                reject(error);
+            }
+        });
+    }
+    rejectAll(recommendation) {
+        return this.choose(recommendation, undefined);
+    }
+    feedback(recommendation, actionId, label, value) {
+        return new Promise((resolve, reject) => {
+            var _a;
+            try {
+                if (!recommendation.recommendedActions
+                    .map((action) => action.actionId)
+                    .includes(actionId)) {
+                    const recomendationActions = recommendation.recommendedActions.map((action) => action.actionId);
+                    throw new Error(`actionId ${actionId} not in recommendation ${recomendationActions}`);
+                }
+                if (!this.targetLabels.includes(label)) {
+                    throw new Error(`label ${label} not in any of weightedOracles`);
+                }
+                const recommendedAction = this.actionsMap[actionId];
+                const probability = (_a = recommendation.recommendedActions.find((action) => action.actionId === actionId)) === null || _a === void 0 ? void 0 : _a.probability;
+                const trainingData = [
+                    {
+                        actionId: actionId,
+                        actionFeatures: recommendedAction.features,
+                        context: recommendation.context,
+                        [label]: value,
+                        probability: probability,
+                    },
+                ];
+                this.train(trainingData);
+                resolve(trainingData);
+            }
+            catch (error) {
+                reject(error);
+            }
+        });
+    }
+    train(trainingData) {
+        return new Promise((resolve, reject) => {
+            try {
+                for (let oracle of this.weightedOracles) {
+                    oracle.oracle.fitMany(trainingData);
+                }
+                resolve();
+            }
+            catch (error) {
+                reject(error);
+            }
+        });
+    }
+}
+exports.WeightedMultiBandit = WeightedMultiBandit;
+
+},{"./MathService":2,"./SimpleOracle":5}],7:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -745,21 +1063,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./SimpleBandit"), exports);
 __exportStar(require("./SimpleOracle"), exports);
 __exportStar(require("./MultiBandit"), exports);
+__exportStar(require("./WeightedMultiBandit"), exports);
 __exportStar(require("./interfaces"), exports);
 
-},{"./MultiBandit":3,"./SimpleBandit":4,"./SimpleOracle":5,"./interfaces":12}],7:[function(require,module,exports){
+},{"./MultiBandit":3,"./SimpleBandit":4,"./SimpleOracle":5,"./WeightedMultiBandit":6,"./interfaces":13}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],8:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],9:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],10:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],11:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],12:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],10:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],11:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],12:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"dup":8}],13:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -783,4 +1102,4 @@ __exportStar(require("./ISimpleOracle"), exports);
 __exportStar(require("./IAction"), exports);
 __exportStar(require("./ISimpleOracle"), exports);
 
-},{"./IAction":7,"./IRecommendation":8,"./ISimpleBandit":9,"./ISimpleOracle":10,"./ITrainingData":11}]},{},[1]);
+},{"./IAction":8,"./IRecommendation":9,"./ISimpleBandit":10,"./ISimpleOracle":11,"./ITrainingData":12}]},{},[1]);

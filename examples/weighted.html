@@ -1,0 +1,302 @@
+<!doctype html>
+<html>
+  <head>
+    <title>WeightedMultiBandit Example</title>
+  </head>
+  <body>
+    <h1>Weighted Multi Fruit or Treats Bandit</h1>
+    <p>
+      This is an example of a MultiBandit that generates a slate of multiple
+      recommendations.
+    </p>
+    <p>You can pick either of the options, or none of the above.</p>
+    <p>
+      When you select one item, we generate three pieces of training data: one
+      for the item selected, and two for the items not selected.
+    </p>
+    <p>
+      We also have action features, with items either being a fruit or a treat
+    </p>
+
+    <h2>Learning Rate:</h2>
+    <p>
+      Higher learning rates mean that the bandit will learn faster, but will
+      also forget faster.
+    </p>
+    <input type="number" id="learning-rate" value="0.5" step="0.1" />
+
+    <h2>Temperature:</h2>
+    <p>
+      Higher temperature mean that the bandit will be more likely to explore
+      actions with a low score. 
+    </p>
+    <input type="number" id="temperature" value="0.5" step="0.1" />
+
+    <h2>All action scores:</h2>
+    <div id="action-scores"></div>
+
+
+    <h2>All action probabilities:</h2>
+    <div id="action-probabilities"></div>
+
+    <h2>Recommendation JSON:</h2>
+    <div id="recommendation-json"></div>
+
+    <h2>Recommended fruits:</h2>
+    <div id="recommended-fruits"></div>
+
+    
+
+    <h3>Click:</h2>
+    <button id="eat-1">Eat first</button>
+    <button id="eat-2">Eat second</button>
+    <button id="eat-3">Eat third</button>
+
+    <h3>Star Rating:</h2>
+    <div id="chosen-action-id"></div>
+    <select id="star-rating">
+        <option value="0.0">1</option>
+        <option value="0.2">2</option>
+        <option value="0.6">3</option>
+        <option value="0.8">4</option>
+        <option value="1.0">5</option>
+    </select>
+    <button id="submit-rating" disabled=true>Submit Rating</button>
+    <button id="no-rating" disabled=true>No Rating</button>
+
+    <h2>Training Data</h2>
+    <div id="training-data"></div>
+
+    <h2>JSON serialized bandit</h2>
+    <div id="serialized-bandit"></div>
+
+    <script src="../simpleBandit.js"></script>
+    <script>
+      let learningRateInput = document.getElementById("learning-rate");
+      let temperatureInput = document.getElementById("temperature");
+      let learningRate = parseFloat(learningRateInput.value);
+      let temperature = parseFloat(temperatureInput.value);
+      const actionIds = [
+        "apple",
+        "pear",
+        "orange",
+        "chocolate",
+        "candy",
+        "cake",
+      ];
+      const actionFeatures = ['fruit', 'treat']
+
+      const actions = [
+        {
+          actionId: "apple",
+          features: { fruit: 1, treat: 0 },
+        },
+        {
+          actionId: "pear",
+          features: { fruit: 1, treat: 0 },
+        },
+        {
+          actionId: "orange",
+          features: { fruit: 1, treat: 0 },
+        },
+        {
+          actionId: "chocolate",
+          features: { fruit: 0, treat: 1 },
+        },
+        {
+          actionId: "candy",
+          features: { fruit: 0, treat: 1 },
+        },
+        {
+          actionId: "cake",
+          features: { fruit: 0, treat: 1 },
+        },
+      ];
+      const weightedOracles = [
+        {
+            oracle: new SimpleOracle(
+                {
+                    context:['sunny', 'rainy'],
+                    actionIds: actionIds,
+                    features: actionFeatures,
+                    learningRate: learningRate,
+                    tartgetLabel: 'click', // default
+                }),
+            weight: 0.3,
+        },
+        {
+            oracle: new SimpleOracle(
+                {
+                    context:['sunny', 'rainy'],
+                    actionIds: actionIds,
+                    features: actionFeatures,
+                    learningRate: learningRate,
+                    targetLabel: 'stars',
+                }),
+            weight: 0.7,
+        }
+      ];
+
+      const bandit = new WeightedMultiBandit(
+        weightedOracles,
+        actions,
+        temperature,
+        3,
+      );
+
+      let recommendation;
+      let trainingData = [];
+      let context;
+      let chosenActionId;
+
+      learningRateInput.addEventListener("change", function () {
+        learningRate = parseFloat(learningRateInput.value);
+        bandit.oracle.learningRate = learningRate;
+      });
+      temperatureInput.addEventListener("change", function () {
+        temperature = parseFloat(temperatureInput.value);
+        bandit.temperature = temperature;
+        let scoredActions = bandit.getScoredActions(context);
+        scoredActions.sort(function (a, b) {
+          return b.probability - a.probability;
+        });
+        document.getElementById("action-probabilities").innerText =
+          scoredActions
+            .map(function (scoredAction) {
+              return (
+                scoredAction.actionId +
+                " (" +
+                (scoredAction.probability * 100).toFixed(1) +
+                "%)"
+              );
+            })
+            .join(", ");
+      });
+
+      function generateNewRecommendation() {
+        const weather = ["sunny", "rainy"][Math.floor(Math.random() * 2)];
+        context =
+          weather == "sunny" ? { sunny: 1, rainy: 0 } : { sunny: 0, rainy: 1 };
+        recommendation = bandit.recommend(context);
+
+        let recommendedActionsString = "";
+        for (let i = 0; i < recommendation.recommendedActions.length; i++) {
+          recommendedActionsString += `${i + 1}: ${
+            recommendation.recommendedActions[i].actionId
+          }\n`;
+        }
+        document.getElementById("recommended-fruits").innerText =
+          recommendedActionsString;
+        document.getElementById("recommendation-json").innerText =
+          JSON.stringify(recommendation);
+        document.getElementById("chosen-action-id").innerText = "";
+        document.getElementById("action-scores").innerText = JSON.stringify(bandit.getActionScoresPerOracle(context));
+        let scoredActions = bandit.getScoredActions(context);
+        scoredActions.sort(function (a, b) {
+          return b.probability - a.probability;
+        });
+        document.getElementById("action-probabilities").innerText =
+          scoredActions
+            .map(function (scoredAction) {
+              return (
+                scoredAction.actionId +
+                " (" +
+                (scoredAction.probability * 100).toFixed(1) +
+                "%)"
+              );
+            })
+            .join(", ");
+        
+      }
+
+      generateNewRecommendation();
+
+      document
+        .getElementById("eat-1")
+        .addEventListener("click", async function () {
+          chosenActionId = recommendation.recommendedActions[0].actionId;
+          newTrainingData = await bandit.choose(recommendation, chosenActionId);
+          trainingData = trainingData.concat(newTrainingData);
+          document.getElementById("chosen-action-id").innerText =
+            `Your choice : ${chosenActionId}`;
+          document.getElementById("training-data").innerText =
+            JSON.stringify(trainingData);
+          document.getElementById("serialized-bandit").innerText =
+            bandit.toJSON();
+          for(let i = 1; i <= 3; i++) {
+            document.getElementById("eat-" + i).disabled = true;
+          }
+          document.getElementById("submit-rating").disabled = false;
+          document.getElementById("no-rating").disabled = false;
+        });
+      document
+        .getElementById("eat-2")
+        .addEventListener("click", async function () {
+          chosenActionId = recommendation.recommendedActions[1].actionId;
+          newTrainingData = await bandit.choose(recommendation, chosenActionId);
+          trainingData = trainingData.concat(newTrainingData);
+          document.getElementById("chosen-action-id").innerText =
+            `Your choice : ${chosenActionId}`;
+          document.getElementById("training-data").innerText =
+            JSON.stringify(trainingData);
+          document.getElementById("serialized-bandit").innerText =
+            bandit.toJSON();
+          for(let i = 1; i <= 3; i++) {
+            document.getElementById("eat-" + i).disabled = true;
+          }
+          document.getElementById("submit-rating").disabled = false;
+          document.getElementById("no-rating").disabled = false;
+        });
+      document
+        .getElementById("eat-3")
+        .addEventListener("click", async function () {
+          actionId = recommendation.recommendedActions[2].actionId;
+          newTrainingData = await bandit.choose(recommendation, actionId);
+          trainingData = trainingData.concat(newTrainingData);
+          document.getElementById("chosen-action-id").innerText =
+            `Your choice : ${chosenActionId}`;
+          document.getElementById("training-data").innerText =
+            JSON.stringify(trainingData);
+          document.getElementById("serialized-bandit").innerText =
+            bandit.toJSON();
+          for(let i = 1; i <= 3; i++) {
+            document.getElementById("eat-" + i).disabled = true;
+          }
+          document.getElementById("submit-rating").disabled = false;
+          document.getElementById("no-rating").disabled = false;
+        });
+      document
+        .getElementById("submit-rating")
+        .addEventListener("click", async function () {
+          newTrainingData = await bandit.feedback(
+            recommendation, 
+            chosenActionId, 
+            'stars', 
+            parseFloat(document.getElementById("star-rating").value)
+          );
+          trainingData = trainingData.concat(newTrainingData);
+          document.getElementById("training-data").innerText =
+            JSON.stringify(trainingData);
+          document.getElementById("serialized-bandit").innerText =
+            bandit.toJSON();
+          
+          for(let i = 1; i <= 3; i++) {
+            document.getElementById("eat-" + i).disabled = false;
+          }
+          document.getElementById("submit-rating").disabled = true;
+          document.getElementById("no-rating").disabled = true;
+          generateNewRecommendation();
+        });
+      document
+        .getElementById("no-rating")
+        .addEventListener("click", async function () {
+          for(let i = 1; i <= 3; i++) {
+            document.getElementById("eat-" + i).disabled = false;
+          }
+          document.getElementById("submit-rating").disabled = true;
+          document.getElementById("no-rating").disabled = true;
+          generateNewRecommendation();
+        });
+    </script>
+  </body>
+</html>
