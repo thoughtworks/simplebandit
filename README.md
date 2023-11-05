@@ -14,7 +14,6 @@ npm install .
 
 ## Usage
 
-
 ### With actionIds only
 
 In the simplest case you are simply learning a preference over a list of possible actions, without context or action features. By accepting a recommendation you make the recommended action more likely in the future. By rejecting it, you make it less likely. The bandit learns from your feedback.
@@ -22,7 +21,7 @@ In the simplest case you are simply learning a preference over a list of possibl
 ```typescript
 import { SimpleBandit } from "simplebandit";
 
-const bandit = SimpleBandit.fromActionIds({actionIds:["apple", "pear"]});
+const bandit = SimpleBandit.fromActionIds({ actionIds: ["apple", "pear"] });
 
 let recommendation = bandit.recommend();
 bandit.accept(recommendation);
@@ -42,7 +41,7 @@ const actions: IAction[] = [
   { actionId: "chocolate", features: { fruit: 0 } },
 ];
 
-const bandit = SimpleBandit.fromActions({actions:actions});
+const bandit = SimpleBandit.fromActions({ actions: actions });
 ```
 
 ### Adding context
@@ -50,21 +49,23 @@ const bandit = SimpleBandit.fromActions({actions:actions});
 We can also learn preferences depending on a context, for example whether it is raining or not.
 
 ```typescript
-const bandit = new SimpleBandit.fromContextAndActionIds(
-  {
-    context:["rain"],
-    actionIds: ["apple", "pear"],
-  }
-);
+const bandit = new SimpleBandit.fromContextAndActionIds({
+  context: ["rain"],
+  actionIds: ["apple", "pear"],
+});
 let recommendation = bandit.recommend({ rain: 1 });
 ```
 
 ### Configuring learning rate and temperature
 
-You can adjust how quick the bandit learns (and forgets) with the `learningRate`. You can adjust how much it exploits (higher probability for higher scoring actions) or explores (higher probability for lower scoring actions) with `temperature`:
+You can adjust how quick the bandit learns (and forgets) with the `learningRate`. You can adjust how much it exploits (higher probability for higher scoring actions by setting low `temperature`) or explores (higher probability for lower scoring actions higher `temperature`):
 
 ```typescript
-const bandit = SimpleBandit.fromActionIds({actionIds: ['apple', 'pear'], learningRate:1.0, temperature:5.0})
+const bandit = SimpleBandit.fromActionIds({
+  actionIds: ["apple", "pear"],
+  learningRate: 1.0,
+  temperature: 0.5,
+});
 ```
 
 ### Getting multiple recommendations
@@ -72,32 +73,35 @@ const bandit = SimpleBandit.fromActionIds({actionIds: ['apple', 'pear'], learnin
 In order to get multiple recommendation (or a 'slate') you use `MultiBandit`:
 
 ```typescript
-import { MultiBandit } from 'simplebandit'
+import { MultiBandit } from "simplebandit";
 
-const bandit = MultiBandit.fromActionIds({actionIds:['apple', 'pear', 'banana'], nRecommendations:2})
-let recommendations = bandit.recommend()
-bandit.choose(recommendations, 'apple')
+const bandit = MultiBandit.fromActionIds({
+  actionIds: ["apple", "pear", "banana"],
+  nRecommendations: 2,
+});
+let recommendations = bandit.recommend();
+bandit.choose(recommendations, "apple");
 //bandit.rejectAll(recommendations)
 ```
 
 ### Serializing and storing bandits
 
 You can serialize bandits to JSON and load them from JSON. So you can store e.g. a personalized bandit
-for each user and load them on demand. 
+for each user and load them on demand.
 
 ```typescript
-const bandit2 = SimpleBandit.fromJSON(bandit1.toJSON())
+const bandit2 = SimpleBandit.fromJSON(bandit1.toJSON());
 ```
 
 ### Retaining training data
 
-The `accept`, `reject` and `choose` methods also return a `trainingData` object. 
+The `accept`, `reject` and `choose` methods also return a `trainingData` object.
 These can be stored so that you can re-train the bandit at a later point (perhaps with e.g. a different learningRate, or with different initial weights):
 
 ```typescript
-const trainingData = bandit.accept(recommendation)
-const bandit2 = bandit.fromActionIds({actionIds: ['apple', 'pear']})
-bandit2.train([trainingData])
+const trainingData = bandit.accept(recommendation);
+const bandit2 = bandit.fromActionIds({ actionIds: ["apple", "pear"] });
+bandit2.train([trainingData]);
 ```
 
 ## Usage javascript
