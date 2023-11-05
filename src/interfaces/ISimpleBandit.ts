@@ -18,12 +18,8 @@ export interface ISimpleBandit {
 
   getScoredActions(context: FeaturesHash): IScoredAction[];
   recommend(context: FeaturesHash): IRecommendation;
-  accept(
-    recommendation: IRecommendation,
-  ): Promise<ITrainingData[]>;
-  reject(
-    recommendation: IRecommendation,
-  ): Promise<ITrainingData[]>;
+  accept(recommendation: IRecommendation): Promise<ITrainingData[]>;
+  reject(recommendation: IRecommendation): Promise<ITrainingData[]>;
 
   train(trainingData: ITrainingData[]): Promise<void>;
 }

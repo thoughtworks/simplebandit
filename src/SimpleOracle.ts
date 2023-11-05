@@ -38,7 +38,7 @@ export class SimpleOracle {
     contextActionFeatureInteractions = true,
     useInversePropensityWeighting = true,
     negativeClassWeight = DEFAULT_NEGATIVE_CLASS_WEIGHT,
-    targetLabel = "label",
+    targetLabel = "click",
     strictFeatures = true,
     weights = {},
   }: SimpleOracleOptions = {}) {
@@ -381,7 +381,6 @@ export class SimpleOracle {
       }
     } else {
       // Handle missing or incorrect target label
-      console.error(`Missing or undefined target label: ${this.targetLabel}`);
     }
   }
 

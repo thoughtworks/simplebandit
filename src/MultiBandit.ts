@@ -21,7 +21,7 @@ export class MultiBandit implements IMultiBandit {
   constructor(
     oracle: SimpleOracle,
     actions: IAction[],
-    temperature: number = 5.0,
+    temperature: number = 0.5,
     nRecommendations: number = 3,
   ) {
     this.oracle = oracle;
@@ -169,6 +169,15 @@ export class MultiBandit implements IMultiBandit {
     return sampleIndex;
   }
 
+  _getActionScore(
+    actionId: string,
+    context: FeaturesHash,
+    features: FeaturesHash
+  ) {
+    const actionScore = this.oracle.predict(actionId, context, features);
+    return actionScore;
+  }
+
   getScoredActions(context: FeaturesHash = {}): IRecommendedAction[] {
     let scoredActions: IRecommendedAction[] = [];
 
@@ -176,12 +185,8 @@ export class MultiBandit implements IMultiBandit {
     for (let i = 0; i < actionIds.length; i++) {
       const actionId = actionIds[i];
       const action = this.actionsMap[actionId];
-      const actionScore = this.oracle.predict(
-        action.actionId,
-        context,
-        action.features,
-      );
-      const softmaxNumerator = Math.exp(this.temperature * actionScore);
+      const actionScore = this._getActionScore(action.actionId, context, action.features);
+      const softmaxNumerator = Math.exp(actionScore / this.temperature);
       scoredActions.push({
         actionId: actionId,
         score: actionScore,
@@ -235,13 +240,13 @@ export class MultiBandit implements IMultiBandit {
       }
       const context = recommendation.context;
       const actionFeatures = recommendedAction.features;
-      const label = recommendedAction.actionId === selectedActionId ? 1 : 0;
+      const click = recommendedAction.actionId === selectedActionId ? 1 : 0;
       const probability = recommendation.recommendedActions[index].probability;
       trainingData.push({
         actionId: actionId,
         actionFeatures: actionFeatures,
         context: context,
-        label: label,
+        click: click,
         probability: probability,
       });
     }
@@ -258,7 +263,7 @@ export class MultiBandit implements IMultiBandit {
           recommendation,
           actionId,
         );
-        this.oracle.fitMany(trainingData);
+        this.train(trainingData);
         resolve(trainingData);
       } catch (error) {
         reject(error);

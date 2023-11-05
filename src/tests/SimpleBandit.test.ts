@@ -157,19 +157,19 @@ describe("SimpleBandit", () => {
           actionId: "apple",
           context: { morning: 1 },
           actionFeatures: { fruit: 1 },
-          label: 1,
+          click: 1,
         },
         {
           actionId: "pear",
           context: { morning: 1 },
           actionFeatures: { fruit: 1 },
-          label: 1,
+          click: 1,
         },
         {
           actionId: "chocolate",
           context: { morning: 1 },
           actionFeatures: { fruit: 0 },
-          label: 0,
+          click: 0,
         },
       ];
       bandit.train(trainingData);

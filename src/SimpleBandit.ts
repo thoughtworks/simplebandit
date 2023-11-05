@@ -20,7 +20,7 @@ export class SimpleBandit implements ISimpleBandit {
   constructor(
     oracle: SimpleOracle,
     actions: IAction[],
-    temperature: number = 1.0,
+    temperature: number = 0.5,
   ) {
     this.oracle = oracle;
     this.actionsMap = actions.reduce((acc, obj) => {
@@ -122,7 +122,7 @@ export class SimpleBandit implements ISimpleBandit {
 
   static fromSimpleBanditState(
     state: ISimpleBanditState,
-    actions: IAction[],
+    actions: IAction[]
   ): ISimpleBandit {
     const banditOracle = SimpleOracle.fromOracleState(state.oracleState);
 
@@ -145,25 +145,33 @@ export class SimpleBandit implements ISimpleBandit {
     const scores = actionScores.map((ex) => ex.score);
     const probabilities = ConvertScoresToProbabilityDistribution(
       scores,
-      this.temperature,
+      this.temperature
     );
     const sampleIndex = SampleFromProbabilityDistribution(probabilities);
     return sampleIndex;
   }
 
+  _getActionScore(
+    actionId: string,
+    context: FeaturesHash,
+    features: FeaturesHash
+  ) {
+    const actionScore = this.oracle.predict(actionId, context, features);
+    return actionScore;
+  }
+
   getScoredActions(context: FeaturesHash = {}): IScoredAction[] {
     let scoredActions: IScoredAction[] = [];
-
     const actionIds = Object.keys(this.actionsMap);
     for (let i = 0; i < actionIds.length; i++) {
       const actionId = actionIds[i];
       const action = this.actionsMap[actionId];
-      const actionScore = this.oracle.predict(
+      const actionScore = this._getActionScore(
         action.actionId,
         context,
-        action.features,
+        action.features
       );
-      const softmaxNumerator = Math.exp(this.temperature * actionScore);
+      const softmaxNumerator = Math.exp(actionScore / this.temperature);
       scoredActions.push({
         actionId: actionId,
         score: actionScore,
@@ -172,7 +180,7 @@ export class SimpleBandit implements ISimpleBandit {
     }
     let SoftmaxDenominator = scoredActions.reduce(
       (a, b) => a + b.probability,
-      0,
+      0
     );
     scoredActions = scoredActions.map((ex) => ({
       actionId: ex.actionId,
@@ -198,28 +206,26 @@ export class SimpleBandit implements ISimpleBandit {
 
   _generateOracleTrainingData(
     recommendation: IRecommendation,
-    selectedActionId: string | undefined = undefined,
+    selectedActionId: string | undefined = undefined
   ): ITrainingData[] {
     let trainingData: ITrainingData[] = [
       {
         actionId: recommendation.actionId,
         actionFeatures: this.actionsMap[recommendation.actionId].features,
         context: recommendation.context,
-        label: recommendation.actionId === selectedActionId ? 1 : 0,
+        click: recommendation.actionId === selectedActionId ? 1 : 0,
         probability: recommendation.probability,
       },
     ];
     return trainingData;
   }
 
-  accept(
-    recommendation: IRecommendation,
-  ): Promise<ITrainingData[]> {
+  accept(recommendation: IRecommendation): Promise<ITrainingData[]> {
     return new Promise((resolve, reject) => {
       try {
         const trainingData = this._generateOracleTrainingData(
           recommendation,
-          recommendation.actionId,
+          recommendation.actionId
         );
         this.oracle.fitMany(trainingData);
         resolve(trainingData);
@@ -229,14 +235,12 @@ export class SimpleBandit implements ISimpleBandit {
     });
   }
 
-  reject(
-    recommendation: IRecommendation,
-  ): Promise<ITrainingData[]> {
+  reject(recommendation: IRecommendation): Promise<ITrainingData[]> {
     return new Promise((resolve, reject) => {
       try {
         const trainingData = this._generateOracleTrainingData(
           recommendation,
-          undefined,
+          undefined
         );
         this.oracle.fitMany(trainingData);
         resolve(trainingData);

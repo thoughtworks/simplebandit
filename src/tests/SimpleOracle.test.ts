@@ -13,7 +13,7 @@ describe("SimpleOracle", () => {
   const contextActionIdInteractions = false;
   const contextActionFeatureInteractions = true;
   const useInversePropensityWeighting = false;
-  const targetLabel = "label";
+  const targetLabel = "click";
   const strictFeatures = true;
   const weights = {
     intercept: 0,
@@ -82,11 +82,14 @@ describe("SimpleOracle", () => {
       true,
     );
     expect(() =>
-      nonstrict_oracle._getOrderedInputsArray("action2", {"context1":1}, {"feature1":1}),
+      nonstrict_oracle._getOrderedInputsArray(
+        "action2",
+        { context1: 1 },
+        { feature1: 1 },
+      ),
     ).not.toThrow("Missing features in inputsHash: ");
   });
 
-  
   beforeEach(() => {
     oracle = new SimpleOracle({
       actionIds: actionIds,
@@ -351,7 +354,7 @@ describe("SimpleOracle", () => {
   describe("toJSON", () => {
     it("should return a JSON object with the correct properties", () => {
       expect(oracle.toJSON()).toEqual(
-        '{"actionIds":["action1","action2"],"context":["context1","context2"],"actionFeatures":["feature1","feature2"],"learningRate":0.1,"contextActionIdInteractions":false,"contextActionFeatureInteractions":true,"useInversePropensityWeighting":false,"negativeClassWeight":1,"targetLabel":"label","strictFeatures":true,"weights":{"intercept":0,"action1":0.1,"action2":0.2,"feature1":0.3,"feature2":0.4,"context1*feature1":0,"context1*feature2":0,"context2*feature1":0,"context2*feature2":0}}',
+        '{"actionIds":["action1","action2"],"context":["context1","context2"],"actionFeatures":["feature1","feature2"],"learningRate":0.1,"contextActionIdInteractions":false,"contextActionFeatureInteractions":true,"useInversePropensityWeighting":false,"negativeClassWeight":1,"targetLabel":"click","strictFeatures":true,"weights":{"intercept":0,"action1":0.1,"action2":0.2,"feature1":0.3,"feature2":0.4,"context1*feature1":0,"context1*feature2":0,"context2*feature1":0,"context2*feature2":0}}',
       );
     });
   });
@@ -618,7 +621,7 @@ describe("SimpleOracle", () => {
         actionId: "action1",
         context: { context1: 1, context2: 0 },
         actionFeatures: { feature1: 1, feature2: 0 },
-        label: 1,
+        click: 1,
         probability: 0.5,
       };
       const oldWeights = oracle.weights.slice();
@@ -637,14 +640,14 @@ describe("SimpleOracle", () => {
           actionId: "action1",
           context: { context1: 1, context2: 0 },
           actionFeatures: { feature1: 1, feature2: 0 },
-          label: 1,
+          click: 1,
           probability: 0.5,
         },
         {
           actionId: "action1",
           context: { context1: 1, context2: 0 },
           actionFeatures: { feature1: 1, feature2: 0 },
-          label: 1,
+          click: 1,
           probability: 0.5,
         },
       ];
