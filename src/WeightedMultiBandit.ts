@@ -1,4 +1,4 @@
-import { IAction } from "./interfaces/IAction";
+import { IAction, IScoredAction } from "./interfaces/IAction";
 import {
   IMultiRecommendation,
   IRecommendedAction,
@@ -8,7 +8,7 @@ import {
   WeightedOracleState,
   IWeightedMultiBanditState,
   IWeightedMultiBandit,
-} from "./interfaces/IWeightedMultiBandit";
+} from "./interfaces/IWeightedBandits";
 import {
   ConvertScoresToProbabilityDistribution,
   SampleFromProbabilityDistribution,
@@ -208,8 +208,8 @@ export class WeightedMultiBandit implements IWeightedMultiBandit {
     return actionScore;
   }
 
-  getScoredActions(context: FeaturesHash = {}): IRecommendedAction[] {
-    let scoredActions: IRecommendedAction[] = [];
+  getScoredActions(context: FeaturesHash = {}): IScoredAction {
+    let scoredActions: IScoredAction = [];
 
     const actionIds = Object.keys(this.actionsMap);
     for (let i = 0; i < actionIds.length; i++) {
