@@ -1,5 +1,5 @@
 export type WeightsHash = { [feature: string]: number };
-export type FeaturesHash = { [feature: string]: number };
+
 
 export type ISimpleOracleState = {
   actionIds: string[];

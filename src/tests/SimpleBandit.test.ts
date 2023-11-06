@@ -1,6 +1,6 @@
 import { SimpleOracle } from "../SimpleOracle";
-import { SimpleBandit } from "../SimpleBandit";
-import { ISimpleBanditState } from "../interfaces/ISimpleBandit";
+import { SimpleBandit } from "../Bandits";
+import { ISimpleBanditState } from "../interfaces/IState";
 import { IScoredAction } from "../interfaces/IAction";
 import { IRecommendation } from "../interfaces/IRecommendation";
 import { ITrainingData } from "../interfaces/ITrainingData";
@@ -100,7 +100,7 @@ describe("SimpleBandit", () => {
         oracleState: oracle.getOracleState(),
         temperature: 5.0,
       };
-      expect(bandit.getSimpleBanditState()).toEqual(state);
+      expect(bandit.toState()).toEqual(state);
     });
   });
 

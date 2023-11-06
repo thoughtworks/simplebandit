@@ -25,18 +25,22 @@
     </p>
     <input type="number" id="learning-rate" value="0.5" step="0.1" />
 
-    <h2>Softmax Beta:</h2>
+    <h2>Temperature:</h2>
     <p>
-      Higher softmax betas mean that the bandit will be more likely to choose
-      the action with the highest score.
+      Lower temperature mean that the bandit will be more likely to choose
+      the action with the highest score (exploit), higher temperature means that
+      the bandit is more likely to choose the actions with a lower score (exploration)
     </p>
-    <input type="number" id="softmax-beta" value="3.0" step="0.1" />
+    <input type="number" id="temperature" value="0.2" step="0.1" />
 
     <h2>All action probabilities:</h2>
     <div id="action-probabilities"></div>
 
     <h2>Recommendation JSON:</h2>
     <div id="recommendation-json"></div>
+
+    <h2>Weather:</h2>
+    <div id="weather"></div>
 
     <h2>Recommended fruits:</h2>
     <div id="recommended-fruits"></div>
@@ -55,7 +59,7 @@
     <script src="../simpleBandit.js"></script>
     <script>
       let learningRateInput = document.getElementById("learning-rate");
-      let temperatureInput = document.getElementById("softmax-beta");
+      let temperatureInput = document.getElementById("temperature");
       let learningRate = parseFloat(learningRateInput.value);
       let temperature = parseFloat(temperatureInput.value);
 

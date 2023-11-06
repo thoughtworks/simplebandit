@@ -1,5 +1,3 @@
-export * from "./SimpleBandit";
-export * from "./SimpleOracle";
-export * from "./MultiBandit";
-export * from "./WeightedMultiBandit"
+export * from "./Bandits"
 export * from "./interfaces";
+export * from "./SimpleOracle";

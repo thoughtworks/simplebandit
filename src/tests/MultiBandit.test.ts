@@ -1,6 +1,6 @@
 import { SimpleOracle } from "../SimpleOracle";
-import { MultiBandit } from "../MultiBandit";
-import { IMultiBanditState } from "../interfaces/IMultiBandit";
+import { MultiBandit } from "../Bandits";
+import { IMultiBanditState } from "../interfaces/IState";
 import { IScoredAction } from "../interfaces/IAction";
 import { IMultiRecommendation } from "../interfaces/IRecommendation";
 import { ITrainingData } from "../interfaces/ITrainingData";
@@ -109,7 +109,7 @@ describe("MultiBandit", () => {
         temperature: 5.0,
         nRecommendations: 2,
       };
-      expect(bandit.getMultiBanditState()).toEqual(state);
+      expect(bandit.toState()).toEqual(state);
     });
   });
 

@@ -1,4 +1,4 @@
-import { FeaturesHash } from "./ISimpleOracle";
+import { FeaturesHash } from "./IBandits";
 
 export interface IAction {
   actionId: string;
