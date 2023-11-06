@@ -1,8 +1,8 @@
 # SimpleBandit
 
-SimpleBandit is a convenient typescript/javascript library for contextual bandits, with no external dependencies, transpiling to <1000 lines of javascript.
+SimpleBandit is a lightweight typescript/javascript library for contextual bandits, with no external dependencies, transpiling to <1000 lines of javascript.
 
-It provides classes and interfaces to create and manage bandit models, generate recommendations, select actions, and update your models.
+It provides classes and interfaces to create and manage bandit models, generate recommendations, select actions, and update your models. Easily integrates with React Native to support privacy sensitive recommendations on the user's device. 
 
 Under the hood it's a logistic regression oracle with softmax exploration.
 
@@ -16,7 +16,7 @@ npm install .
 
 ### With actionIds only
 
-In the simplest case you are simply learning a preference over a list of possible actions, without context or action features. By accepting a recommendation you make the recommended action more likely in the future. By rejecting it, you make it less likely. The bandit learns from your feedback.
+In the simplest case you are simply learning a preference over a list of possible actions, without regards to context or action features. By accepting a recommendation you make the recommended action more likely in the future. By rejecting it, you make it less likely. The bandit learns from your feedback, and adjusts.
 
 ```typescript
 import { SimpleBandit } from "simplebandit";
@@ -25,6 +25,7 @@ const bandit = SimpleBandit.fromActionIds({ actionIds: ["apple", "pear"] });
 
 let recommendation = bandit.recommend();
 bandit.accept(recommendation);
+consolo.log(recommendation.actionId)
 
 recommendation2 = bandit.recommend();
 bandit.reject(recommendation2);
@@ -32,7 +33,7 @@ bandit.reject(recommendation2);
 
 ### With action features
 
-By defining action features we can also learn across actions: by choosing a fruit we make other fruits also more likely for the next recomendation.
+By defining action features we can also learn across actions: e.g. by choosing a fruit we make other fruits also more likely for the next recommendation.
 
 ```typescript
 const actions: IAction[] = [
@@ -58,13 +59,13 @@ let recommendation = bandit.recommend({ rain: 1 });
 
 ### Configuring learning rate and temperature
 
-You can adjust how quick the bandit learns (and forgets) with the `learningRate`. You can adjust how much it exploits (higher probability for higher scoring actions by setting low `temperature`) or explores (higher probability for lower scoring actions higher `temperature`):
+You can adjust how quick the bandit learns (and forgets) with the `learningRate`. You can adjust how much it exploits (low `temperature` means higher probability for higher scoring actions) or explores (higher `temperature` means higher probability for lower scoring actions):
 
 ```typescript
 const bandit = SimpleBandit.fromActionIds({
   actionIds: ["apple", "pear"],
   learningRate: 1.0,
-  temperature: 0.5,
+  temperature: 0.2,
 });
 ```
 
@@ -80,14 +81,14 @@ const bandit = MultiBandit.fromActionIds({
   nRecommendations: 2,
 });
 let recommendations = bandit.recommend();
+console.log(recommendations.recommendedActions[0].actionId)
 bandit.choose(recommendations, "apple");
 //bandit.rejectAll(recommendations)
 ```
 
 ### Serializing and storing bandits
 
-You can serialize bandits to JSON and load them from JSON. So you can store e.g. a personalized bandit
-for each user and load them on demand.
+You can easily serialize/deserialize bandits to/from JSON. So you can store e.g. a personalized bandit for each user and load them on demand.
 
 ```typescript
 const bandit2 = SimpleBandit.fromJSON(bandit1.toJSON());
@@ -113,6 +114,7 @@ There are several pure javascript examples provided in the `examples/` directory
 - `actionfeatures.html`: adds action features.
 - `contextfeatures.html`: adds context features
 - `multi.html`: multiple recommendations (slate)
+- `weighted.html`: multiple (weighted) oracles instead of just one
 
 ## Testing
 
