@@ -105,6 +105,80 @@ const bandit2 = bandit.fromActionIds({ actionIds: ["apple", "pear"] });
 bandit2.train([trainingData]);
 ```
 
+## Defining your own oracle
+
+For more control you can define your own oracle before passing it on to the bandit:
+
+```typescript
+oracle = new SimpleOracle({
+  actionIds = ['apple', 'pear'],
+  context = ['rainy'],
+  actionFeatures = ['fruit'],
+  learningRate = 1.0, 
+  contextActionIdInteractions = true, // can switch off context-actionId interactions
+  contextActionFeatureInteractions = true, // can switch off context-actionFeatures interactions
+  useInversePropensityWeighting = true, // oracle uses ipw by default (sample weight = 1/p), but can be switched off
+  negativeClassWeight = 1.0, // higher or lower sample weight for negative class
+  targetLabel = "click", // target label for oracle, can differ for WeightedBandits
+  strictFeatures = true, // if false fill missing features with 0, instead of raising error
+  weights = {}, // initialize oracle with weights
+});
+
+bandit = new SimpleBandit({
+  oracle:oracle,
+  temperature:0.2,
+});
+```
+
+## Multiple oracles
+
+The default oracle only optimizes for accepts/clicks, but in many cases you want to optimize for other objectives or maybe a mixture of different objectives. For that you can use `WeightedBandit` or `WeightedMultiBandit`:
+
+```typescript
+const weightedOracles = [
+  {
+    oracle: new SimpleOracle(
+      {
+          context:['sunny', 'rainy'],
+          actionIds: ['apple', 'pear'],
+          features: ['fruit'],
+          learningRate: learningRate,
+          tartgetLabel: 'click', // default
+      }),
+    weight: 0.3,
+  },
+  {
+    oracle: new SimpleOracle(
+      {
+          context:['sunny', 'rainy'],
+          actionIds: ['apple', 'pear'],
+          features: ['fruit'],
+          learningRate: learningRate,
+          targetLabel: 'stars',
+      }),
+    weight: 0.7,
+  }
+];
+
+const bandit = new WeightedBandit(
+  weightedOracles,
+  actions,
+  temperature,
+);
+```
+
+The `accept`, `reject` and `choose` methods still work the same for for all oracles with `targerLabel: 'click'`. For other `targetLabels` there is the `feedback` method:
+
+```typescript
+recommendation = bandit.recommend(context)
+bandit.feedback(
+  recommendation,
+  'stars', // targetLabel
+  1.0, // value: should be -1 < value < 1 
+  //'apple' for WeightedMultiBandit also specifiy the actionId
+)
+```
+
 ## Usage javascript
 
 There are several pure javascript examples provided in the `examples/` directory:
