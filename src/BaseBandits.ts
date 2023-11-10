@@ -9,7 +9,7 @@ import {
   ConvertScoresToProbabilityDistribution,
   SampleFromProbabilityDistribution,
 } from "./MathService";
-import { SimpleOracle } from "./SimpleOracle";
+import { SimpleOracle, WeightedOracle } from "./SimpleOracle";
 import { IBanditState } from "./interfaces/IState";
 
 export abstract class BaseBandit {
@@ -178,8 +178,6 @@ export class SingleOracleBandit extends BaseBandit {
     });
   }
 }
-
-export type WeightedOracle = { oracle: SimpleOracle; weight: number };
 
 export class BaseWeightedBandit extends BaseBandit {
   weightedOracles: WeightedOracle[];

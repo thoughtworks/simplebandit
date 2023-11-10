@@ -10,6 +10,8 @@ const DEFAULT_PROBABILITY: number = 0.1;
 const DEFAULT_LEARNING_RATE: number = 0.5;
 const DEFAULT_NEGATIVE_CLASS_WEIGHT: number = 1.0;
 
+export type WeightedOracle = { oracle: SimpleOracle; weight: number };
+
 export class SimpleOracle {
   actionIds!: string[];
   context!: string[];

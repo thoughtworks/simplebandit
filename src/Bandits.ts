@@ -1,8 +1,7 @@
 import { IAction } from "./interfaces/IAction";
-import { SimpleOracle } from "./SimpleOracle";
+import { SimpleOracle, WeightedOracle } from "./SimpleOracle";
 import {
   SingleOracleBandit,
-  WeightedOracle,
   BaseWeightedBandit,
 } from "./BaseBandits";
 import { SimpleBanditMixin, MultiBanditMixin } from "./BanditMixins";
