@@ -1,26 +1,3 @@
-export function weightedHarmonicMean(
-  numbers: number[],
-  weights: number[],
-): number {
-  if (numbers.length !== weights.length) {
-    throw new Error(
-      "The length of numbers array and weights array must be the same.",
-    );
-  }
-  let sumWeightedValues = 0;
-  let sumWeights = 0;
-  for (let i = 0; i < numbers.length; i++) {
-    if (numbers[i] === 0) {
-      throw new Error(
-        "Cannot calculate harmonic mean when a value in the numbers array is zero.",
-      );
-    }
-    sumWeightedValues += weights[i] / numbers[i];
-    sumWeights += weights[i];
-  }
-  return sumWeights / sumWeightedValues;
-}
-
 export const ConvertScoresToProbabilityDistribution = (
   scores: number[],
   temperature: number,
@@ -84,35 +61,4 @@ export const SampleFromProbabilityDistribution = (probs: number[]): number => {
     }
   }
   return -1;
-};
-
-export const CosineSimilarity = (A: number[], B: number[]): number => {
-  if (
-    !Array.isArray(A) ||
-    !Array.isArray(B) ||
-    !A.every(Number.isFinite) ||
-    !B.every(Number.isFinite)
-  ) {
-    throw new TypeError(
-      "Invalid input. Both A and B should be arrays of finite numbers.",
-    );
-  }
-  if (A.length !== B.length) {
-    throw new Error("Arrays must have the same length");
-  }
-  if (A.length === 0) {
-    return 0;
-  }
-  let dotProduct = 0;
-  let magA = 0;
-  let magB = 0;
-  for (let i = 0; i < A.length; i++) {
-    dotProduct += A[i] * B[i];
-    magA += A[i] * A[i];
-    magB += B[i] * B[i];
-  }
-  magA = Math.sqrt(magA);
-  magB = Math.sqrt(magB);
-  const similarity = dotProduct / (magA * magB);
-  return similarity;
 };

@@ -89,7 +89,7 @@
 
       learningRateInput.addEventListener("change", function () {
         learningRate = parseFloat(learningRateInput.value);
-        bandit.oracle.learningRate = learningRate;
+        bandit.oracles[0].learningRate = learningRate;
       });
       temperatureInput.addEventListener("change", function () {
         temperature = parseFloat(temperatureInput.value);

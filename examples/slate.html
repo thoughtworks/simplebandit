@@ -37,7 +37,7 @@
     <div id="action-probabilities"></div>
 
     <h2>Recommendation JSON:</h2>
-    <div id="recommendation-json"></div>
+    <div id="slate-json"></div>
 
     <h2>Weather:</h2>
     <div id="weather"></div>
@@ -90,14 +90,14 @@
         },
       ];
 
-      let bandit = MultiBandit.fromContextAndActions({
+      let bandit = SimpleBandit.fromContextAndActions({
         context: ["sunny", "rainy"],
         actions: actions,
         temperature: temperature,
         learningRate: learningRate,
-        nRecommendations: 3,
+        slateSize: 3,
       });
-      let recommendation;
+      let slate;
       let trainingData = [];
       let context;
 
@@ -116,18 +116,18 @@
         const weather = ["sunny", "rainy"][Math.floor(Math.random() * 2)];
         context =
           weather == "sunny" ? { sunny: 1, rainy: 0 } : { sunny: 0, rainy: 1 };
-        recommendation = bandit.recommend(context);
+        slate = bandit.slate(context);
 
-        let recommendedActionsString = "";
-        for (let i = 0; i < recommendation.recommendedActions.length; i++) {
-          recommendedActionsString += `${i + 1}: ${
-            recommendation.recommendedActions[i].actionId
+        let slateActionsString = "";
+        for (let i = 0; i < slate.slateActions.length; i++) {
+          slateActionsString += `${i + 1}: ${
+            slate.slateActions[i].actionId
           }\n`;
         }
         document.getElementById("recommended-fruits").innerText =
-          recommendedActionsString;
-        document.getElementById("recommendation-json").innerText =
-          JSON.stringify(recommendation);
+          slateActionsString;
+        document.getElementById("slate-json").innerText =
+          JSON.stringify(slate);
         let scoredActions = bandit.getScoredActions(context);
         scoredActions.sort(function (a, b) {
           return b.probability - a.probability;
@@ -150,8 +150,8 @@
       document
         .getElementById("eat-1")
         .addEventListener("click", async function () {
-          actionId = recommendation.recommendedActions[0].actionId;
-          newTrainingData = await bandit.choose(recommendation, actionId);
+          actionId = slate.slateActions[0].actionId;
+          newTrainingData = await bandit.choose(slate, actionId);
           trainingData = trainingData.concat(newTrainingData);
           document.getElementById("training-data").innerText =
             JSON.stringify(trainingData);
@@ -162,8 +162,8 @@
       document
         .getElementById("eat-2")
         .addEventListener("click", async function () {
-          actionId = recommendation.recommendedActions[1].actionId;
-          newTrainingData = await bandit.choose(recommendation, actionId);
+          actionId = slate.slateActions[1].actionId;
+          newTrainingData = await bandit.choose(slate, actionId);
           trainingData = trainingData.concat(newTrainingData);
           document.getElementById("training-data").innerText =
             JSON.stringify(trainingData);
@@ -174,8 +174,8 @@
       document
         .getElementById("eat-3")
         .addEventListener("click", async function () {
-          actionId = recommendation.recommendedActions[2].actionId;
-          newTrainingData = await bandit.choose(recommendation, actionId);
+          actionId = slate.slateActions[2].actionId;
+          newTrainingData = await bandit.choose(slate, actionId);
           trainingData = trainingData.concat(newTrainingData);
           document.getElementById("training-data").innerText =
             JSON.stringify(trainingData);
@@ -187,7 +187,7 @@
       document
         .getElementById("dont-eat-button")
         .addEventListener("click", async function () {
-          newTrainingData = await bandit.rejectAll(recommendation);
+          newTrainingData = await bandit.reject(slate);
           trainingData = trainingData.concat(newTrainingData);
           document.getElementById("training-data").innerText =
             JSON.stringify(trainingData);

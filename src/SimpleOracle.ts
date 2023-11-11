@@ -1,6 +1,7 @@
 import {
   SimpleOracleOptions,
   ISimpleOracleState,
+  ISimpleOracle,
   WeightsHash,
   FeaturesHash,
   ITrainingData,
@@ -12,7 +13,7 @@ const DEFAULT_NEGATIVE_CLASS_WEIGHT: number = 1.0;
 
 export type WeightedOracle = { oracle: SimpleOracle; weight: number };
 
-export class SimpleOracle {
+export class SimpleOracle implements ISimpleOracle {
   actionIds!: string[];
   context!: string[];
   actionFeatures!: string[];
@@ -24,6 +25,8 @@ export class SimpleOracle {
   negativeClassWeight: number;
   targetLabel: string;
   strictFeatures: boolean;
+  name: string
+  oracleWeight: number
   weights!: number[];
 
   allInputFeatures!: string[];
@@ -42,6 +45,8 @@ export class SimpleOracle {
     negativeClassWeight = DEFAULT_NEGATIVE_CLASS_WEIGHT,
     targetLabel = "click",
     strictFeatures = true,
+    name = "click",
+    oracleWeight = 1.0,
     weights = {},
   }: SimpleOracleOptions = {}) {
     if (
@@ -82,6 +87,8 @@ export class SimpleOracle {
     this.useInversePropensityWeighting = useInversePropensityWeighting;
     this.negativeClassWeight = negativeClassWeight;
     this.strictFeatures = strictFeatures;
+    this.name = name
+    this.oracleWeight = oracleWeight
   }
 
   public getOracleState(): ISimpleOracleState {
@@ -96,6 +103,8 @@ export class SimpleOracle {
       negativeClassWeight: this.negativeClassWeight,
       targetLabel: this.targetLabel,
       strictFeatures: this.strictFeatures,
+      name: this.name,
+      oracleWeight: this.oracleWeight,
       weights: this.getWeightsHash(),
     };
   }
@@ -113,6 +122,8 @@ export class SimpleOracle {
       negativeClassWeight: oracleState.negativeClassWeight,
       targetLabel: oracleState.targetLabel,
       strictFeatures: oracleState.strictFeatures,
+      name: oracleState.name,
+      oracleWeight: oracleState.oracleWeight,
       weights: oracleState.weights,
     } as SimpleOracleOptions);
   }
@@ -353,7 +364,7 @@ export class SimpleOracle {
     return proba;
   }
 
-  fit(trainingData: ITrainingData) {
+  fit(trainingData: ITrainingData): void {
     if (trainingData[this.targetLabel as keyof ITrainingData] !== undefined) {
       const X = this._getOrderedInputsArray(
         trainingData.actionId,
@@ -386,7 +397,7 @@ export class SimpleOracle {
     }
   }
 
-  fitMany(trainingDataList: ITrainingData[]) {
+  fitMany(trainingDataList: ITrainingData[]): void {
     for (let i = 0; i < trainingDataList.length; i++) {
       this.fit(trainingDataList[i]);
     }

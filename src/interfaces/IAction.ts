@@ -1,14 +1,13 @@
-import { FeaturesHash } from "./IBandits";
+import { FeaturesHash } from "./ISimpleOracle";
 
 export interface IAction {
   actionId: string;
   features: FeaturesHash;
-  selectedCount?: number;
+  clickCount?: number;
 }
 
 export interface IScoredAction {
   actionId: string;
   score: number;
   probability: number;
-  selectedCount?: number;
 }

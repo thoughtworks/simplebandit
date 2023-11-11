@@ -15,6 +15,8 @@ describe("SimpleOracle", () => {
   const useInversePropensityWeighting = false;
   const targetLabel = "click";
   const strictFeatures = true;
+  const name = "click";
+  const oracleWeight = 1.0;
   const weights = {
     intercept: 0,
     action1: 0.1,
@@ -140,6 +142,8 @@ describe("SimpleOracle", () => {
         negativeClassWeight: 1.0,
         targetLabel,
         strictFeatures,
+        name,
+        oracleWeight,
         weights: {
           intercept: 0,
           "context1*feature1": 0,
@@ -170,6 +174,8 @@ describe("SimpleOracle", () => {
         negativeClassWeight: 1.0,
         targetLabel,
         strictFeatures,
+        name,
+        oracleWeight,
         weights: {
           intercept: 0,
           "context1*feature1": 0,
@@ -354,7 +360,7 @@ describe("SimpleOracle", () => {
   describe("toJSON", () => {
     it("should return a JSON object with the correct properties", () => {
       expect(oracle.toJSON()).toEqual(
-        '{"actionIds":["action1","action2"],"context":["context1","context2"],"actionFeatures":["feature1","feature2"],"learningRate":0.1,"contextActionIdInteractions":false,"contextActionFeatureInteractions":true,"useInversePropensityWeighting":false,"negativeClassWeight":1,"targetLabel":"click","strictFeatures":true,"weights":{"intercept":0,"action1":0.1,"action2":0.2,"feature1":0.3,"feature2":0.4,"context1*feature1":0,"context1*feature2":0,"context2*feature1":0,"context2*feature2":0}}',
+        '{"actionIds":["action1","action2"],"context":["context1","context2"],"actionFeatures":["feature1","feature2"],"learningRate":0.1,"contextActionIdInteractions":false,"contextActionFeatureInteractions":true,"useInversePropensityWeighting":false,"negativeClassWeight":1,"targetLabel":"click","strictFeatures":true,"name":"click","oracleWeight":1,"weights":{"intercept":0,"action1":0.1,"action2":0.2,"feature1":0.3,"feature2":0.4,"context1*feature1":0,"context1*feature2":0,"context2*feature1":0,"context2*feature2":0}}',
       );
     });
   });

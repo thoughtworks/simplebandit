@@ -1,26 +1,23 @@
-import { ISimpleOracleState } from "./ISimpleOracle";
+export type WeightsHash = { [feature: string]: number };
 
-export type IBanditState = {
+export type ISimpleOracleState = {
+  actionIds: string[];
+  context: string[];
+  actionFeatures: string[];
+  learningRate: number;
+  contextActionIdInteractions: boolean;
+  contextActionFeatureInteractions: boolean;
+  useInversePropensityWeighting: boolean;
+  negativeClassWeight: number;
+  targetLabel: string;
+  strictFeatures: boolean;
+  name: string;
+  oracleWeight: number;
+  weights: WeightsHash;
+};
+
+export type ISimpleBanditState = {
+  oracleStates: ISimpleOracleState[];
   temperature: number;
+  slateSize: number;
 };
-
-export interface ISimpleBanditState extends IBanditState {
-  oracleState: ISimpleOracleState;
-}
-
-export interface IMultiBanditState extends ISimpleBanditState {
-  nRecommendations: number;
-}
-
-export type WeightedOracleState = {
-  oracleState: ISimpleOracleState;
-  weight: number;
-};
-
-export interface IWeightedBanditState extends IBanditState {
-  oraclesStates: WeightedOracleState[];
-}
-
-export interface IWeightedMultiBanditState extends IWeightedBanditState {
-  nRecommendations: number;
-}

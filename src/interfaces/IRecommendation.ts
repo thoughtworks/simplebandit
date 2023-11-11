@@ -1,4 +1,4 @@
-import { FeaturesHash } from "./IBandits";
+import { FeaturesHash } from "./ISimpleOracle";
 
 export interface IRecommendation {
   context: FeaturesHash;
@@ -7,13 +7,13 @@ export interface IRecommendation {
   probability: number;
 }
 
-export interface IRecommendedAction {
+export interface ISlateAction {
   actionId: string;
   score: number;
   probability: number;
 }
 
-export interface IMultiRecommendation {
+export interface ISlate {
   context: FeaturesHash;
-  recommendedActions: Array<IRecommendedAction>;
+  slateActions: Array<ISlateAction>;
 }

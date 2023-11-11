@@ -1,14 +1,15 @@
 import { SimpleOracle } from "../SimpleOracle";
-import { MultiBandit } from "../Bandits";
-import { IMultiBanditState } from "../interfaces/IState";
+import { SimpleBandit } from "../SimpleBandit";
+import { ISimpleBanditState } from "../interfaces/IState";
 import { IScoredAction } from "../interfaces/IAction";
-import { IMultiRecommendation } from "../interfaces/IRecommendation";
+import { IRecommendation } from "../interfaces/IRecommendation";
 import { ITrainingData } from "../interfaces/ITrainingData";
+import exp from "constants";
 
-describe("MultiBandit", () => {
+describe("Single Oracle Bandit Recommendation", () => {
   let oracle: SimpleOracle;
-  let bandit: MultiBandit;
-  const actionIds = ["apple", "pear", "banana", "chocolate", "candy"];
+  let bandit: SimpleBandit;
+  const actionIds = ["apple", "pear", "chocolate"];
   const actions = [
     {
       actionId: "apple",
@@ -19,15 +20,7 @@ describe("MultiBandit", () => {
       features: { fruit: 1 },
     },
     {
-      actionId: "banana",
-      features: { fruit: 1 },
-    },
-    {
       actionId: "chocolate",
-      features: { fruit: 0 },
-    },
-    {
-      actionId: "candy",
       features: { fruit: 0 },
     },
   ];
@@ -39,75 +32,85 @@ describe("MultiBandit", () => {
       actionFeatures: ["fruit"],
       learningRate: 1.0,
     });
-    bandit = new MultiBandit(oracle, actions, 5.0, 2);
+    bandit = new SimpleBandit({
+      oracles: [oracle],
+      actions: actions,
+      temperature: 0.5,
+      slateSize: 1,
+    });
   });
 
   describe("constructor", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
-      expect(bandit.oracle).toEqual(oracle);
-      expect(bandit.temperature).toEqual(5.0);
-      expect(bandit.nRecommendations).toEqual(2);
+      expect(bandit.oracles).toEqual([oracle]);
+      expect(bandit.temperature).toEqual(0.5);
+      expect(bandit.slateSize).toEqual(1);
+      expect(bandit.actionsMap).toBeDefined();
+      expect(bandit.actionsMap).toHaveProperty("apple");
+      expect(bandit.actionsMap).toHaveProperty("pear");
+      expect(bandit.actionsMap).toHaveProperty("chocolate");
     });
   });
 
   describe("fromContextAndActions", () => {
-    it("should create an instance of MultiBandit with the correct properties", () => {
-      const bandit = MultiBandit.fromContextAndActions({
+    it("should create an instance of SimpleBandit with the correct properties", () => {
+      const bandit = SimpleBandit.fromContextAndActions({
         context: ["morning"],
         actions: actions,
-        temperature: 5.0,
+        temperature: 0.5,
         learningRate: 1.0,
       });
-      expect(bandit.oracle).toBeDefined();
-      expect(bandit.temperature).toEqual(5.0);
+      expect(bandit.oracles).toBeDefined();
+      expect(bandit.temperature).toEqual(0.5);
     });
   });
 
   describe("fromContextAndActionIds", () => {
-    it("should create an instance of MultiBandit with the correct properties", () => {
-      const bandit = MultiBandit.fromContextAndActionIds({
+    it("should create an instance of SimpleBandit with the correct properties", () => {
+      const bandit = SimpleBandit.fromContextAndActionIds({
         context: ["morning"],
         actionIds: actionIds,
-        temperature: 5.0,
         learningRate: 1.0,
+        temperature: 0.5,
       });
-      expect(bandit.oracle).toBeDefined();
-      expect(bandit.temperature).toEqual(5.0);
+      expect(bandit.oracles).toBeDefined();
+      expect(bandit.oracles[0].learningRate).toEqual(1.0);
+      expect(bandit.temperature).toEqual(0.5);
     });
   });
 
   describe("fromActions", () => {
-    it("should create an instance of MultiBandit with the correct properties", () => {
-      const bandit = MultiBandit.fromActions({
+    it("should create an instance of SimpleBandit with the correct properties", () => {
+      const bandit = SimpleBandit.fromActions({
         actions: actions,
-        temperature: 5.0,
         learningRate: 1.0,
-        nRecommendations: 2,
+        temperature: 0.5,
       });
-      expect(bandit.oracle).toBeDefined();
-      expect(bandit.temperature).toEqual(5.0);
+      expect(bandit.oracles).toBeDefined();
+      expect(bandit.oracles[0].learningRate).toEqual(1.0);
+      expect(bandit.temperature).toEqual(0.5);
     });
   });
 
   describe("fromActionIds", () => {
-    it("should create an instance of MultiBandit with the correct properties", () => {
-      const bandit = MultiBandit.fromActionIds({
+    it("should create an instance of SimpleBandit with the correct properties", () => {
+      const bandit = SimpleBandit.fromActionIds({
         actionIds: actionIds,
-        temperature: 5.0,
         learningRate: 1.0,
-        nRecommendations: 2,
+        temperature: 0.5,
       });
-      expect(bandit.oracle).toBeDefined();
-      expect(bandit.temperature).toEqual(5.0);
+      expect(bandit.oracles).toBeDefined();
+      expect(bandit.oracles[0].learningRate).toEqual(1.0);
+      expect(bandit.temperature).toEqual(0.5);
     });
   });
 
   describe("getBanditState", () => {
     it("should return the correct state", () => {
-      const state: IMultiBanditState = {
-        oracleState: oracle.getOracleState(),
-        temperature: 5.0,
-        nRecommendations: 2,
+      const state: ISimpleBanditState = {
+        oracleStates: [oracle.getOracleState()],
+        temperature: 0.5,
+        slateSize: 1,
       };
       expect(bandit.toState()).toEqual(state);
     });
@@ -115,10 +118,10 @@ describe("MultiBandit", () => {
 
   describe("toJSON", () => {
     it("should return the correct JSON string", () => {
-      const state: IMultiBanditState = {
-        oracleState: oracle.getOracleState(),
-        temperature: 5.0,
-        nRecommendations: 2,
+      const state: ISimpleBanditState = {
+        oracleStates: [oracle.getOracleState()],
+        temperature: 0.5,
+        slateSize: 1,
       };
       expect(bandit.toJSON()).toEqual(JSON.stringify(state));
     });
@@ -126,12 +129,12 @@ describe("MultiBandit", () => {
 
   describe("fromJSON", () => {
     it("should return the correct instance", () => {
-      const state: IMultiBanditState = {
-        oracleState: oracle.getOracleState(),
-        temperature: 5.0,
-        nRecommendations: 2,
+      const state: ISimpleBanditState = {
+        oracleStates: [oracle.getOracleState()],
+        temperature: 0.5,
+        slateSize: 1,
       };
-      const bandit2 = MultiBandit.fromJSON(JSON.stringify(state), actions);
+      const bandit2 = SimpleBandit.fromJSON(JSON.stringify(state), actions);
       expect(bandit2).toEqual(bandit);
     });
   });
@@ -156,13 +159,14 @@ describe("MultiBandit", () => {
       scoredActions.forEach((scoredAction) => {
         expect(scoredAction).toHaveProperty("actionId");
         expect(scoredAction).toHaveProperty("score");
+        expect(scoredAction).toHaveProperty("probability");
       });
     });
   });
 
   describe("train", () => {
     it("training the bandit should change the weights of the oracle", () => {
-      const oldWeights = bandit.oracle.weights.slice();
+      const oldWeights = bandit.oracles[0].weights.slice();
       const trainingData: ITrainingData[] = [
         {
           actionId: "apple",
@@ -184,13 +188,13 @@ describe("MultiBandit", () => {
         },
       ];
       bandit.train(trainingData);
-      expect(bandit.oracle.weights).not.toEqual(oldWeights);
+      expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
     });
   });
 
   describe("recommend", () => {
     const context: { [feature: string]: number } = { morning: 1 };
-    let recommendation: IMultiRecommendation;
+    let recommendation: IRecommendation;
     beforeEach(() => {
       recommendation = bandit.recommend(context);
     });
@@ -199,25 +203,22 @@ describe("MultiBandit", () => {
       expect(recommendation.context).toEqual(context);
     });
     it("recommendation should have both an actionId a score and a probability that is defined", () => {
-      expect(recommendation.recommendedActions).toBeInstanceOf(Array);
-      recommendation.recommendedActions.forEach((action) => {
-        expect(action.actionId).toBeDefined();
-        expect(action.score).toBeDefined();
-        expect(action.probability).toBeDefined();
+      expect(recommendation.actionId).toBeDefined();
+      expect(recommendation.score).toBeDefined();
+      expect(recommendation.probability).toBeDefined();
+    });
+    describe("accept", () => {
+      it("the weights of the oracle should be changed", () => {
+        const oldWeights = bandit.oracles[0].weights.slice();
+        bandit.accept(recommendation);
+        expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
       });
     });
-    describe("choose", () => {
+    describe("reject", () => {
       it("the weights of the oracle should be changed", () => {
-        const oldWeights = bandit.oracle.weights.slice();
-        bandit.choose(recommendation, "apple");
-        expect(bandit.oracle.weights).not.toEqual(oldWeights);
-      });
-    });
-    describe("rejectAll", () => {
-      it("the weights of the oracle should be changed", () => {
-        const oldWeights = bandit.oracle.weights.slice();
-        bandit.rejectAll(recommendation);
-        expect(bandit.oracle.weights).not.toEqual(oldWeights);
+        const oldWeights = bandit.oracles[0].weights.slice();
+        bandit.reject(recommendation);
+        expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
       });
     });
   });
