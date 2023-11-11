@@ -71,19 +71,17 @@ const bandit = SimpleBandit.fromActionIds({
 
 ### Getting multiple recommendations
 
-In order to get multiple recommendation (or a 'slate') you use `MultiBandit`:
+In order to get multiple recommendation (or a 'slate'):
 
 ```typescript
-import { MultiBandit } from "simplebandit";
-
-const bandit = MultiBandit.fromActionIds({
+const bandit = SimpleBandit.fromActionIds({
   actionIds: ["apple", "pear", "banana"],
-  nRecommendations: 2,
+  slateSize: 2,
 });
-let recommendations = bandit.recommend();
-console.log(recommendations.recommendedActions[0].actionId)
-bandit.choose(recommendations, "apple");
-//bandit.rejectAll(recommendations)
+let slate = bandit.slate();
+console.log(slate.slateActions[0].actionId)
+bandit.choose(slate, "apple");
+//bandit.reject(slate)
 ```
 
 ### Serializing and storing bandits
@@ -125,7 +123,7 @@ oracle = new SimpleOracle({
 });
 
 bandit = new SimpleBandit({
-  oracle:oracle,
+  oracles:oracle,
   temperature:0.2,
 });
 ```
@@ -135,9 +133,8 @@ bandit = new SimpleBandit({
 The default oracle only optimizes for accepts/clicks, but in many cases you want to optimize for other objectives or maybe a mixture of different objectives. For that you can use `WeightedBandit` or `WeightedMultiBandit`:
 
 ```typescript
-const weightedOracles = [
-  {
-    oracle: new SimpleOracle(
+const oracles = [
+  new SimpleOracle(
       {
           context:['sunny', 'rainy'],
           actionIds: ['apple', 'pear'],
@@ -145,10 +142,7 @@ const weightedOracles = [
           learningRate: learningRate,
           tartgetLabel: 'click', // default
       }),
-    weight: 0.3,
-  },
-  {
-    oracle: new SimpleOracle(
+  oracle: new SimpleOracle(
       {
           context:['sunny', 'rainy'],
           actionIds: ['apple', 'pear'],
@@ -156,15 +150,13 @@ const weightedOracles = [
           learningRate: learningRate,
           targetLabel: 'stars',
       }),
-    weight: 0.7,
-  }
 ];
 
-const bandit = new WeightedBandit(
-  weightedOracles,
-  actions,
-  temperature,
-);
+const bandit = new SimpleBandit({
+  oracles:oracles,
+  actions:actions,
+  temperature:temperature,
+});
 ```
 
 The `accept`, `reject` and `choose` methods still work the same for for all oracles with `targerLabel: 'click'`. For other `targetLabels` there is the `feedback` method:
@@ -187,7 +179,7 @@ There are several pure javascript examples provided in the `examples/` directory
 - `simple.html`: adds a lot more debug info to see what's going on under the hood
 - `actionfeatures.html`: adds action features.
 - `contextfeatures.html`: adds context features
-- `multi.html`: multiple recommendations (slate)
+- `slate.html`: multiple recommendations (slate)
 - `weighted.html`: multiple (weighted) oracles instead of just one
 
 ## Testing
