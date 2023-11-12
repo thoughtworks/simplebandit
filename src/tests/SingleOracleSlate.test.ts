@@ -197,7 +197,7 @@ describe("SimpleBandit with slates", () => {
 
   describe("train", () => {
     it("training the bandit should change the weights of the oracle", () => {
-      const oldWeights = bandit.oracles[0].weights.slice();
+      const oldWeights = { ...bandit.oracles[0].weights };
       const trainingData: ITrainingData[] = [
         {
           actionId: "apple",
@@ -243,14 +243,14 @@ describe("SimpleBandit with slates", () => {
     });
     describe("choose", () => {
       it("the weights of the oracle should be changed", () => {
-        const oldWeights = bandit.oracles[0].weights.slice();
+        const oldWeights = { ...bandit.oracles[0].weights };
         bandit.choose(slate, slate.slateActions[0].actionId);
         expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
       });
     });
     describe("rejectAll", () => {
       it("the weights of the oracle should be changed", () => {
-        const oldWeights = bandit.oracles[0].weights.slice();
+        const oldWeights = { ...bandit.oracles[0].weights };
         bandit.reject(slate);
         expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
       });

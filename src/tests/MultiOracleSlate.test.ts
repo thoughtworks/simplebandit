@@ -70,8 +70,8 @@ describe("Multiple Oracles Recomendation", () => {
 
   describe("oracle should update upon responding to a slate", () => {
     it("choose should update weights for click oracle", () => {
-      const oldClickWeights = oracles[0].weights.slice();
-      const oldRatingWeights = oracles[1].weights.slice();
+      const oldClickWeights = { ...bandit.oracles[0].weights };
+      const oldRatingWeights = { ...oracles[1].weights };
       const slate = bandit.slate({ morning: 1 });
       const selectedActionId = slate.slateActions[0].actionId;
       bandit.choose(slate, selectedActionId);
@@ -80,8 +80,8 @@ describe("Multiple Oracles Recomendation", () => {
     });
 
     it("reject should update weights for click oracle", () => {
-      const oldClickWeights = oracles[0].weights.slice();
-      const oldRatingWeights = oracles[1].weights.slice();
+      const oldClickWeights = { ...bandit.oracles[0].weights };
+      const oldRatingWeights = { ...oracles[1].weights };
       const slate = bandit.slate({ morning: 1 });
 
       bandit.reject(slate);
@@ -90,8 +90,8 @@ describe("Multiple Oracles Recomendation", () => {
     });
 
     it("feedback should update weights for rating oracle", () => {
-      const oldClickWeights = oracles[0].weights.slice();
-      const oldRatingWeights = oracles[1].weights.slice();
+      const oldClickWeights = { ...bandit.oracles[0].weights };
+      const oldRatingWeights = { ...oracles[1].weights };
       const slate = bandit.slate({ morning: 1 });
       const selectedActionId = slate.slateActions[0].actionId;
       bandit.feedback(slate, "rating", 1, selectedActionId);

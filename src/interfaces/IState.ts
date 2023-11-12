@@ -1,19 +1,18 @@
 export type WeightsHash = { [feature: string]: number };
 
 export type ISimpleOracleState = {
-  actionIds: string[];
-  context: string[];
-  actionFeatures: string[];
+  actionIds?: string[];
+  context?: string[];
+  actionFeatures?: string[];
   learningRate: number;
+  actionIdFeatures: boolean;
   contextActionIdInteractions: boolean;
   contextActionFeatureInteractions: boolean;
   useInversePropensityWeighting: boolean;
-  negativeClassWeight: number;
   targetLabel: string;
-  strictFeatures: boolean;
   name: string;
   oracleWeight: number;
-  weights: WeightsHash;
+  weights: { [feature: string]: number };
 };
 
 export type ISimpleBanditState = {

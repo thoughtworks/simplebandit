@@ -5,7 +5,6 @@ import {
   ISlateAction,
 } from "./interfaces/IRecommendation";
 import { ITrainingData } from "./interfaces/ITrainingData";
-import { FeaturesHash } from "./interfaces/ISimpleOracle";
 import { SampleFromProbabilityDistribution } from "./Sampling";
 import { SimpleOracle } from "./SimpleOracle";
 import { ISimpleBandit } from "./interfaces/ISimpleBandit";
@@ -182,8 +181,8 @@ export class SimpleBandit implements ISimpleBandit {
 
   _getActionScore(
     actionId: string,
-    context: FeaturesHash,
-    features: FeaturesHash,
+    context: { [feature: string]: number },
+    features: { [feature: string]: number },
   ): number {
     return this.oracles.reduce(
       (score, oracle) =>
@@ -193,7 +192,9 @@ export class SimpleBandit implements ISimpleBandit {
     );
   }
 
-  getScoredActions(context: FeaturesHash = {}): IScoredAction[] {
+  getScoredActions(
+    context: { [feature: string]: number } = {},
+  ): IScoredAction[] {
     let scoredActions: IScoredAction[] = [];
 
     const actionIds = Object.keys(this.actionsMap);
@@ -225,7 +226,7 @@ export class SimpleBandit implements ISimpleBandit {
   }
 
   getScoredActionsPerOracle(
-    context: FeaturesHash = {},
+    context: { [feature: string]: number } = {},
   ): Array<{ [key: string]: number | string }> {
     let actionScoresPerOracle: Array<{ [key: string]: number | string }> = [];
     for (const [actionId, action] of Object.entries(this.actionsMap)) {
@@ -283,7 +284,7 @@ export class SimpleBandit implements ISimpleBandit {
     }
   }
 
-  recommend(context: FeaturesHash = {}): IRecommendation {
+  recommend(context: { [feature: string]: number } = {}): IRecommendation {
     let scoredActions = this.getScoredActions(context);
     const probabilities = scoredActions.map((action) => action.probability);
     const sampleIndex = SampleFromProbabilityDistribution(probabilities);
@@ -298,7 +299,7 @@ export class SimpleBandit implements ISimpleBandit {
     return recommendation;
   }
 
-  slate(context: FeaturesHash = {}): ISlate {
+  slate(context: { [feature: string]: number } = {}): ISlate {
     let scoredActions = this.getScoredActions(context);
 
     let slateActions: ISlateAction[] = [];
@@ -448,7 +449,7 @@ export class SimpleBandit implements ISimpleBandit {
     return new Promise((resolve, reject) => {
       try {
         for (let oracle of this.oracles) {
-          oracle.fitMany(trainingData);
+          oracle.fit(trainingData);
         }
         resolve();
       } catch (error) {

@@ -1,8 +1,7 @@
-import { FeaturesHash } from "./ISimpleOracle";
 
 export interface IAction {
   actionId: string;
-  features: FeaturesHash;
+  features: { [feature: string] : number};
   clickCount?: number;
 }
 

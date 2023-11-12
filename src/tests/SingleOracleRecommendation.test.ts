@@ -4,7 +4,6 @@ import { ISimpleBanditState } from "../interfaces/IState";
 import { IScoredAction } from "../interfaces/IAction";
 import { IRecommendation } from "../interfaces/IRecommendation";
 import { ITrainingData } from "../interfaces/ITrainingData";
-import exp from "constants";
 
 describe("Single Oracle Bandit Recommendation", () => {
   let oracle: SimpleOracle;
@@ -166,7 +165,7 @@ describe("Single Oracle Bandit Recommendation", () => {
 
   describe("train", () => {
     it("training the bandit should change the weights of the oracle", () => {
-      const oldWeights = bandit.oracles[0].weights.slice();
+      const oldWeights = { ...bandit.oracles[0].weights };
       const trainingData: ITrainingData[] = [
         {
           actionId: "apple",
@@ -209,14 +208,14 @@ describe("Single Oracle Bandit Recommendation", () => {
     });
     describe("accept", () => {
       it("the weights of the oracle should be changed", () => {
-        const oldWeights = bandit.oracles[0].weights.slice();
+        const oldWeights = { ...bandit.oracles[0].weights };
         bandit.accept(recommendation);
         expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
       });
     });
     describe("reject", () => {
       it("the weights of the oracle should be changed", () => {
-        const oldWeights = bandit.oracles[0].weights.slice();
+        const oldWeights = { ...bandit.oracles[0].weights };
         bandit.reject(recommendation);
         expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
       });

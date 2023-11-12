@@ -1,7 +1,5 @@
-import { FeaturesHash } from "./ISimpleOracle";
-
 export interface IRecommendation {
-  context: FeaturesHash;
+  context: { [feature: string]: number };
   actionId: string;
   score: number;
   probability: number;
@@ -14,6 +12,6 @@ export interface ISlateAction {
 }
 
 export interface ISlate {
-  context: FeaturesHash;
+  context: { [feature: string]: number };
   slateActions: Array<ISlateAction>;
 }

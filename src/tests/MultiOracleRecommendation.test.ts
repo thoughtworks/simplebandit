@@ -3,7 +3,7 @@ import { SimpleBandit } from "../SimpleBandit";
 import { ISimpleBanditState } from "../interfaces/IState";
 import { IScoredAction } from "../interfaces/IAction";
 import { IRecommendation } from "../interfaces/IRecommendation";
-import { ITrainingData } from "../interfaces/ITrainingData"
+import { ITrainingData } from "../interfaces/ITrainingData";
 
 describe("Multiple Oracles Recomendation", () => {
   let bandit: SimpleBandit;
@@ -147,9 +147,10 @@ describe("Multiple Oracles Recomendation", () => {
 
   describe("train", () => {
     it("training the bandit should change the weights of the oracle", () => {
-      const oldWeights: number[][] = bandit.oracles.map((oracle) =>
-        oracle.weights.slice(),
-      );
+      const oldWeights: Array<{ [feature: string]: number }> =
+        bandit.oracles.map((oracle) => {
+          return { ...oracle.weights };
+        });
       const trainingData: ITrainingData[] = [
         {
           actionId: "apple",
@@ -206,7 +207,7 @@ describe("Multiple Oracles Recomendation", () => {
     });
     describe("accept", () => {
       it("the weights of the oracle should be changed", () => {
-        const oldWeights = bandit.oracles[0].weights.slice();
+        const oldWeights = { ...bandit.oracles[0].weights };
         bandit.accept(recommendation);
         expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
       });
@@ -214,14 +215,14 @@ describe("Multiple Oracles Recomendation", () => {
     describe("reject", () => {
       it("the weights of the oracle should be changed", () => {
         bandit.accept(recommendation);
-        const oldWeights = bandit.oracles[0].weights.slice();
+        const oldWeights = { ...bandit.oracles[0].weights };
         bandit.reject(recommendation);
         expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
       });
     });
     describe("feedback", () => {
       it("the weights of the oracle should be changed", () => {
-        const oldWeights = bandit.oracles[1].weights.slice();
+        const oldWeights = { ...bandit.oracles[1].weights };
         bandit.feedback(recommendation, "rating", 1);
         expect(bandit.oracles[1].weights).not.toEqual(oldWeights);
       });

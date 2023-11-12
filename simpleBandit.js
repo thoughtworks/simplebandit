@@ -350,7 +350,7 @@ class SimpleBandit {
         return new Promise((resolve, reject) => {
             try {
                 for (let oracle of this.oracles) {
-                    oracle.fitMany(trainingData);
+                    oracle.fit(trainingData);
                 }
                 resolve();
             }
@@ -368,33 +368,42 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SimpleOracle = void 0;
 const DEFAULT_PROBABILITY = 0.1;
 const DEFAULT_LEARNING_RATE = 0.5;
-const DEFAULT_NEGATIVE_CLASS_WEIGHT = 1.0;
 class SimpleOracle {
-    constructor({ actionIds = [], context = [], actionFeatures = [], learningRate = DEFAULT_LEARNING_RATE, // example default value
-    contextActionIdInteractions = true, contextActionFeatureInteractions = true, useInversePropensityWeighting = true, negativeClassWeight = DEFAULT_NEGATIVE_CLASS_WEIGHT, targetLabel = "click", strictFeatures = true, name = "click", oracleWeight = 1.0, weights = {}, } = {}) {
-        if (!Array.isArray(actionIds) ||
-            !Array.isArray(context) ||
-            !Array.isArray(actionFeatures)) {
-            throw new Error("actionIds, context, actionFeatures must be arrays.");
+    constructor({ actionIds = undefined, context = undefined, actionFeatures = undefined, learningRate = DEFAULT_LEARNING_RATE, // example default value
+    actionIdFeatures = true, contextActionIdInteractions = true, contextActionFeatureInteractions = true, useInversePropensityWeighting = true, targetLabel = "click", name = "click", oracleWeight = 1.0, weights = {}, } = {}) {
+        if ((actionIds !== undefined &&
+            !(Array.isArray(actionIds) &&
+                actionIds.every((item) => typeof item === "string"))) ||
+            (context !== undefined &&
+                !(Array.isArray(context) &&
+                    context.every((item) => typeof item === "string"))) ||
+            (actionFeatures !== undefined &&
+                !(Array.isArray(actionFeatures) &&
+                    actionFeatures.every((item) => typeof item === "string")))) {
+            throw new Error("actionIds, context, actionFeatures must be arrays of strings or undefined.");
         }
         if (typeof learningRate !== "number" || learningRate <= 0) {
             throw new Error("Invalid argument: learningRate must be a positive number.");
         }
-        if (typeof contextActionIdInteractions !== "boolean" ||
+        if (typeof actionIdFeatures !== "boolean" ||
+            typeof contextActionIdInteractions !== "boolean" ||
             typeof contextActionFeatureInteractions !== "boolean" ||
-            typeof useInversePropensityWeighting !== "boolean" ||
-            typeof strictFeatures !== "boolean") {
-            throw new Error("contextActionIdInteractions, contextActionFeatureInteractions, useInversePropensityWeighting, strictFeatures must be booleans.");
+            typeof useInversePropensityWeighting !== "boolean") {
+            throw new Error("actionIdFeatures, contextActionIdInteractions, contextActionFeatureInteractions, useInversePropensityWeighting must be booleans.");
         }
+        this.actionIds = actionIds;
+        this.context = context;
+        this.actionFeatures = actionFeatures;
         this.addIntercept = true;
-        this.setFeaturesAndUpdateWeights(actionIds, context, actionFeatures, contextActionIdInteractions, contextActionFeatureInteractions, weights);
+        this.actionIdFeatures = actionIdFeatures;
+        this.contextActionIdInteractions = contextActionIdInteractions;
+        this.contextActionFeatureInteractions = contextActionFeatureInteractions;
         this.targetLabel = targetLabel;
         this.learningRate = learningRate;
         this.useInversePropensityWeighting = useInversePropensityWeighting;
-        this.negativeClassWeight = negativeClassWeight;
-        this.strictFeatures = strictFeatures;
         this.name = name;
         this.oracleWeight = oracleWeight;
+        this.weights = weights;
     }
     getOracleState() {
         return {
@@ -402,15 +411,14 @@ class SimpleOracle {
             context: this.context,
             actionFeatures: this.actionFeatures,
             learningRate: this.learningRate,
+            actionIdFeatures: this.actionIdFeatures,
             contextActionIdInteractions: this.contextActionIdInteractions,
             contextActionFeatureInteractions: this.contextActionFeatureInteractions,
             useInversePropensityWeighting: this.useInversePropensityWeighting,
-            negativeClassWeight: this.negativeClassWeight,
             targetLabel: this.targetLabel,
-            strictFeatures: this.strictFeatures,
             name: this.name,
             oracleWeight: this.oracleWeight,
-            weights: this.getWeightsHash(),
+            weights: this.weights,
         };
     }
     static fromOracleState(oracleState) {
@@ -419,12 +427,11 @@ class SimpleOracle {
             context: oracleState.context,
             actionFeatures: oracleState.actionFeatures,
             learningRate: oracleState.learningRate,
+            actionIdFeatures: oracleState.actionIdFeatures,
             contextActionIdInteractions: oracleState.contextActionIdInteractions,
             contextActionFeatureInteractions: oracleState.contextActionFeatureInteractions,
             useInversePropensityWeighting: oracleState.useInversePropensityWeighting,
-            negativeClassWeight: oracleState.negativeClassWeight,
             targetLabel: oracleState.targetLabel,
-            strictFeatures: oracleState.strictFeatures,
             name: oracleState.name,
             oracleWeight: oracleState.oracleWeight,
             weights: oracleState.weights,
@@ -437,212 +444,81 @@ class SimpleOracle {
         let oracleState = JSON.parse(json);
         return SimpleOracle.fromOracleState(oracleState);
     }
-    _getFeatures() {
-        let features = [
-            ...this.actionIds,
-            ...this.actionFeatures,
-            ...this.interactionFeatures,
-        ];
-        return features;
-    }
-    _getInteractionFeatures() {
-        let interactionFeatures = [];
-        if (this.contextActionIdInteractions) {
-            for (let i = 0; i < this.context.length; i++) {
-                for (let j = 0; j < this.actionIds.length; j++) {
-                    interactionFeatures.push(this.context[i] + "*" + this.actionIds[j]);
-                }
-            }
-        }
-        if (this.contextActionFeatureInteractions) {
-            for (let i = 0; i < this.context.length; i++) {
-                for (let j = 0; j < this.actionFeatures.length; j++) {
-                    interactionFeatures.push(this.context[i] + "*" + this.actionFeatures[j]);
-                }
-            }
-        }
-        return interactionFeatures;
-    }
-    _getNFeatures() {
-        if (this.addIntercept) {
-            return this.features.length + 1;
-        }
-        else {
-            return this.features.length;
-        }
-    }
-    _zeroWeights(nFeatures) {
-        return Array(nFeatures).fill(0);
-    }
-    _updateWeights(newWeights = {}) {
-        var _a, _b;
-        const combinedWeights = Object.assign({}, this.getWeightsHash(), newWeights);
-        this.weights = this._zeroWeights(this._getNFeatures());
-        let offset = this.addIntercept ? 1 : 0;
-        if (this.addIntercept) {
-            this.weights[0] = (_a = combinedWeights["intercept"]) !== null && _a !== void 0 ? _a : this.weights[0];
-        }
-        for (let i = 0; i < this.features.length; i++) {
-            const feature = this.features[i];
-            this.weights[i + offset] =
-                (_b = combinedWeights[feature]) !== null && _b !== void 0 ? _b : this.weights[i + offset];
-        }
-        return this.weights;
-    }
-    setFeaturesAndUpdateWeights(actionIds, context, actionFeatures, contextActionIdInteractions, contextActionFeatureInteractions, weights = {}) {
-        this.actionIds = actionIds !== null && actionIds !== void 0 ? actionIds : this.actionIds;
-        this.context = context !== null && context !== void 0 ? context : this.context;
-        this.actionFeatures = actionFeatures !== null && actionFeatures !== void 0 ? actionFeatures : this.actionFeatures;
-        this.contextActionIdInteractions =
-            contextActionIdInteractions !== null && contextActionIdInteractions !== void 0 ? contextActionIdInteractions : this.contextActionIdInteractions;
-        this.contextActionFeatureInteractions =
-            contextActionFeatureInteractions !== null && contextActionFeatureInteractions !== void 0 ? contextActionFeatureInteractions : this.contextActionFeatureInteractions;
-        this.allInputFeatures = [...this.context, ...this.actionFeatures];
-        this.interactionFeatures = this._getInteractionFeatures();
-        this.features = this._getFeatures();
-        this.nFeatures = this._getNFeatures();
-        this.weights = this._updateWeights(weights);
-    }
-    getWeightsHash() {
-        let result = {};
-        if (this.weights == undefined) {
-            return result;
-        }
-        if (this.addIntercept) {
-            result["intercept"] = this.weights[0];
-        }
-        if (this.features !== undefined) {
-            this.features.forEach((key, i) => {
-                result[key] = this.weights[i + 1];
-            });
-        }
-        return result;
-    }
-    getWeightsMap(round = 3) {
-        const result = new Map();
-        if (this.addIntercept) {
-            result.set("intercept", Number(this.weights[0]).toFixed(round));
-            this.features.forEach((key, i) => {
-                result.set(key, Number(this.weights[i + 1]).toFixed(round));
-            });
-        }
-        else {
-            this.features.forEach((key, i) => {
-                result.set(key, Number(this.weights[i]).toFixed(round));
-            });
-        }
-        return result;
-    }
-    _hashContainsAllKeys(hash, keys) {
-        for (let i = 0; i < keys.length; i++) {
-            if (!hash.hasOwnProperty(keys[i])) {
-                return false;
-            }
-        }
-        return true;
-    }
-    _addActionIdFeatures(inputsHash, actionId = undefined) {
-        for (let i = 0; i < this.actionIds.length; i++) {
-            if (this.actionIds[i] === actionId) {
-                inputsHash[this.actionIds[i]] = 1;
-            }
-            else {
-                inputsHash[this.actionIds[i]] = 0;
-            }
-        }
-        return inputsHash;
-    }
-    _addInteractionFeatures(inputsHash) {
-        if (this.contextActionIdInteractions) {
-            for (let i = 0; i < this.context.length; i++) {
-                for (let j = 0; j < this.actionIds.length; j++) {
-                    inputsHash[this.context[i] + "*" + this.actionIds[j]] =
-                        inputsHash[this.context[i]] * inputsHash[this.actionIds[j]];
-                }
-            }
-        }
-        if (this.contextActionFeatureInteractions) {
-            for (let i = 0; i < this.context.length; i++) {
-                for (let j = 0; j < this.actionFeatures.length; j++) {
-                    inputsHash[this.context[i] + "*" + this.actionFeatures[j]] =
-                        inputsHash[this.context[i]] * inputsHash[this.actionFeatures[j]];
-                }
-            }
-        }
-        return inputsHash;
-    }
-    _getOrderedInputsArray(actionId, context = {}, actionFeatures = {}) {
-        let inputsHash = Object.assign(Object.assign({}, context), actionFeatures);
-        if (!this._hashContainsAllKeys(inputsHash, this.allInputFeatures)) {
-            // throw error with missing features:
-            const missingFeatures = [];
-            this.allInputFeatures.forEach((feature) => {
-                if (!inputsHash.hasOwnProperty(feature)) {
-                    missingFeatures.push(feature);
-                }
-            });
-            if (this.strictFeatures) {
-                throw new Error(`Missing features in inputsHash: ${missingFeatures}`);
-            }
-            else {
-                // add missing features with value 0:
-                missingFeatures.forEach((feature) => {
-                    inputsHash[feature] = 0;
-                });
-            }
-        }
-        inputsHash = this._addActionIdFeatures(inputsHash, actionId);
-        inputsHash = this._addInteractionFeatures(inputsHash);
-        const inputsArray = [];
-        if (this.addIntercept) {
-            inputsArray.push(1);
-        }
-        for (const feature of this.features) {
-            inputsArray.push(inputsHash[feature]);
-        }
-        return inputsArray;
-    }
     _sigmoid(z) {
         return 1 / (1 + Math.exp(-z));
     }
-    _predictLogit(actionId, contextInputs = {}, actionInputs = {}) {
-        const X = this._getOrderedInputsArray(actionId, contextInputs, actionInputs);
+    _getModelInputsWeightsAndLogit(actionId, contextInputs = {}, actionInputs = {}) {
+        let inputs = {};
+        let weights = {};
         let logit = 0;
-        for (let i = 0; i < X.length; i++) {
-            logit += X[i] * this.weights[i];
+        if (this.addIntercept) {
+            weights["intercept"] = this.weights["intercept"] || 0;
+            inputs["intercept"] = 1;
+            logit += weights["intercept"] * inputs["intercept"];
         }
-        return logit;
+        if (this.actionIdFeatures) {
+            weights[actionId] = this.weights[actionId] || 0;
+            inputs[actionId] = 1;
+            logit += inputs[actionId] * weights[actionId];
+        }
+        if (this.contextActionIdInteractions) {
+            for (let contextFeature in contextInputs) {
+                if (!this.context || this.context.includes(contextFeature)) {
+                    let interactionFeature = `${contextFeature}*${actionId}`;
+                    weights[interactionFeature] = this.weights[interactionFeature] || 0;
+                    inputs[interactionFeature] = contextInputs[contextFeature];
+                    logit += weights[interactionFeature] * inputs[interactionFeature];
+                }
+            }
+        }
+        if (this.contextActionFeatureInteractions) {
+            for (let actionFeature in actionInputs) {
+                if (!this.actionFeatures ||
+                    this.actionFeatures.includes(actionFeature)) {
+                    for (let contextFeature in contextInputs) {
+                        if (!this.context || this.context.includes(contextFeature)) {
+                            let interactionFeature = `${contextFeature}*${actionFeature}`;
+                            weights[interactionFeature] =
+                                this.weights[interactionFeature] || 0;
+                            inputs[interactionFeature] =
+                                contextInputs[contextFeature] * actionInputs[actionFeature];
+                            logit += weights[interactionFeature] * inputs[interactionFeature];
+                        }
+                    }
+                }
+            }
+        }
+        return { inputs: inputs, weights: weights, logit: logit };
     }
     predict(actionId, contextInputs = {}, actionInputs = {}) {
-        const logit = this._predictLogit(actionId, contextInputs, actionInputs);
-        const proba = this._sigmoid(logit);
-        return proba;
+        const processedInput = this._getModelInputsWeightsAndLogit(actionId, contextInputs, actionInputs);
+        return this._sigmoid(processedInput["logit"]);
     }
     fit(trainingData) {
         var _a, _b, _c;
-        if (trainingData[this.targetLabel] !== undefined) {
-            const X = this._getOrderedInputsArray(trainingData.actionId, (_a = trainingData.context) !== null && _a !== void 0 ? _a : {}, (_b = trainingData.actionFeatures) !== null && _b !== void 0 ? _b : {});
-            const y = trainingData[this.targetLabel];
-            let sampleWeight = 1;
-            if (this.useInversePropensityWeighting) {
-                sampleWeight = 1 / ((_c = trainingData.probability) !== null && _c !== void 0 ? _c : DEFAULT_PROBABILITY);
-            }
-            if (y == 0) {
-                sampleWeight = sampleWeight * this.negativeClassWeight;
-            }
-            const pred = this._sigmoid(this._predictLogit(trainingData.actionId, trainingData.context, trainingData.actionFeatures));
-            for (let i = 0; i < this.weights.length; i++) {
-                const gradient = sampleWeight * this.learningRate * ((pred - y) * X[i]);
-                this.weights[i] -= gradient;
-            }
+        if (!Array.isArray(trainingData)) {
+            trainingData = [trainingData];
         }
-        else {
-            // Handle missing or incorrect target label
-        }
-    }
-    fitMany(trainingDataList) {
-        for (let i = 0; i < trainingDataList.length; i++) {
-            this.fit(trainingDataList[i]);
+        for (let data of trainingData) {
+            if (data[this.targetLabel] !== undefined) {
+                const processedInput = this._getModelInputsWeightsAndLogit(data.actionId, (_a = data.contextInputs) !== null && _a !== void 0 ? _a : {}, (_b = data.actionInputs) !== null && _b !== void 0 ? _b : {});
+                const y = data[this.targetLabel];
+                let sampleWeight = 1;
+                if (this.useInversePropensityWeighting) {
+                    sampleWeight = 1 / ((_c = data.probability) !== null && _c !== void 0 ? _c : DEFAULT_PROBABILITY);
+                }
+                const pred = this._sigmoid(processedInput["logit"]);
+                const grad = sampleWeight * this.learningRate * (pred - y);
+                for (let feature in processedInput.inputs) {
+                    this.weights[feature] =
+                        processedInput.weights[feature] -
+                            grad * processedInput.inputs[feature];
+                }
+            }
+            else {
+                // silently ignore training data without target label:
+                // not meant for this oracle
+            }
         }
     }
 }

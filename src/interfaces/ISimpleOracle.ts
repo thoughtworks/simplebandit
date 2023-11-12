@@ -1,61 +1,29 @@
-import { WeightsHash } from "./IState";
 import { ISimpleOracleState } from "./IState";
 import { ITrainingData } from "./ITrainingData";
 
-export type FeaturesHash = { [feature: string]: number };
-
-export interface SimpleOracleOptions {
+export interface ISimpleOracle {
   actionIds?: string[];
   context?: string[];
   actionFeatures?: string[];
-  learningRate?: number;
-  contextActionIdInteractions?: boolean;
-  contextActionFeatureInteractions?: boolean;
-  useInversePropensityWeighting?: boolean;
-  negativeClassWeight?: number;
-  targetLabel?: string;
-  strictFeatures?: boolean;
-  name?: string;
-  oracleWeight?: number;
-  weights?: WeightsHash;
-}
-
-export interface ISimpleOracle {
-  actionIds: string[];
-  context: string[];
-  actionFeatures: string[];
   addIntercept: boolean;
   learningRate: number;
+  actionIdFeatures: boolean;
   contextActionIdInteractions: boolean;
   contextActionFeatureInteractions: boolean;
   useInversePropensityWeighting: boolean;
-  negativeClassWeight: number;
   targetLabel: string;
-  strictFeatures: boolean;
   name: string;
   oracleWeight: number;
-  weights: number[];
+  weights: { [feature: string]: number };
 
   getOracleState(): ISimpleOracleState;
   toJSON(): string;
 
-  setFeaturesAndUpdateWeights(
-    actionIds?: string[],
-    context?: string[],
-    actionFeatures?: string[],
-    contextActionIdInteractions?: boolean,
-    contextActionFeatureInteractions?: boolean,
-    weights?: WeightsHash,
-  ): void;
-
-  getWeightsHash(): WeightsHash;
-  getWeightsMap(round: number): Map<string, string>;
   predict(
     actionId: string,
-    contextInputs: FeaturesHash,
-    actionInputs: FeaturesHash,
+    contextInputs: { [feature: string]: number },
+    actionInputs: { [feature: string]: number },
   ): number;
 
-  fit(trainingData: ITrainingData): void;
-  fitMany(trainingData: ITrainingData[]): void;
+  fit(trainingData: ITrainingData | ITrainingData[]): void;
 }

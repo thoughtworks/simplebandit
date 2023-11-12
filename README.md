@@ -2,7 +2,7 @@
 
 SimpleBandit is a lightweight typescript/javascript library for contextual bandits, with no external dependencies, transpiling to <1000 lines of javascript.
 
-It provides classes and interfaces to create and manage bandit models, generate recommendations, select actions, and update your models. Easily integrates with React Native to support privacy sensitive recommendations on the user's device.
+It provides classes and interfaces to create and manage bandit models, generate recommendations, select actions, and update your models. Easily integrates with React Native to support privacy sensitive and fully interpretable recommendations on the user's device.
 
 Under the hood it's a logistic regression oracle with softmax exploration.
 
