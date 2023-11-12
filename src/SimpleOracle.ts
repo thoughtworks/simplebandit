@@ -25,8 +25,8 @@ export class SimpleOracle implements ISimpleOracle {
   negativeClassWeight: number;
   targetLabel: string;
   strictFeatures: boolean;
-  name: string
-  oracleWeight: number
+  name: string;
+  oracleWeight: number;
   weights!: number[];
 
   allInputFeatures!: string[];
@@ -87,8 +87,8 @@ export class SimpleOracle implements ISimpleOracle {
     this.useInversePropensityWeighting = useInversePropensityWeighting;
     this.negativeClassWeight = negativeClassWeight;
     this.strictFeatures = strictFeatures;
-    this.name = name
-    this.oracleWeight = oracleWeight
+    this.name = name;
+    this.oracleWeight = oracleWeight;
   }
 
   public getOracleState(): ISimpleOracleState {

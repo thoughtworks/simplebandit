@@ -1,6 +1,6 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
-const { SimpleOracle, SimpleBandit, } = require("./src");
+const { SimpleOracle, SimpleBandit } = require("./src");
 window.SimpleOracle = SimpleOracle;
 window.SimpleBandit = SimpleBandit;
 module.exports = {
@@ -11,36 +11,7 @@ module.exports = {
 },{"./src":5}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SampleFromProbabilityDistribution = exports.ConvertScoresToProbabilityDistribution = void 0;
-const ConvertScoresToProbabilityDistribution = (scores, temperature) => {
-    if (scores.length === 0) {
-        throw new Error("scores array must not be empty");
-    }
-    if (temperature <= 0) {
-        throw new Error("temperature must be greater than zero");
-    }
-    const maxScore = Math.max(...scores);
-    if (maxScore === -Infinity) {
-        throw new Error("scores array must contain at least one finite number");
-    }
-    let probabilities = [];
-    let softmaxDenominator = 0;
-    const softmaxNumerators = [];
-    for (let i = 0; i < scores.length; i++) {
-        const score = scores[i];
-        if (!Number.isFinite(score)) {
-            throw new Error(`score at index ${i} must be a finite number`);
-        }
-        const softmaxNumerator = Math.exp(temperature * (score - maxScore));
-        softmaxDenominator += softmaxNumerator;
-        softmaxNumerators.push(softmaxNumerator);
-    }
-    for (let i = 0; i < softmaxNumerators.length; i++) {
-        probabilities.push(softmaxNumerators[i] / softmaxDenominator);
-    }
-    return probabilities;
-};
-exports.ConvertScoresToProbabilityDistribution = ConvertScoresToProbabilityDistribution;
+exports.SampleFromProbabilityDistribution = void 0;
 const SampleFromProbabilityDistribution = (probs) => {
     if (probs.length === 0) {
         throw new Error("probs array must not be empty");
@@ -173,12 +144,6 @@ class SimpleBandit {
         return this.oracles.reduce((score, oracle) => score +
             oracle.oracleWeight * oracle.predict(actionId, context, features), 0);
     }
-    _sampleFromActionScores(actionScores) {
-        const scores = actionScores.map((ex) => ex.score);
-        const probabilities = (0, Sampling_1.ConvertScoresToProbabilityDistribution)(scores, this.temperature);
-        const sampleIndex = (0, Sampling_1.SampleFromProbabilityDistribution)(probabilities);
-        return sampleIndex;
-    }
     getScoredActions(context = {}) {
         let scoredActions = [];
         const actionIds = Object.keys(this.actionsMap);
@@ -254,7 +219,8 @@ class SimpleBandit {
     }
     recommend(context = {}) {
         let scoredActions = this.getScoredActions(context);
-        const sampleIndex = this._sampleFromActionScores(scoredActions);
+        const probabilities = scoredActions.map((action) => action.probability);
+        const sampleIndex = (0, Sampling_1.SampleFromProbabilityDistribution)(probabilities);
         const recommendedAction = scoredActions[sampleIndex];
         const recommendation = {
             context: context,
@@ -268,7 +234,9 @@ class SimpleBandit {
         let scoredActions = this.getScoredActions(context);
         let slateActions = [];
         for (let index = 0; index < this.slateSize; index++) {
-            const sampleIndex = this._sampleFromActionScores(scoredActions);
+            const probabilities = scoredActions.map((action) => action.probability);
+            const sampleIndex = (0, Sampling_1.SampleFromProbabilityDistribution)(probabilities);
+            // const sampleIndex = this._sampleFromActionScores(scoredActions);
             slateActions[index] = scoredActions[sampleIndex];
             scoredActions.splice(sampleIndex, 1);
         }

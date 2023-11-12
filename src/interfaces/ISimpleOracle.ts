@@ -21,7 +21,6 @@ export interface SimpleOracleOptions {
 }
 
 export interface ISimpleOracle {
-
   actionIds: string[];
   context: string[];
   actionFeatures: string[];
@@ -33,8 +32,8 @@ export interface ISimpleOracle {
   negativeClassWeight: number;
   targetLabel: string;
   strictFeatures: boolean;
-  name: string
-  oracleWeight: number
+  name: string;
+  oracleWeight: number;
   weights: number[];
 
   getOracleState(): ISimpleOracleState;

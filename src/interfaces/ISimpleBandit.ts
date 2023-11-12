@@ -18,7 +18,7 @@ export interface ISimpleBandit {
 
   recommend(context: FeaturesHash): IRecommendation;
   slate(context: FeaturesHash): ISlate;
-  
+
   accept(recommendation: IRecommendation): Promise<ITrainingData[]>;
   choose(slate: ISlate, actionId: string): Promise<ITrainingData[]>;
   reject(recommendation: IRecommendation | ISlate): Promise<ITrainingData[]>;
@@ -26,12 +26,12 @@ export interface ISimpleBandit {
     recommendation: IRecommendation | ISlate,
     label: string,
     value: number,
-    actionId: string | undefined
+    actionId: string | undefined,
   ): Promise<ITrainingData[]>;
 
   getScoredActions(context: FeaturesHash): IScoredAction[];
   getScoredActionsPerOracle(
-    context: FeaturesHash
+    context: FeaturesHash,
   ): Array<{ [key: string]: number | string }>;
 
   train(trainingData: ITrainingData[]): Promise<void>;

@@ -39,7 +39,12 @@ describe("SimpleBandit with slates", () => {
       actionFeatures: ["fruit"],
       learningRate: 1.0,
     });
-    bandit = new SimpleBandit({oracles:oracle, actions:actions, temperature:0.5, slateSize:2});
+    bandit = new SimpleBandit({
+      oracles: oracle,
+      actions: actions,
+      temperature: 0.5,
+      slateSize: 2,
+    });
   });
 
   describe("constructor", () => {
@@ -239,7 +244,7 @@ describe("SimpleBandit with slates", () => {
     describe("choose", () => {
       it("the weights of the oracle should be changed", () => {
         const oldWeights = bandit.oracles[0].weights.slice();
-        bandit.choose(slate, "apple");
+        bandit.choose(slate, slate.slateActions[0].actionId);
         expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
       });
     });

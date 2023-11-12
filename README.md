@@ -2,7 +2,7 @@
 
 SimpleBandit is a lightweight typescript/javascript library for contextual bandits, with no external dependencies, transpiling to <1000 lines of javascript.
 
-It provides classes and interfaces to create and manage bandit models, generate recommendations, select actions, and update your models. Easily integrates with React Native to support privacy sensitive recommendations on the user's device. 
+It provides classes and interfaces to create and manage bandit models, generate recommendations, select actions, and update your models. Easily integrates with React Native to support privacy sensitive recommendations on the user's device.
 
 Under the hood it's a logistic regression oracle with softmax exploration.
 
@@ -25,7 +25,7 @@ const bandit = SimpleBandit.fromActionIds({ actionIds: ["apple", "pear"] });
 
 let recommendation = bandit.recommend();
 bandit.accept(recommendation);
-consolo.log(recommendation.actionId)
+consolo.log(recommendation.actionId);
 
 recommendation2 = bandit.recommend();
 bandit.reject(recommendation2);
@@ -79,7 +79,7 @@ const bandit = SimpleBandit.fromActionIds({
   slateSize: 2,
 });
 let slate = bandit.slate();
-console.log(slate.slateActions[0].actionId)
+console.log(slate.slateActions[0].actionId);
 bandit.choose(slate, "apple");
 //bandit.reject(slate)
 ```
@@ -109,10 +109,10 @@ For more control you can define your own oracle before passing it on to the band
 
 ```typescript
 oracle = new SimpleOracle({
-  actionIds = ['apple', 'pear'],
-  context = ['rainy'],
-  actionFeatures = ['fruit'],
-  learningRate = 1.0, 
+  actionIds = ["apple", "pear"],
+  context = ["rainy"],
+  actionFeatures = ["fruit"],
+  learningRate = 1.0,
   contextActionIdInteractions = true, // can switch off context-actionId interactions
   contextActionFeatureInteractions = true, // can switch off context-actionFeatures interactions
   useInversePropensityWeighting = true, // oracle uses ipw by default (sample weight = 1/p), but can be switched off
@@ -123,8 +123,8 @@ oracle = new SimpleOracle({
 });
 
 bandit = new SimpleBandit({
-  oracles:oracle,
-  temperature:0.2,
+  oracles: oracle,
+  temperature: 0.2,
 });
 ```
 
@@ -162,13 +162,13 @@ const bandit = new SimpleBandit({
 The `accept`, `reject` and `choose` methods still work the same for for all oracles with `targerLabel: 'click'`. For other `targetLabels` there is the `feedback` method:
 
 ```typescript
-recommendation = bandit.recommend(context)
+recommendation = bandit.recommend(context);
 bandit.feedback(
   recommendation,
-  'stars', // targetLabel
-  1.0, // value: should be -1 < value < 1 
+  "stars", // targetLabel
+  1.0, // value: should be -1 < value < 1
   //'apple' for WeightedMultiBandit also specifiy the actionId
-)
+);
 ```
 
 ## Usage javascript

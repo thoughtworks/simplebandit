@@ -6,10 +6,7 @@ import {
 } from "./interfaces/IRecommendation";
 import { ITrainingData } from "./interfaces/ITrainingData";
 import { FeaturesHash } from "./interfaces/ISimpleOracle";
-import {
-  ConvertScoresToProbabilityDistribution,
-  SampleFromProbabilityDistribution,
-} from "./Sampling";
+import { SampleFromProbabilityDistribution } from "./Sampling";
 import { SimpleOracle } from "./SimpleOracle";
 import { ISimpleBandit } from "./interfaces/ISimpleBandit";
 import { ISimpleBanditState } from "./interfaces/IState";
@@ -161,10 +158,10 @@ export class SimpleBandit implements ISimpleBandit {
 
   static fromState(
     state: ISimpleBanditState,
-    actions: IAction[]
+    actions: IAction[],
   ): SimpleBandit {
     const oracles = state.oracleStates.map((oracleState) =>
-      SimpleOracle.fromOracleState(oracleState)
+      SimpleOracle.fromOracleState(oracleState),
     );
     return new SimpleBandit({
       oracles: oracles,
@@ -186,24 +183,14 @@ export class SimpleBandit implements ISimpleBandit {
   _getActionScore(
     actionId: string,
     context: FeaturesHash,
-    features: FeaturesHash
+    features: FeaturesHash,
   ): number {
     return this.oracles.reduce(
       (score, oracle) =>
         score +
         oracle.oracleWeight * oracle.predict(actionId, context, features),
-      0
+      0,
     );
-  }
-
-  _sampleFromActionScores(actionScores: IScoredAction[]): number {
-    const scores = actionScores.map((ex) => ex.score);
-    const probabilities = ConvertScoresToProbabilityDistribution(
-      scores,
-      this.temperature
-    );
-    const sampleIndex = SampleFromProbabilityDistribution(probabilities);
-    return sampleIndex;
   }
 
   getScoredActions(context: FeaturesHash = {}): IScoredAction[] {
@@ -216,7 +203,7 @@ export class SimpleBandit implements ISimpleBandit {
       const actionScore = this._getActionScore(
         action.actionId,
         context,
-        action.features
+        action.features,
       );
       const softmaxNumerator = Math.exp(actionScore / this.temperature);
       scoredActions.push({
@@ -227,7 +214,7 @@ export class SimpleBandit implements ISimpleBandit {
     }
     let SoftmaxDenominator = scoredActions.reduce(
       (a, b) => a + b.probability,
-      0
+      0,
     );
     scoredActions = scoredActions.map((ex) => ({
       actionId: ex.actionId,
@@ -238,7 +225,7 @@ export class SimpleBandit implements ISimpleBandit {
   }
 
   getScoredActionsPerOracle(
-    context: FeaturesHash = {}
+    context: FeaturesHash = {},
   ): Array<{ [key: string]: number | string }> {
     let actionScoresPerOracle: Array<{ [key: string]: number | string }> = [];
     for (const [actionId, action] of Object.entries(this.actionsMap)) {
@@ -257,7 +244,7 @@ export class SimpleBandit implements ISimpleBandit {
 
   _generateClickOracleTrainingData(
     recommendation: IRecommendation | ISlate,
-    selectedActionId: string | undefined = undefined
+    selectedActionId: string | undefined = undefined,
   ): ITrainingData[] {
     if ("actionId" in recommendation) {
       let trainingData: ITrainingData[] = [
@@ -277,7 +264,7 @@ export class SimpleBandit implements ISimpleBandit {
         const recommendedAction = this.actionsMap[actionId];
         if (!recommendedAction) {
           throw new Error(
-            `Failed to generate training data for recommended exercise at index ${index}.`
+            `Failed to generate training data for recommended exercise at index ${index}.`,
           );
         }
         const context = recommendation.context;
@@ -298,7 +285,8 @@ export class SimpleBandit implements ISimpleBandit {
 
   recommend(context: FeaturesHash = {}): IRecommendation {
     let scoredActions = this.getScoredActions(context);
-    const sampleIndex = this._sampleFromActionScores(scoredActions);
+    const probabilities = scoredActions.map((action) => action.probability);
+    const sampleIndex = SampleFromProbabilityDistribution(probabilities);
     const recommendedAction = scoredActions[sampleIndex];
 
     const recommendation: IRecommendation = {
@@ -315,7 +303,9 @@ export class SimpleBandit implements ISimpleBandit {
 
     let slateActions: ISlateAction[] = [];
     for (let index = 0; index < this.slateSize; index++) {
-      const sampleIndex = this._sampleFromActionScores(scoredActions);
+      const probabilities = scoredActions.map((action) => action.probability);
+      const sampleIndex = SampleFromProbabilityDistribution(probabilities);
+      // const sampleIndex = this._sampleFromActionScores(scoredActions);
       slateActions[index] = scoredActions[sampleIndex];
       scoredActions.splice(sampleIndex, 1);
     }
@@ -331,12 +321,12 @@ export class SimpleBandit implements ISimpleBandit {
       try {
         if (!this.targetLabels.includes("click")) {
           throw new Error(
-            "no oracle with `click` as targetLabel, so cannot use accept()"
+            "no oracle with `click` as targetLabel, so cannot use accept()",
           );
         }
         const trainingData = this._generateClickOracleTrainingData(
           recommendation,
-          recommendation.actionId
+          recommendation.actionId,
         );
         this.train(trainingData);
         resolve(trainingData);
@@ -351,7 +341,7 @@ export class SimpleBandit implements ISimpleBandit {
       try {
         if (!this.targetLabels.includes("click")) {
           throw new Error(
-            "no oracle with `click` as targetLabel, so cannot use accept()"
+            "no oracle with `click` as targetLabel, so cannot use accept()",
           );
         }
         if (actionId == undefined) {
@@ -363,7 +353,7 @@ export class SimpleBandit implements ISimpleBandit {
         }
         const trainingData = this._generateClickOracleTrainingData(
           slate,
-          actionId
+          actionId,
         );
         this.train(trainingData);
         resolve(trainingData);
@@ -378,12 +368,12 @@ export class SimpleBandit implements ISimpleBandit {
       try {
         if (!this.targetLabels.includes("click")) {
           throw new Error(
-            "no oracle with `click` as targetLabel, so cannot use accept()"
+            "no oracle with `click` as targetLabel, so cannot use accept()",
           );
         }
         const trainingData = this._generateClickOracleTrainingData(
           recommendation,
-          undefined
+          undefined,
         );
         this.train(trainingData);
         resolve(trainingData);
@@ -397,7 +387,7 @@ export class SimpleBandit implements ISimpleBandit {
     recommendation_or_slate: IRecommendation | ISlate,
     label: string,
     value: number,
-    actionId: string | undefined = undefined
+    actionId: string | undefined = undefined,
   ): Promise<ITrainingData[]> {
     return new Promise((resolve, reject) => {
       try {
@@ -411,7 +401,7 @@ export class SimpleBandit implements ISimpleBandit {
           // IRecommendation
           if (actionId && actionId !== recommendation_or_slate.actionId) {
             throw new Error(
-              `actionId ${actionId} does not match recommendation.actionId ${recommendation_or_slate.actionId}`
+              `actionId ${actionId} does not match recommendation.actionId ${recommendation_or_slate.actionId}`,
             );
           }
           recommendedAction = this.actionsMap[recommendation_or_slate.actionId];
@@ -422,16 +412,16 @@ export class SimpleBandit implements ISimpleBandit {
             throw new Error(`actionId must be provided for slate`);
           }
           const foundAction = recommendation_or_slate.slateActions.find(
-            (action) => action.actionId === actionId
+            (action) => action.actionId === actionId,
           );
           if (!foundAction) {
             throw new Error(
-              `No action found in slate with actionId ${actionId}`
+              `No action found in slate with actionId ${actionId}`,
             );
           }
           if (!this.actionsMap.hasOwnProperty(actionId)) {
             throw new Error(
-              `No action found for this bandit with actionId ${actionId}`
+              `No action found for this bandit with actionId ${actionId}`,
             );
           }
           recommendedAction = this.actionsMap[actionId];

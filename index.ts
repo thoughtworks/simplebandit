@@ -1,7 +1,4 @@
-const {
-  SimpleOracle,
-  SimpleBandit,
-} = require("./src");
+const { SimpleOracle, SimpleBandit } = require("./src");
 
 (window as any).SimpleOracle = SimpleOracle;
 (window as any).SimpleBandit = SimpleBandit;
