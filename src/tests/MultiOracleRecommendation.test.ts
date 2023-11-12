@@ -3,8 +3,7 @@ import { SimpleBandit } from "../SimpleBandit";
 import { ISimpleBanditState } from "../interfaces/IState";
 import { IScoredAction } from "../interfaces/IAction";
 import { IRecommendation } from "../interfaces/IRecommendation";
-import { ITrainingData } from "../interfaces/ITrainingData";
-// import { WeightsHash } from "../interfaces/ISimpleOracle";
+import { ITrainingData } from "../interfaces/ITrainingData"
 
 describe("Multiple Oracles Recomendation", () => {
   let bandit: SimpleBandit;

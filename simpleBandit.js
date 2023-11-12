@@ -700,11 +700,11 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(require("./IRecommendation"), exports);
 __exportStar(require("./IAction"), exports);
-__exportStar(require("./ISimpleOracle"), exports);
+__exportStar(require("./IRecommendation"), exports);
 __exportStar(require("./ISimpleBandit"), exports);
-__exportStar(require("./ITrainingData"), exports);
+__exportStar(require("./ISimpleOracle"), exports);
 __exportStar(require("./IState"), exports);
+__exportStar(require("./ITrainingData"), exports);
 
 },{"./IAction":6,"./IRecommendation":7,"./ISimpleBandit":8,"./ISimpleOracle":9,"./IState":10,"./ITrainingData":11}]},{},[1]);
