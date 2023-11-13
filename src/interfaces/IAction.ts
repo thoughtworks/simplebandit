@@ -1,7 +1,6 @@
-
 export interface IAction {
   actionId: string;
-  features: { [feature: string] : number};
+  features: { [feature: string]: number };
   clickCount?: number;
 }
 

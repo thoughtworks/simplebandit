@@ -41,6 +41,9 @@
     <h2>Recommendation JSON:</h2>
     <div id="recommendation-json"></div>
 
+    <h2>Weather:</h2>
+    <div id="weather"></div>
+
     <h2>Recommended fruits:</h2>
     <div id="recommended-fruits"></div>
 
@@ -174,6 +177,7 @@
         for (let i = 0; i < slate.slateActions.length; i++) {
           slateActionsString += `${i + 1}: ${slate.slateActions[i].actionId}\n`;
         }
+        document.getElementById("weather").innerText = weather;
         document.getElementById("recommended-fruits").innerText =
           slateActionsString;
         document.getElementById("recommendation-json").innerText =

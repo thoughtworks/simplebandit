@@ -5,7 +5,6 @@ import {
   ITrainingData,
 } from "./interfaces";
 
-
 export interface SimpleOracleOptions {
   actionIds?: string[];
   context?: string[];
@@ -141,7 +140,7 @@ export class SimpleOracle implements ISimpleOracle {
       actionFeatures: oracleState.actionFeatures,
       contextActionIdInteractions: oracleState.contextActionIdInteractions,
       contextActionFeatureInteractions:
-      oracleState.contextActionFeatureInteractions,
+        oracleState.contextActionFeatureInteractions,
       useInversePropensityWeighting: oracleState.useInversePropensityWeighting,
       targetLabel: oracleState.targetLabel,
       name: oracleState.name,
@@ -275,7 +274,7 @@ export class SimpleOracle implements ISimpleOracle {
         }
         let sampleWeight = 1;
         if (this.useInversePropensityWeighting) {
-          sampleWeight = 1 / (data.probability);
+          sampleWeight = 1 / data.probability;
         }
 
         const pred = this._sigmoid(processedInput["logit"]);

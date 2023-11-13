@@ -23,14 +23,21 @@ export class SimpleBandit implements ISimpleBandit {
     temperature = 0.5,
     slateSize = 1,
   }: {
-    oracles: SimpleOracle | SimpleOracle[];
-    actions: IAction[];
+    oracles?: SimpleOracle | SimpleOracle[];
+    actions: (IAction | string)[];
     temperature?: number;
     slateSize?: number;
   }) {
-    this.oracles = Array.isArray(oracles) ? oracles : [oracles];
+    this.oracles = Array.isArray(oracles)
+      ? oracles
+      : oracles
+      ? [oracles]
+      : [new SimpleOracle()];
     this.targetLabels = this.oracles.map((oracle) => oracle.targetLabel);
-    this.actionsMap = actions.reduce((acc, obj) => {
+    const processedActions = actions.map((action) =>
+      typeof action === "string" ? { actionId: action, features: {} } : action,
+    );
+    this.actionsMap = processedActions.reduce((acc, obj) => {
       (acc as any)[obj.actionId] = obj;
       return acc;
     }, {});
@@ -38,114 +45,114 @@ export class SimpleBandit implements ISimpleBandit {
     this.slateSize = slateSize;
   }
 
-  static fromActions({
-    actions,
-    temperature = 5.0,
-    learningRate = 1.0,
-    slateSize = 1,
-  }: {
-    actions: IAction[];
-    temperature?: number;
-    learningRate?: number;
-    slateSize?: number;
-  }): SimpleBandit {
-    const features = [
-      ...new Set(actions.flatMap((action) => Object.keys(action.features))),
-    ];
-    const actionIds = actions.map((action) => action.actionId);
-    const oracle = new SimpleOracle({
-      actionIds: actionIds,
-      context: [],
-      features: features,
-      learningRate: learningRate,
-    });
-    return new SimpleBandit({
-      oracles: [oracle],
-      actions: actions,
-      temperature: temperature,
-      slateSize: slateSize,
-    });
-  }
+  // static fromActions({
+  //   actions,
+  //   temperature = 5.0,
+  //   learningRate = 1.0,
+  //   slateSize = 1,
+  // }: {
+  //   actions: IAction[];
+  //   temperature?: number;
+  //   learningRate?: number;
+  //   slateSize?: number;
+  // }): SimpleBandit {
+  //   const features = [
+  //     ...new Set(actions.flatMap((action) => Object.keys(action.features))),
+  //   ];
+  //   const actionIds = actions.map((action) => action.actionId);
+  //   const oracle = new SimpleOracle({
+  //     actionIds: actionIds,
+  //     context: [],
+  //     features: features,
+  //     learningRate: learningRate,
+  //   });
+  //   return new SimpleBandit({
+  //     oracles: [oracle],
+  //     actions: actions,
+  //     temperature: temperature,
+  //     slateSize: slateSize,
+  //   });
+  // }
 
-  static fromContextAndActions({
-    context,
-    actions,
-    temperature = 0.5,
-    learningRate = 1.0,
-    slateSize = 1,
-  }: {
-    context: string[];
-    actions: IAction[];
-    temperature?: number;
-    learningRate?: number;
-    slateSize?: number;
-  }): SimpleBandit {
-    const features = [
-      ...new Set(actions.flatMap((action) => Object.keys(action.features))),
-    ];
-    const actionIds = actions.map((action) => action.actionId);
-    const oracle = new SimpleOracle({
-      actionIds: actionIds,
-      context: context,
-      features: features,
-      learningRate: learningRate,
-    });
-    return new SimpleBandit({
-      oracles: [oracle],
-      actions: actions,
-      temperature: temperature,
-      slateSize: slateSize,
-    });
-  }
+  // static fromContextAndActions({
+  //   context,
+  //   actions,
+  //   temperature = 0.5,
+  //   learningRate = 1.0,
+  //   slateSize = 1,
+  // }: {
+  //   context: string[];
+  //   actions: IAction[];
+  //   temperature?: number;
+  //   learningRate?: number;
+  //   slateSize?: number;
+  // }): SimpleBandit {
+  //   const features = [
+  //     ...new Set(actions.flatMap((action) => Object.keys(action.features))),
+  //   ];
+  //   const actionIds = actions.map((action) => action.actionId);
+  //   const oracle = new SimpleOracle({
+  //     actionIds: actionIds,
+  //     context: context,
+  //     features: features,
+  //     learningRate: learningRate,
+  //   });
+  //   return new SimpleBandit({
+  //     oracles: [oracle],
+  //     actions: actions,
+  //     temperature: temperature,
+  //     slateSize: slateSize,
+  //   });
+  // }
 
-  static fromActionIds({
-    actionIds,
-    temperature = 0.5,
-    learningRate = 1.0,
-    slateSize = 1,
-  }: {
-    actionIds: string[];
-    temperature?: number;
-    learningRate?: number;
-    slateSize?: number;
-  }): SimpleBandit {
-    const actions = actionIds.map((actionId) => ({
-      actionId: actionId,
-      features: {},
-    }));
-    return SimpleBandit.fromActions({
-      actions,
-      temperature,
-      learningRate,
-      slateSize,
-    });
-  }
+  // static fromActionIds({
+  //   actionIds,
+  //   temperature = 0.5,
+  //   learningRate = 1.0,
+  //   slateSize = 1,
+  // }: {
+  //   actionIds: string[];
+  //   temperature?: number;
+  //   learningRate?: number;
+  //   slateSize?: number;
+  // }): SimpleBandit {
+  //   const actions = actionIds.map((actionId) => ({
+  //     actionId: actionId,
+  //     features: {},
+  //   }));
+  //   return SimpleBandit.fromActions({
+  //     actions,
+  //     temperature,
+  //     learningRate,
+  //     slateSize,
+  //   });
+  // }
 
-  static fromContextAndActionIds({
-    context,
-    actionIds,
-    temperature = 0.5,
-    learningRate = 1.0,
-    slateSize = 1,
-  }: {
-    context: string[];
-    actionIds: string[];
-    temperature?: number;
-    learningRate?: number;
-    slateSize?: number;
-  }): SimpleBandit {
-    const actions = actionIds.map((actionId) => ({
-      actionId: actionId,
-      features: {},
-    }));
-    return SimpleBandit.fromContextAndActions({
-      context,
-      actions,
-      temperature,
-      learningRate,
-      slateSize,
-    });
-  }
+  // static fromContextAndActionIds({
+  //   context,
+  //   actionIds,
+  //   temperature = 0.5,
+  //   learningRate = 1.0,
+  //   slateSize = 1,
+  // }: {
+  //   context: string[];
+  //   actionIds: string[];
+  //   temperature?: number;
+  //   learningRate?: number;
+  //   slateSize?: number;
+  // }): SimpleBandit {
+  //   const actions = actionIds.map((actionId) => ({
+  //     actionId: actionId,
+  //     features: {},
+  //   }));
+  //   return SimpleBandit.fromContextAndActions({
+  //     context,
+  //     actions,
+  //     temperature,
+  //     learningRate,
+  //     slateSize,
+  //   });
+  // }
 
   toState(): ISimpleBanditState {
     return {

@@ -79,10 +79,10 @@
           features: { fruit: 0, treat: 1 },
         },
       ];
-      let bandit = SimpleBandit.fromActions({
+      let bandit = new SimpleBandit({
+        oracles: new SimpleOracle({ learningRate: learningRate }),
         actions: actions,
         temperature: temperature,
-        learningRate: learningRate,
       });
       let recommendation;
       let recommendedAction;

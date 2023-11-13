@@ -64,11 +64,9 @@
       let learningRate = parseFloat(learningRateInput.value);
       let temperature = parseFloat(temperatureInput.value);
 
-      let bandit = SimpleBandit.fromContextAndActionIds({
-        context: ["sunny", "rainy"],
-        actionIds: ["apple", "pear", "orange"],
+      let bandit = new SimpleBandit({
+        oracles: new SimpleOracle({ learningRate: learningRate }),
         temperature: temperature,
-        learningRate: learningRate,
       });
       document.getElementById("serialized-bandit").innerText = bandit.toJSON();
 

@@ -51,56 +51,39 @@ describe("Single Oracle Bandit Recommendation", () => {
     });
   });
 
-  describe("fromContextAndActions", () => {
+  describe("pass actionIds as actions", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
-      const bandit = SimpleBandit.fromContextAndActions({
-        context: ["morning"],
-        actions: actions,
-        temperature: 0.5,
-        learningRate: 1.0,
+      const bandit = new SimpleBandit({
+        actions: ["action1", "action2"],
       });
       expect(bandit.oracles).toBeDefined();
       expect(bandit.temperature).toEqual(0.5);
+      expect(bandit.slateSize).toEqual(1);
+      expect(bandit.actionsMap).toBeDefined();
+      expect(bandit.actionsMap).toHaveProperty("action1");
+      expect(bandit.actionsMap).toHaveProperty("action2");
     });
   });
 
-  describe("fromContextAndActionIds", () => {
-    it("should create an instance of SimpleBandit with the correct properties", () => {
-      const bandit = SimpleBandit.fromContextAndActionIds({
-        context: ["morning"],
-        actionIds: actionIds,
-        learningRate: 1.0,
-        temperature: 0.5,
+  describe("pass actionIds as actions", () => {
+    it("should create an instance of SimpleBandit with a mix of actionId and IActions", () => {
+      const bandit = new SimpleBandit({
+        actions: [{ actionId: "action1", features: { night: 1 } }, "action2"],
       });
       expect(bandit.oracles).toBeDefined();
-      expect(bandit.oracles[0].learningRate).toEqual(1.0);
       expect(bandit.temperature).toEqual(0.5);
-    });
-  });
-
-  describe("fromActions", () => {
-    it("should create an instance of SimpleBandit with the correct properties", () => {
-      const bandit = SimpleBandit.fromActions({
-        actions: actions,
-        learningRate: 1.0,
-        temperature: 0.5,
+      expect(bandit.slateSize).toEqual(1);
+      expect(bandit.actionsMap).toBeDefined();
+      expect(bandit.actionsMap).toHaveProperty("action1");
+      expect(bandit.actionsMap).toHaveProperty("action2");
+      expect(bandit.actionsMap["action1"]).toEqual({
+        actionId: "action1",
+        features: { night: 1 },
       });
-      expect(bandit.oracles).toBeDefined();
-      expect(bandit.oracles[0].learningRate).toEqual(1.0);
-      expect(bandit.temperature).toEqual(0.5);
-    });
-  });
-
-  describe("fromActionIds", () => {
-    it("should create an instance of SimpleBandit with the correct properties", () => {
-      const bandit = SimpleBandit.fromActionIds({
-        actionIds: actionIds,
-        learningRate: 1.0,
-        temperature: 0.5,
+      expect(bandit.actionsMap["action2"]).toEqual({
+        actionId: "action2",
+        features: {},
       });
-      expect(bandit.oracles).toBeDefined();
-      expect(bandit.oracles[0].learningRate).toEqual(1.0);
-      expect(bandit.temperature).toEqual(0.5);
     });
   });
 

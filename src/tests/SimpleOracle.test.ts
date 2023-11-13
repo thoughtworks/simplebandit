@@ -1,8 +1,5 @@
 import { SimpleOracle, SimpleOracleOptions } from "../SimpleOracle";
-import {
-  ITrainingData,
-  ISimpleOracleState,
-} from "../interfaces";
+import { ITrainingData, ISimpleOracleState } from "../interfaces";
 
 describe("SimpleOracle", () => {
   const context = ["context1", "context2"];
@@ -236,8 +233,8 @@ describe("SimpleOracle", () => {
 
     it("should return the correct model inputs and weights with limited context and features", () => {
       oracle = new SimpleOracle({
-        context: ['context1'],
-        features: ['feature1'],
+        context: ["context1"],
+        features: ["feature1"],
       });
       const context = {
         context1: 1,
@@ -311,12 +308,10 @@ describe("SimpleOracle", () => {
     });
 
     it("should return the correct model inputs and weights with empty weights", () => {
-      oracle = new SimpleOracle(
-        {
-          actionIdFeatures: false,
-          actionFeatures: false,
-        },
-      );
+      oracle = new SimpleOracle({
+        actionIdFeatures: false,
+        actionFeatures: false,
+      });
       const context = {
         context1: 1,
         context2: 0,
@@ -358,13 +353,13 @@ describe("SimpleOracle", () => {
     it("should return the correct model inputs and weights with empty weights", () => {
       oracle = new SimpleOracle({
         weights: {
-            intercept: 1,
-            action1: 1,
-            feature1: 1,
-            "context1*feature1": 1,
-            "context2*feature1": 1,
-            "context1*action1": 1,
-        }
+          intercept: 1,
+          action1: 1,
+          feature1: 1,
+          "context1*feature1": 1,
+          "context2*feature1": 1,
+          "context1*action1": 1,
+        },
       });
       const context = {
         context1: 1,
@@ -467,7 +462,6 @@ describe("SimpleOracle", () => {
       expect(oracle.predict(actionId, context, features)).toEqual(0.5);
     });
     it("should return 0.73 for all features that add up to 1.3", () => {
-
       const context = {
         context1: 1,
         context2: 0,
@@ -477,9 +471,7 @@ describe("SimpleOracle", () => {
         feature2: 0,
       };
       const actionId = "action3";
-      expect(oracle.predict(actionId, context, features)).toBeCloseTo(
-        0.785, 2,
-      );
+      expect(oracle.predict(actionId, context, features)).toBeCloseTo(0.785, 2);
     });
     it("should return 0.2689 for all features that add up to -1.3", () => {
       const context = {
@@ -491,10 +483,7 @@ describe("SimpleOracle", () => {
         feature2: 0,
       };
       const actionId = "action3";
-      expect(oracle.predict(actionId, context, features)).toBeCloseTo(
-        0.214,
-        3,
-      );
+      expect(oracle.predict(actionId, context, features)).toBeCloseTo(0.214, 3);
     });
   });
 
@@ -518,8 +507,8 @@ describe("SimpleOracle", () => {
       let trainingData: ITrainingData = {
         actionId: "action1",
         probability: 0.5,
-        context: {"context1": 1},
-        features: {"feature1": 1},
+        context: { context1: 1 },
+        features: { feature1: 1 },
         click: 1,
       };
       const oldWeights = { ...oracle.weights };
@@ -534,19 +523,19 @@ describe("SimpleOracle", () => {
 
     it("should return an array of weights that are different from the previous weights", () => {
       let oracle = new SimpleOracle({
-        weights:{
-          "intercept": 1,
-          "action1": 1,
+        weights: {
+          intercept: 1,
+          action1: 1,
           "context1*action1": 1,
           "context1*feature1": 1,
-          "feature1": 1,
-        }
+          feature1: 1,
+        },
       });
       let trainingData: ITrainingData = {
         actionId: "action1",
         probability: 0.5,
-        context: {"context1": 1},
-        features: {"feature1": 1},
+        context: { context1: 1 },
+        features: { feature1: 1 },
         click: 1,
       };
       const oldWeights = { ...oracle.weights };
@@ -554,7 +543,7 @@ describe("SimpleOracle", () => {
       expect(oracle.weights).not.toEqual(oldWeights);
       //pred = 1/(1+e^-(1+1+1+1+1)) = 0.993
       // 1 - sampleWeight * this.learningRate * (pred - y) * inputs[feature] = 1/0.5 * 1.0 * (0.993 - 1) * 1 = 1.0133
-      expect(oracle.weights["action1"]).toBeCloseTo(1.0133,3);
+      expect(oracle.weights["action1"]).toBeCloseTo(1.0133, 3);
       expect(oracle.weights["context1*action1"]).toBeCloseTo(1.0133, 2);
       expect(oracle.weights["context1*feature1"]).toBeCloseTo(1.0133, 2);
       expect(oracle.weights["feature1"]).toBeCloseTo(1.0133, 2);

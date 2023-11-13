@@ -67,35 +67,34 @@
       const actions = [
         {
           actionId: "apple",
-          features: { fruit: 1, treat: 0 },
+          features: { fruit: 1 },
         },
         {
           actionId: "pear",
-          features: { fruit: 1, treat: 0 },
+          features: { fruit: 1 },
         },
         {
           actionId: "orange",
-          features: { fruit: 1, treat: 0 },
+          features: { fruit: 1 },
         },
         {
           actionId: "chocolate",
-          features: { fruit: 0, treat: 1 },
+          features: { treat: 1 },
         },
         {
           actionId: "candy",
-          features: { fruit: 0, treat: 1 },
+          features: { treat: 1 },
         },
         {
           actionId: "cake",
-          features: { fruit: 0, treat: 1 },
+          features: { treat: 1 },
         },
       ];
 
-      let bandit = SimpleBandit.fromContextAndActions({
-        context: ["sunny", "rainy"],
+      let bandit = new SimpleBandit({
+        oracles: new SimpleOracle({ learningRate: learningRate }),
         actions: actions,
         temperature: temperature,
-        learningRate: learningRate,
         slateSize: 3,
       });
       let slate;
@@ -123,6 +122,7 @@
         for (let i = 0; i < slate.slateActions.length; i++) {
           slateActionsString += `${i + 1}: ${slate.slateActions[i].actionId}\n`;
         }
+        document.getElementById("weather").innerText = weather;
         document.getElementById("recommended-fruits").innerText =
           slateActionsString;
         document.getElementById("slate-json").innerText = JSON.stringify(slate);
