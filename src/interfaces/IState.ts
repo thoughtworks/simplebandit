@@ -3,9 +3,10 @@ export type WeightsHash = { [feature: string]: number };
 export type ISimpleOracleState = {
   actionIds?: string[];
   context?: string[];
-  actionFeatures?: string[];
+  features?: string[];
   learningRate: number;
   actionIdFeatures: boolean;
+  actionFeatures: boolean;
   contextActionIdInteractions: boolean;
   contextActionFeatureInteractions: boolean;
   useInversePropensityWeighting: boolean;

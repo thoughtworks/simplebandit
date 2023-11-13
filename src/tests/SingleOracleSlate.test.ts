@@ -36,7 +36,7 @@ describe("SimpleBandit with slates", () => {
     oracle = new SimpleOracle({
       actionIds: actionIds,
       context: ["morning"],
-      actionFeatures: ["fruit"],
+      features: ["fruit"],
       learningRate: 1.0,
     });
     bandit = new SimpleBandit({
@@ -201,20 +201,23 @@ describe("SimpleBandit with slates", () => {
       const trainingData: ITrainingData[] = [
         {
           actionId: "apple",
+          probability: 0.5,
           context: { morning: 1 },
-          actionFeatures: { fruit: 1 },
+          features: { fruit: 1 },
           click: 1,
         },
         {
           actionId: "pear",
+          probability: 0.5,
           context: { morning: 1 },
-          actionFeatures: { fruit: 1 },
+          features: { fruit: 1 },
           click: 1,
         },
         {
           actionId: "chocolate",
+          probability: 0.5,
           context: { morning: 1 },
-          actionFeatures: { fruit: 0 },
+          features: { fruit: 0 },
           click: 0,
         },
       ];

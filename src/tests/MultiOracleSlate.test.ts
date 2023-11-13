@@ -1,9 +1,5 @@
 import { SimpleOracle } from "../SimpleOracle";
 import { SimpleBandit } from "../SimpleBandit";
-import { ISimpleBanditState } from "../interfaces/IState";
-import { IScoredAction } from "../interfaces/IAction";
-import { IRecommendation } from "../interfaces/IRecommendation";
-import { ITrainingData } from "../interfaces/ITrainingData";
 
 describe("Multiple Oracles Recomendation", () => {
   let bandit: SimpleBandit;
@@ -30,7 +26,7 @@ describe("Multiple Oracles Recomendation", () => {
       new SimpleOracle({
         actionIds: actionIds,
         context: ["morning"],
-        actionFeatures: ["fruit"],
+        features: ["fruit"],
         targetLabel: "click",
         learningRate: 1.0,
         oracleWeight: 0.5,
@@ -38,7 +34,7 @@ describe("Multiple Oracles Recomendation", () => {
       new SimpleOracle({
         actionIds: actionIds,
         context: ["morning"],
-        actionFeatures: ["fruit"],
+        features: ["fruit"],
         targetLabel: "rating",
         learningRate: 1.0,
         oracleWeight: 0.5,

@@ -81,7 +81,7 @@
         "candy",
         "cake",
       ];
-      const actionFeatures = ["fruit", "treat"];
+      const features = ["fruit", "treat"];
 
       const actions = [
         {
@@ -113,7 +113,7 @@
         new SimpleOracle({
           context: ["sunny", "rainy"],
           actionIds: actionIds,
-          features: actionFeatures,
+          features: features,
           learningRate: learningRate,
           tartgetLabel: "click", // default
           oracleWeight: 0.3,
@@ -121,7 +121,7 @@
         new SimpleOracle({
           context: ["sunny", "rainy"],
           actionIds: actionIds,
-          features: actionFeatures,
+          features: features,
           learningRate: learningRate,
           targetLabel: "stars",
           oracleWeight: 0.7,

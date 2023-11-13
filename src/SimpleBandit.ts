@@ -49,14 +49,14 @@ export class SimpleBandit implements ISimpleBandit {
     learningRate?: number;
     slateSize?: number;
   }): SimpleBandit {
-    const actionFeatures = [
+    const features = [
       ...new Set(actions.flatMap((action) => Object.keys(action.features))),
     ];
     const actionIds = actions.map((action) => action.actionId);
     const oracle = new SimpleOracle({
       actionIds: actionIds,
       context: [],
-      actionFeatures: actionFeatures,
+      features: features,
       learningRate: learningRate,
     });
     return new SimpleBandit({
@@ -80,14 +80,14 @@ export class SimpleBandit implements ISimpleBandit {
     learningRate?: number;
     slateSize?: number;
   }): SimpleBandit {
-    const actionFeatures = [
+    const features = [
       ...new Set(actions.flatMap((action) => Object.keys(action.features))),
     ];
     const actionIds = actions.map((action) => action.actionId);
     const oracle = new SimpleOracle({
       actionIds: actionIds,
       context: context,
-      actionFeatures: actionFeatures,
+      features: features,
       learningRate: learningRate,
     });
     return new SimpleBandit({
@@ -251,7 +251,7 @@ export class SimpleBandit implements ISimpleBandit {
       let trainingData: ITrainingData[] = [
         {
           actionId: recommendation.actionId,
-          actionFeatures: this.actionsMap[recommendation.actionId].features,
+          features: this.actionsMap[recommendation.actionId].features,
           context: recommendation.context,
           click: recommendation.actionId === selectedActionId ? 1 : 0,
           probability: recommendation.probability,
@@ -269,12 +269,12 @@ export class SimpleBandit implements ISimpleBandit {
           );
         }
         const context = recommendation.context;
-        const actionFeatures = recommendedAction.features;
+        const features = recommendedAction.features;
         const click = recommendedAction.actionId === selectedActionId ? 1 : 0;
         const probability = recommendation.slateActions[index].probability;
         trainingData.push({
           actionId: actionId,
-          actionFeatures: actionFeatures,
+          features: features,
           context: context,
           click: click,
           probability: probability,
@@ -431,7 +431,7 @@ export class SimpleBandit implements ISimpleBandit {
         const trainingData: ITrainingData[] = [
           {
             actionId: recommendedAction.actionId,
-            actionFeatures: recommendedAction.features,
+            features: recommendedAction.features,
             context: recommendation_or_slate.context,
             [label]: value,
             probability: probability,

@@ -109,16 +109,16 @@ For more control you can define your own oracle before passing it on to the band
 
 ```typescript
 oracle = new SimpleOracle({
-  actionIds = ["apple", "pear"],
-  context = ["rainy"],
-  actionFeatures = ["fruit"],
-  learningRate = 1.0,
-  contextActionIdInteractions = true, // can switch off context-actionId interactions
-  contextActionFeatureInteractions = true, // can switch off context-actionFeatures interactions
+  actionIds: ["apple", "pear"], // only encode certain actionIds
+  context: ["rainy"], // only encode certain context features, ignore others
+  features: ["fruit"], // only encode certain action features, ignore others
+  learningRate: 1.0, // how quick the oracle learns (and forgets)
+  actionIdFeatures: true // learn preference for individual actions, regardless of context
+  actionFeatures: true // learn preference over action features, regardless of context
+  contextActionIdInteractions = true, // clearn interaction between context and actionId preference
+  contextActionFeatureInteractions = true, // learn interaction between context and action features preference
   useInversePropensityWeighting = true, // oracle uses ipw by default (sample weight = 1/p), but can be switched off
-  negativeClassWeight = 1.0, // higher or lower sample weight for negative class
-  targetLabel = "click", // target label for oracle, can differ for WeightedBandits
-  strictFeatures = true, // if false fill missing features with 0, instead of raising error
+  targetLabel = "click", // target label for oracle, defaults to click, but can also be e.g. 'rating' 
   weights = {}, // initialize oracle with weights
 });
 
@@ -136,19 +136,13 @@ The default oracle only optimizes for accepts/clicks, but in many cases you want
 const oracles = [
   new SimpleOracle(
       {
-          context:['sunny', 'rainy'],
-          actionIds: ['apple', 'pear'],
-          features: ['fruit'],
-          learningRate: learningRate,
-          tartgetLabel: 'click', // default
+          targetLabel: 'click', // default
       }),
-  oracle: new SimpleOracle(
+  new SimpleOracle(
       {
           context:['sunny', 'rainy'],
-          actionIds: ['apple', 'pear'],
-          features: ['fruit'],
-          learningRate: learningRate,
           targetLabel: 'stars',
+          oracleWeight: 2.0, // this oracle twice as important as the first
       }),
 ];
 
@@ -159,7 +153,7 @@ const bandit = new SimpleBandit({
 });
 ```
 
-The `accept`, `reject` and `choose` methods still work the same for for all oracles with `targerLabel: 'click'`. For other `targetLabels` there is the `feedback` method:
+The `accept`, `reject` and `choose` methods still work the same for for all oracles with `targetLabel: 'click'`. For other `targetLabels` there is the `feedback` method:
 
 ```typescript
 recommendation = bandit.recommend(context);
@@ -167,8 +161,22 @@ bandit.feedback(
   recommendation,
   "stars", // targetLabel
   1.0, // value: should be -1 < value < 1
-  //'apple' for WeightedMultiBandit also specifiy the actionId
+  //'apple' for slate also specifiy the actionId
 );
+```
+
+For a slate you have to specify which action was chosen:
+
+```typescript
+slate = bandit.recommend(context);
+bandit.feedback(
+  slate,
+  "stars",
+  1.0,
+  slate.slateActions[0].actionId, // if first item was chosen
+)
+
+
 ```
 
 ## Usage javascript

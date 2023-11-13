@@ -4,7 +4,7 @@ import { ITrainingData } from "./ITrainingData";
 export interface ISimpleOracle {
   actionIds?: string[];
   context?: string[];
-  actionFeatures?: string[];
+  features?: string[];
   addIntercept: boolean;
   learningRate: number;
   actionIdFeatures: boolean;
@@ -21,8 +21,8 @@ export interface ISimpleOracle {
 
   predict(
     actionId: string,
-    contextInputs: { [feature: string]: number },
-    actionInputs: { [feature: string]: number },
+    context: { [feature: string]: number },
+    features: { [feature: string]: number },
   ): number;
 
   fit(trainingData: ITrainingData | ITrainingData[]): void;

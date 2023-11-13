@@ -57,14 +57,14 @@ class SimpleBandit {
         this.slateSize = slateSize;
     }
     static fromActions({ actions, temperature = 5.0, learningRate = 1.0, slateSize = 1, }) {
-        const actionFeatures = [
+        const features = [
             ...new Set(actions.flatMap((action) => Object.keys(action.features))),
         ];
         const actionIds = actions.map((action) => action.actionId);
         const oracle = new SimpleOracle_1.SimpleOracle({
             actionIds: actionIds,
             context: [],
-            actionFeatures: actionFeatures,
+            features: features,
             learningRate: learningRate,
         });
         return new SimpleBandit({
@@ -75,14 +75,14 @@ class SimpleBandit {
         });
     }
     static fromContextAndActions({ context, actions, temperature = 0.5, learningRate = 1.0, slateSize = 1, }) {
-        const actionFeatures = [
+        const features = [
             ...new Set(actions.flatMap((action) => Object.keys(action.features))),
         ];
         const actionIds = actions.map((action) => action.actionId);
         const oracle = new SimpleOracle_1.SimpleOracle({
             actionIds: actionIds,
             context: context,
-            actionFeatures: actionFeatures,
+            features: features,
             learningRate: learningRate,
         });
         return new SimpleBandit({
@@ -186,7 +186,7 @@ class SimpleBandit {
             let trainingData = [
                 {
                     actionId: recommendation.actionId,
-                    actionFeatures: this.actionsMap[recommendation.actionId].features,
+                    features: this.actionsMap[recommendation.actionId].features,
                     context: recommendation.context,
                     click: recommendation.actionId === selectedActionId ? 1 : 0,
                     probability: recommendation.probability,
@@ -203,12 +203,12 @@ class SimpleBandit {
                     throw new Error(`Failed to generate training data for recommended exercise at index ${index}.`);
                 }
                 const context = recommendation.context;
-                const actionFeatures = recommendedAction.features;
+                const features = recommendedAction.features;
                 const click = recommendedAction.actionId === selectedActionId ? 1 : 0;
                 const probability = recommendation.slateActions[index].probability;
                 trainingData.push({
                     actionId: actionId,
-                    actionFeatures: actionFeatures,
+                    features: features,
                     context: context,
                     click: click,
                     probability: probability,
@@ -332,7 +332,7 @@ class SimpleBandit {
                 const trainingData = [
                     {
                         actionId: recommendedAction.actionId,
-                        actionFeatures: recommendedAction.features,
+                        features: recommendedAction.features,
                         context: recommendation_or_slate.context,
                         [label]: value,
                         probability: probability,
@@ -369,7 +369,7 @@ exports.SimpleOracle = void 0;
 const DEFAULT_PROBABILITY = 0.1;
 const DEFAULT_LEARNING_RATE = 0.5;
 class SimpleOracle {
-    constructor({ actionIds = undefined, context = undefined, actionFeatures = undefined, learningRate = DEFAULT_LEARNING_RATE, // example default value
+    constructor({ actionIds = undefined, context = undefined, features = undefined, learningRate = DEFAULT_LEARNING_RATE, // example default value
     actionIdFeatures = true, contextActionIdInteractions = true, contextActionFeatureInteractions = true, useInversePropensityWeighting = true, targetLabel = "click", name = "click", oracleWeight = 1.0, weights = {}, } = {}) {
         if ((actionIds !== undefined &&
             !(Array.isArray(actionIds) &&
@@ -377,10 +377,10 @@ class SimpleOracle {
             (context !== undefined &&
                 !(Array.isArray(context) &&
                     context.every((item) => typeof item === "string"))) ||
-            (actionFeatures !== undefined &&
-                !(Array.isArray(actionFeatures) &&
-                    actionFeatures.every((item) => typeof item === "string")))) {
-            throw new Error("actionIds, context, actionFeatures must be arrays of strings or undefined.");
+            (features !== undefined &&
+                !(Array.isArray(features) &&
+                    features.every((item) => typeof item === "string")))) {
+            throw new Error("actionIds, context, features must be arrays of strings or undefined.");
         }
         if (typeof learningRate !== "number" || learningRate <= 0) {
             throw new Error("Invalid argument: learningRate must be a positive number.");
@@ -393,7 +393,7 @@ class SimpleOracle {
         }
         this.actionIds = actionIds;
         this.context = context;
-        this.actionFeatures = actionFeatures;
+        this.features = features;
         this.addIntercept = true;
         this.actionIdFeatures = actionIdFeatures;
         this.contextActionIdInteractions = contextActionIdInteractions;
@@ -409,7 +409,7 @@ class SimpleOracle {
         return {
             actionIds: this.actionIds,
             context: this.context,
-            actionFeatures: this.actionFeatures,
+            features: this.features,
             learningRate: this.learningRate,
             actionIdFeatures: this.actionIdFeatures,
             contextActionIdInteractions: this.contextActionIdInteractions,
@@ -425,7 +425,7 @@ class SimpleOracle {
         return new SimpleOracle({
             actionIds: oracleState.actionIds,
             context: oracleState.context,
-            actionFeatures: oracleState.actionFeatures,
+            features: oracleState.features,
             learningRate: oracleState.learningRate,
             actionIdFeatures: oracleState.actionIdFeatures,
             contextActionIdInteractions: oracleState.contextActionIdInteractions,
@@ -447,7 +447,7 @@ class SimpleOracle {
     _sigmoid(z) {
         return 1 / (1 + Math.exp(-z));
     }
-    _getModelInputsWeightsAndLogit(actionId, contextInputs = {}, actionInputs = {}) {
+    _getModelInputsWeightsAndLogit(actionId, context = {}, features = {}) {
         let inputs = {};
         let weights = {};
         let logit = 0;
@@ -462,26 +462,26 @@ class SimpleOracle {
             logit += inputs[actionId] * weights[actionId];
         }
         if (this.contextActionIdInteractions) {
-            for (let contextFeature in contextInputs) {
+            for (let contextFeature in context) {
                 if (!this.context || this.context.includes(contextFeature)) {
                     let interactionFeature = `${contextFeature}*${actionId}`;
                     weights[interactionFeature] = this.weights[interactionFeature] || 0;
-                    inputs[interactionFeature] = contextInputs[contextFeature];
+                    inputs[interactionFeature] = context[contextFeature];
                     logit += weights[interactionFeature] * inputs[interactionFeature];
                 }
             }
         }
         if (this.contextActionFeatureInteractions) {
-            for (let actionFeature in actionInputs) {
-                if (!this.actionFeatures ||
-                    this.actionFeatures.includes(actionFeature)) {
-                    for (let contextFeature in contextInputs) {
+            for (let actionFeature in features) {
+                if (!this.features ||
+                    this.features.includes(actionFeature)) {
+                    for (let contextFeature in context) {
                         if (!this.context || this.context.includes(contextFeature)) {
                             let interactionFeature = `${contextFeature}*${actionFeature}`;
                             weights[interactionFeature] =
                                 this.weights[interactionFeature] || 0;
                             inputs[interactionFeature] =
-                                contextInputs[contextFeature] * actionInputs[actionFeature];
+                                context[contextFeature] * features[actionFeature];
                             logit += weights[interactionFeature] * inputs[interactionFeature];
                         }
                     }
@@ -490,8 +490,8 @@ class SimpleOracle {
         }
         return { inputs: inputs, weights: weights, logit: logit };
     }
-    predict(actionId, contextInputs = {}, actionInputs = {}) {
-        const processedInput = this._getModelInputsWeightsAndLogit(actionId, contextInputs, actionInputs);
+    predict(actionId, context = {}, features = {}) {
+        const processedInput = this._getModelInputsWeightsAndLogit(actionId, context, features);
         return this._sigmoid(processedInput["logit"]);
     }
     fit(trainingData) {
@@ -501,7 +501,7 @@ class SimpleOracle {
         }
         for (let data of trainingData) {
             if (data[this.targetLabel] !== undefined) {
-                const processedInput = this._getModelInputsWeightsAndLogit(data.actionId, (_a = data.contextInputs) !== null && _a !== void 0 ? _a : {}, (_b = data.actionInputs) !== null && _b !== void 0 ? _b : {});
+                const processedInput = this._getModelInputsWeightsAndLogit(data.actionId, (_a = data.context) !== null && _a !== void 0 ? _a : {}, (_b = data.features) !== null && _b !== void 0 ? _b : {});
                 const y = data[this.targetLabel];
                 let sampleWeight = 1;
                 if (this.useInversePropensityWeighting) {

@@ -30,7 +30,7 @@ describe("Multiple Oracles Recomendation", () => {
       new SimpleOracle({
         actionIds: actionIds,
         context: ["morning"],
-        actionFeatures: ["fruit"],
+        features: ["fruit"],
         targetLabel: "click",
         learningRate: 1.0,
         oracleWeight: 0.5,
@@ -38,7 +38,7 @@ describe("Multiple Oracles Recomendation", () => {
       new SimpleOracle({
         actionIds: actionIds,
         context: ["morning"],
-        actionFeatures: ["fruit"],
+        features: ["fruit"],
         targetLabel: "rating",
         learningRate: 1.0,
         oracleWeight: 0.5,
@@ -154,32 +154,37 @@ describe("Multiple Oracles Recomendation", () => {
       const trainingData: ITrainingData[] = [
         {
           actionId: "apple",
+          probability: 0.5,
           context: { morning: 1 },
-          actionFeatures: { fruit: 1 },
+          features: { fruit: 1 },
           click: 1,
         },
         {
           actionId: "pear",
+          probability: 0.5,
           context: { morning: 1 },
-          actionFeatures: { fruit: 1 },
+          features: { fruit: 1 },
           click: 1,
         },
         {
           actionId: "chocolate",
+          probability: 0.5,
           context: { morning: 1 },
-          actionFeatures: { fruit: 0 },
+          features: { fruit: 0 },
           click: 0,
         },
         {
           actionId: "chocolate",
+          probability: 0.5,
           context: { morning: 1 },
-          actionFeatures: { fruit: 0 },
+          features: { fruit: 0 },
           rating: 1,
         },
         {
           actionId: "apple",
+          probability: 0.5,
           context: { morning: 0 },
-          actionFeatures: { fruit: 1 },
+          features: { fruit: 1 },
           rating: 0,
         },
       ];

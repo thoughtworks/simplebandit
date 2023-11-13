@@ -5,17 +5,14 @@ import {
   ITrainingData,
 } from "./interfaces";
 
-const DEFAULT_PROBABILITY: number = 0.1;
-const DEFAULT_LEARNING_RATE: number = 0.5;
-
-export type WeightedOracle = { oracle: SimpleOracle; weight: number };
 
 export interface SimpleOracleOptions {
   actionIds?: string[];
   context?: string[];
-  actionFeatures?: string[];
+  features?: string[];
   learningRate?: number;
   actionIdFeatures?: boolean;
+  actionFeatures?: boolean;
   contextActionIdInteractions?: boolean;
   contextActionFeatureInteractions?: boolean;
   useInversePropensityWeighting?: boolean;
@@ -28,10 +25,11 @@ export interface SimpleOracleOptions {
 export class SimpleOracle implements ISimpleOracle {
   actionIds?: string[];
   context?: string[];
-  actionFeatures?: string[];
+  features?: string[];
   addIntercept!: boolean;
   learningRate: number;
   actionIdFeatures!: boolean;
+  actionFeatures!: boolean;
   contextActionIdInteractions!: boolean;
   contextActionFeatureInteractions!: boolean;
   useInversePropensityWeighting: boolean;
@@ -43,9 +41,10 @@ export class SimpleOracle implements ISimpleOracle {
   public constructor({
     actionIds = undefined,
     context = undefined,
-    actionFeatures = undefined,
-    learningRate = DEFAULT_LEARNING_RATE, // example default value
+    features = undefined,
+    learningRate = 1.0,
     actionIdFeatures = true,
+    actionFeatures = true,
     contextActionIdInteractions = true,
     contextActionFeatureInteractions = true,
     useInversePropensityWeighting = true,
@@ -65,14 +64,14 @@ export class SimpleOracle implements ISimpleOracle {
           Array.isArray(context) &&
           context.every((item) => typeof item === "string")
         )) ||
-      (actionFeatures !== undefined &&
+      (features !== undefined &&
         !(
-          Array.isArray(actionFeatures) &&
-          actionFeatures.every((item) => typeof item === "string")
+          Array.isArray(features) &&
+          features.every((item) => typeof item === "string")
         ))
     ) {
       throw new Error(
-        "actionIds, context, actionFeatures must be arrays of strings or undefined.",
+        "actionIds, context, features must be arrays of strings or undefined.",
       );
     }
 
@@ -84,21 +83,23 @@ export class SimpleOracle implements ISimpleOracle {
 
     if (
       typeof actionIdFeatures !== "boolean" ||
+      typeof actionFeatures !== "boolean" ||
       typeof contextActionIdInteractions !== "boolean" ||
       typeof contextActionFeatureInteractions !== "boolean" ||
       typeof useInversePropensityWeighting !== "boolean"
     ) {
       throw new Error(
-        "actionIdFeatures, contextActionIdInteractions, contextActionFeatureInteractions, useInversePropensityWeighting must be booleans.",
+        "actionIdFeatures, actionFeatures, contextActionIdInteractions, contextActionFeatureInteractions, useInversePropensityWeighting must be booleans.",
       );
     }
 
     this.actionIds = actionIds;
     this.context = context;
-    this.actionFeatures = actionFeatures;
+    this.features = features;
 
     this.addIntercept = true;
     this.actionIdFeatures = actionIdFeatures;
+    this.actionFeatures = actionFeatures;
     this.contextActionIdInteractions = contextActionIdInteractions;
     this.contextActionFeatureInteractions = contextActionFeatureInteractions;
 
@@ -116,9 +117,10 @@ export class SimpleOracle implements ISimpleOracle {
     return {
       actionIds: this.actionIds,
       context: this.context,
-      actionFeatures: this.actionFeatures,
+      features: this.features,
       learningRate: this.learningRate,
       actionIdFeatures: this.actionIdFeatures,
+      actionFeatures: this.actionFeatures,
       contextActionIdInteractions: this.contextActionIdInteractions,
       contextActionFeatureInteractions: this.contextActionFeatureInteractions,
       useInversePropensityWeighting: this.useInversePropensityWeighting,
@@ -133,12 +135,13 @@ export class SimpleOracle implements ISimpleOracle {
     return new SimpleOracle({
       actionIds: oracleState.actionIds,
       context: oracleState.context,
-      actionFeatures: oracleState.actionFeatures,
+      features: oracleState.features,
       learningRate: oracleState.learningRate,
       actionIdFeatures: oracleState.actionIdFeatures,
+      actionFeatures: oracleState.actionFeatures,
       contextActionIdInteractions: oracleState.contextActionIdInteractions,
       contextActionFeatureInteractions:
-        oracleState.contextActionFeatureInteractions,
+      oracleState.contextActionFeatureInteractions,
       useInversePropensityWeighting: oracleState.useInversePropensityWeighting,
       targetLabel: oracleState.targetLabel,
       name: oracleState.name,
@@ -162,8 +165,8 @@ export class SimpleOracle implements ISimpleOracle {
 
   _getModelInputsWeightsAndLogit(
     actionId: string,
-    contextInputs: { [feature: string]: number } = {},
-    actionInputs: { [feature: string]: number } = {},
+    context: { [feature: string]: number } = {},
+    features: { [feature: string]: number } = {},
   ): {
     inputs: { [feature: string]: number };
     weights: { [feature: string]: number };
@@ -185,30 +188,52 @@ export class SimpleOracle implements ISimpleOracle {
       logit += inputs[actionId] * weights[actionId];
     }
 
+    if (this.actionFeatures) {
+      for (let feature in features) {
+        if (!this.features || this.features.includes(feature)) {
+          if (features[feature] > 1 || features[feature] < -1) {
+            throw new Error(
+              "Feature values must be between -1 and 1! But got features=`${features}`",
+            );
+          }
+          weights[feature] = this.weights[feature] || 0;
+          inputs[feature] = features[feature];
+          logit += weights[feature] * inputs[feature];
+        }
+      }
+    }
+
     if (this.contextActionIdInteractions) {
-      for (let contextFeature in contextInputs) {
+      for (let contextFeature in context) {
         if (!this.context || this.context.includes(contextFeature)) {
           let interactionFeature = `${contextFeature}*${actionId}`;
           weights[interactionFeature] = this.weights[interactionFeature] || 0;
-          inputs[interactionFeature] = contextInputs[contextFeature];
+          inputs[interactionFeature] = context[contextFeature];
           logit += weights[interactionFeature] * inputs[interactionFeature];
         }
       }
     }
 
     if (this.contextActionFeatureInteractions) {
-      for (let actionFeature in actionInputs) {
-        if (
-          !this.actionFeatures ||
-          this.actionFeatures.includes(actionFeature)
-        ) {
-          for (let contextFeature in contextInputs) {
+      for (let actionFeature in features) {
+        if (!this.features || this.features.includes(actionFeature)) {
+          for (let contextFeature in context) {
             if (!this.context || this.context.includes(contextFeature)) {
+              if (
+                context[contextFeature] > 1 ||
+                context[contextFeature] < -1 ||
+                features[actionFeature] > 1 ||
+                features[actionFeature] < -1
+              ) {
+                throw new Error(
+                  "Context and feature values must be between -1 and 1! But got context=`${context}` and features=`${features}`",
+                );
+              }
               let interactionFeature = `${contextFeature}*${actionFeature}`;
               weights[interactionFeature] =
                 this.weights[interactionFeature] || 0;
               inputs[interactionFeature] =
-                contextInputs[contextFeature] * actionInputs[actionFeature];
+                context[contextFeature] * features[actionFeature];
               logit += weights[interactionFeature] * inputs[interactionFeature];
             }
           }
@@ -220,13 +245,13 @@ export class SimpleOracle implements ISimpleOracle {
 
   predict(
     actionId: string,
-    contextInputs: { [feature: string]: number } = {},
-    actionInputs: { [feature: string]: number } = {},
+    context: { [feature: string]: number } = {},
+    features: { [feature: string]: number } = {},
   ): number {
     const processedInput = this._getModelInputsWeightsAndLogit(
       actionId,
-      contextInputs,
-      actionInputs,
+      context,
+      features,
     );
     return this._sigmoid(processedInput["logit"]);
   }
@@ -239,13 +264,18 @@ export class SimpleOracle implements ISimpleOracle {
       if (data[this.targetLabel as keyof ITrainingData] !== undefined) {
         const processedInput = this._getModelInputsWeightsAndLogit(
           data.actionId,
-          data.contextInputs ?? {},
-          data.actionInputs ?? {},
+          data.context ?? {},
+          data.features ?? {},
         );
         const y = (data as any)[this.targetLabel];
+        if (y > 1 || y < 0) {
+          throw new Error(
+            "Target label must be between 0 and 1! But got `${this.targetLabel}`=`${y}`",
+          );
+        }
         let sampleWeight = 1;
         if (this.useInversePropensityWeighting) {
-          sampleWeight = 1 / (data.probability ?? DEFAULT_PROBABILITY);
+          sampleWeight = 1 / (data.probability);
         }
 
         const pred = this._sigmoid(processedInput["logit"]);
@@ -257,8 +287,7 @@ export class SimpleOracle implements ISimpleOracle {
             grad * processedInput.inputs[feature];
         }
       } else {
-        // silently ignore training data without target label:
-        // not meant for this oracle
+        // silently ignore training data without targetLabel: not meant for this oracle
       }
     }
   }
