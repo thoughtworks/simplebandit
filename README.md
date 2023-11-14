@@ -8,8 +8,10 @@ Under the hood it's a logistic regression oracle with softmax exploration.
 
 ## Installation
 
+Project is not yet uploaded to npm, but can be installed locally with
+
 ```sh
-npm install .
+npm install
 ```
 
 ## Usage
