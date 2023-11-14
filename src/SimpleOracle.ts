@@ -154,7 +154,7 @@ export class SimpleOracle implements ISimpleOracle {
   }
 
   public static fromJSON(json: string): SimpleOracle {
-    let oracleState = JSON.parse(json);
+    const oracleState = JSON.parse(json);
     return SimpleOracle.fromOracleState(oracleState);
   }
 
@@ -171,8 +171,8 @@ export class SimpleOracle implements ISimpleOracle {
     weights: { [feature: string]: number };
     logit: number;
   } {
-    let inputs: { [feature: string]: number } = {};
-    let weights: { [feature: string]: number } = {};
+    const inputs: { [feature: string]: number } = {};
+    const weights: { [feature: string]: number } = {};
     let logit = 0;
 
     if (this.addIntercept) {
@@ -188,7 +188,7 @@ export class SimpleOracle implements ISimpleOracle {
     }
 
     if (this.actionFeatures) {
-      for (let feature in features) {
+      for (const feature in features) {
         if (!this.features || this.features.includes(feature)) {
           if (features[feature] > 1 || features[feature] < -1) {
             throw new Error(
@@ -203,9 +203,9 @@ export class SimpleOracle implements ISimpleOracle {
     }
 
     if (this.contextActionIdInteractions) {
-      for (let contextFeature in context) {
+      for (const contextFeature in context) {
         if (!this.context || this.context.includes(contextFeature)) {
-          let interactionFeature = `${contextFeature}*${actionId}`;
+          const interactionFeature = `${contextFeature}*${actionId}`;
           weights[interactionFeature] = this.weights[interactionFeature] || 0;
           inputs[interactionFeature] = context[contextFeature];
           logit += weights[interactionFeature] * inputs[interactionFeature];
@@ -214,9 +214,9 @@ export class SimpleOracle implements ISimpleOracle {
     }
 
     if (this.contextActionFeatureInteractions) {
-      for (let actionFeature in features) {
+      for (const actionFeature in features) {
         if (!this.features || this.features.includes(actionFeature)) {
-          for (let contextFeature in context) {
+          for (const contextFeature in context) {
             if (!this.context || this.context.includes(contextFeature)) {
               if (
                 context[contextFeature] > 1 ||
@@ -228,7 +228,7 @@ export class SimpleOracle implements ISimpleOracle {
                   "Context and feature values must be between -1 and 1! But got context=`${context}` and features=`${features}`",
                 );
               }
-              let interactionFeature = `${contextFeature}*${actionFeature}`;
+              const interactionFeature = `${contextFeature}*${actionFeature}`;
               weights[interactionFeature] =
                 this.weights[interactionFeature] || 0;
               inputs[interactionFeature] =
@@ -259,7 +259,7 @@ export class SimpleOracle implements ISimpleOracle {
     if (!Array.isArray(trainingData)) {
       trainingData = [trainingData];
     }
-    for (let data of trainingData) {
+    for (const data of trainingData) {
       if (data[this.targetLabel as keyof ITrainingData] !== undefined) {
         const processedInput = this._getModelInputsWeightsAndLogit(
           data.actionId,
@@ -280,7 +280,7 @@ export class SimpleOracle implements ISimpleOracle {
         const pred = this._sigmoid(processedInput["logit"]);
         const grad = sampleWeight * this.learningRate * (pred - y);
 
-        for (let feature in processedInput.inputs) {
+        for (const feature in processedInput.inputs) {
           this.weights[feature] =
             processedInput.weights[feature] -
             grad * processedInput.inputs[feature];

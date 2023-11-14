@@ -220,7 +220,7 @@ export class SimpleBandit implements ISimpleBandit {
         probability: softmaxNumerator,
       });
     }
-    let SoftmaxDenominator = scoredActions.reduce(
+    const SoftmaxDenominator = scoredActions.reduce(
       (a, b) => a + b.probability,
       0,
     );
@@ -235,7 +235,7 @@ export class SimpleBandit implements ISimpleBandit {
   getScoredActionsPerOracle(
     context: { [feature: string]: number } = {},
   ): Array<{ [key: string]: number | string }> {
-    let actionScoresPerOracle: Array<{ [key: string]: number | string }> = [];
+    const actionScoresPerOracle: Array<{ [key: string]: number | string }> = [];
     for (const [actionId, action] of Object.entries(this.actionsMap)) {
       for (const oracle of this.oracles) {
         const score = oracle.predict(actionId, context, action.features);
@@ -255,7 +255,7 @@ export class SimpleBandit implements ISimpleBandit {
     selectedActionId: string | undefined = undefined,
   ): ITrainingData[] {
     if ("actionId" in recommendation) {
-      let trainingData: ITrainingData[] = [
+      const trainingData: ITrainingData[] = [
         {
           actionId: recommendation.actionId,
           features: this.actionsMap[recommendation.actionId].features,
@@ -266,7 +266,7 @@ export class SimpleBandit implements ISimpleBandit {
       ];
       return trainingData;
     } else {
-      let trainingData: ITrainingData[] = [];
+      const trainingData: ITrainingData[] = [];
       for (let index = 0; index < recommendation.slateActions.length; index++) {
         const actionId = recommendation.slateActions[index].actionId;
         const recommendedAction = this.actionsMap[actionId];
@@ -292,7 +292,7 @@ export class SimpleBandit implements ISimpleBandit {
   }
 
   recommend(context: { [feature: string]: number } = {}): IRecommendation {
-    let scoredActions = this.getScoredActions(context);
+    const scoredActions = this.getScoredActions(context);
     const probabilities = scoredActions.map((action) => action.probability);
     const sampleIndex = SampleFromProbabilityDistribution(probabilities);
     const recommendedAction = scoredActions[sampleIndex];
@@ -307,9 +307,9 @@ export class SimpleBandit implements ISimpleBandit {
   }
 
   slate(context: { [feature: string]: number } = {}): ISlate {
-    let scoredActions = this.getScoredActions(context);
+    const scoredActions = this.getScoredActions(context);
 
-    let slateActions: ISlateAction[] = [];
+    const slateActions: ISlateAction[] = [];
     for (let index = 0; index < this.slateSize; index++) {
       const probabilities = scoredActions.map((action) => action.probability);
       const sampleIndex = SampleFromProbabilityDistribution(probabilities);
@@ -455,7 +455,7 @@ export class SimpleBandit implements ISimpleBandit {
   train(trainingData: ITrainingData[]): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        for (let oracle of this.oracles) {
+        for (const oracle of this.oracles) {
           oracle.fit(trainingData);
         }
         resolve();

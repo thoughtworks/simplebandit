@@ -489,8 +489,8 @@ describe("SimpleOracle", () => {
 
   describe("fit", () => {
     it("should return an array of weights that are different from the previous weights", () => {
-      let oracle = new SimpleOracle();
-      let trainingData: ITrainingData = {
+      const oracle = new SimpleOracle();
+      const trainingData: ITrainingData = {
         actionId: "action1",
         probability: 0.5,
         click: 1,
@@ -503,8 +503,8 @@ describe("SimpleOracle", () => {
     });
 
     it("should return an array of weights that are different from the previous weights", () => {
-      let oracle = new SimpleOracle();
-      let trainingData: ITrainingData = {
+      const oracle = new SimpleOracle();
+      const trainingData: ITrainingData = {
         actionId: "action1",
         probability: 0.5,
         context: { context1: 1 },
@@ -522,7 +522,7 @@ describe("SimpleOracle", () => {
     });
 
     it("should return an array of weights that are different from the previous weights", () => {
-      let oracle = new SimpleOracle({
+      const oracle = new SimpleOracle({
         weights: {
           intercept: 1,
           action1: 1,
@@ -531,7 +531,7 @@ describe("SimpleOracle", () => {
           feature1: 1,
         },
       });
-      let trainingData: ITrainingData = {
+      const trainingData: ITrainingData = {
         actionId: "action1",
         probability: 0.5,
         context: { context1: 1 },

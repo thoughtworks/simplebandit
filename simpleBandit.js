@@ -47,9 +47,13 @@ const Sampling_1 = require("./Sampling");
 const SimpleOracle_1 = require("./SimpleOracle");
 class SimpleBandit {
     constructor({ oracles, actions, temperature = 0.5, slateSize = 1, }) {
-        this.oracles = Array.isArray(oracles) ? oracles : (oracles ? [oracles] : [new SimpleOracle_1.SimpleOracle()]);
+        this.oracles = Array.isArray(oracles)
+            ? oracles
+            : oracles
+                ? [oracles]
+                : [new SimpleOracle_1.SimpleOracle()];
         this.targetLabels = this.oracles.map((oracle) => oracle.targetLabel);
-        const processedActions = actions.map(action => typeof action === 'string' ? { actionId: action, features: {} } : action);
+        const processedActions = actions.map((action) => typeof action === "string" ? { actionId: action, features: {} } : action);
         this.actionsMap = processedActions.reduce((acc, obj) => {
             acc[obj.actionId] = obj;
             return acc;
@@ -203,7 +207,7 @@ class SimpleBandit {
                 probability: softmaxNumerator,
             });
         }
-        let SoftmaxDenominator = scoredActions.reduce((a, b) => a + b.probability, 0);
+        const SoftmaxDenominator = scoredActions.reduce((a, b) => a + b.probability, 0);
         scoredActions = scoredActions.map((ex) => ({
             actionId: ex.actionId,
             score: ex.score,
@@ -212,7 +216,7 @@ class SimpleBandit {
         return scoredActions;
     }
     getScoredActionsPerOracle(context = {}) {
-        let actionScoresPerOracle = [];
+        const actionScoresPerOracle = [];
         for (const [actionId, action] of Object.entries(this.actionsMap)) {
             for (const oracle of this.oracles) {
                 const score = oracle.predict(actionId, context, action.features);
@@ -228,7 +232,7 @@ class SimpleBandit {
     }
     _generateClickOracleTrainingData(recommendation, selectedActionId = undefined) {
         if ("actionId" in recommendation) {
-            let trainingData = [
+            const trainingData = [
                 {
                     actionId: recommendation.actionId,
                     features: this.actionsMap[recommendation.actionId].features,
@@ -240,7 +244,7 @@ class SimpleBandit {
             return trainingData;
         }
         else {
-            let trainingData = [];
+            const trainingData = [];
             for (let index = 0; index < recommendation.slateActions.length; index++) {
                 const actionId = recommendation.slateActions[index].actionId;
                 const recommendedAction = this.actionsMap[actionId];
@@ -263,7 +267,7 @@ class SimpleBandit {
         }
     }
     recommend(context = {}) {
-        let scoredActions = this.getScoredActions(context);
+        const scoredActions = this.getScoredActions(context);
         const probabilities = scoredActions.map((action) => action.probability);
         const sampleIndex = (0, Sampling_1.SampleFromProbabilityDistribution)(probabilities);
         const recommendedAction = scoredActions[sampleIndex];
@@ -276,8 +280,8 @@ class SimpleBandit {
         return recommendation;
     }
     slate(context = {}) {
-        let scoredActions = this.getScoredActions(context);
-        let slateActions = [];
+        const scoredActions = this.getScoredActions(context);
+        const slateActions = [];
         for (let index = 0; index < this.slateSize; index++) {
             const probabilities = scoredActions.map((action) => action.probability);
             const sampleIndex = (0, Sampling_1.SampleFromProbabilityDistribution)(probabilities);
@@ -394,7 +398,7 @@ class SimpleBandit {
     train(trainingData) {
         return new Promise((resolve, reject) => {
             try {
-                for (let oracle of this.oracles) {
+                for (const oracle of this.oracles) {
                     oracle.fit(trainingData);
                 }
                 resolve();
@@ -487,15 +491,15 @@ class SimpleOracle {
         return JSON.stringify(this.getOracleState());
     }
     static fromJSON(json) {
-        let oracleState = JSON.parse(json);
+        const oracleState = JSON.parse(json);
         return SimpleOracle.fromOracleState(oracleState);
     }
     _sigmoid(z) {
         return 1 / (1 + Math.exp(-z));
     }
     _getModelInputsWeightsAndLogit(actionId, context = {}, features = {}) {
-        let inputs = {};
-        let weights = {};
+        const inputs = {};
+        const weights = {};
         let logit = 0;
         if (this.addIntercept) {
             weights["intercept"] = this.weights["intercept"] || 0;
@@ -508,7 +512,7 @@ class SimpleOracle {
             logit += inputs[actionId] * weights[actionId];
         }
         if (this.actionFeatures) {
-            for (let feature in features) {
+            for (const feature in features) {
                 if (!this.features || this.features.includes(feature)) {
                     if (features[feature] > 1 || features[feature] < -1) {
                         throw new Error("Feature values must be between -1 and 1! But got features=`${features}`");
@@ -520,9 +524,9 @@ class SimpleOracle {
             }
         }
         if (this.contextActionIdInteractions) {
-            for (let contextFeature in context) {
+            for (const contextFeature in context) {
                 if (!this.context || this.context.includes(contextFeature)) {
-                    let interactionFeature = `${contextFeature}*${actionId}`;
+                    const interactionFeature = `${contextFeature}*${actionId}`;
                     weights[interactionFeature] = this.weights[interactionFeature] || 0;
                     inputs[interactionFeature] = context[contextFeature];
                     logit += weights[interactionFeature] * inputs[interactionFeature];
@@ -530,9 +534,9 @@ class SimpleOracle {
             }
         }
         if (this.contextActionFeatureInteractions) {
-            for (let actionFeature in features) {
+            for (const actionFeature in features) {
                 if (!this.features || this.features.includes(actionFeature)) {
-                    for (let contextFeature in context) {
+                    for (const contextFeature in context) {
                         if (!this.context || this.context.includes(contextFeature)) {
                             if (context[contextFeature] > 1 ||
                                 context[contextFeature] < -1 ||
@@ -540,7 +544,7 @@ class SimpleOracle {
                                 features[actionFeature] < -1) {
                                 throw new Error("Context and feature values must be between -1 and 1! But got context=`${context}` and features=`${features}`");
                             }
-                            let interactionFeature = `${contextFeature}*${actionFeature}`;
+                            const interactionFeature = `${contextFeature}*${actionFeature}`;
                             weights[interactionFeature] =
                                 this.weights[interactionFeature] || 0;
                             inputs[interactionFeature] =
@@ -562,7 +566,7 @@ class SimpleOracle {
         if (!Array.isArray(trainingData)) {
             trainingData = [trainingData];
         }
-        for (let data of trainingData) {
+        for (const data of trainingData) {
             if (data[this.targetLabel] !== undefined) {
                 const processedInput = this._getModelInputsWeightsAndLogit(data.actionId, (_a = data.context) !== null && _a !== void 0 ? _a : {}, (_b = data.features) !== null && _b !== void 0 ? _b : {});
                 const y = data[this.targetLabel];
@@ -571,11 +575,11 @@ class SimpleOracle {
                 }
                 let sampleWeight = 1;
                 if (this.useInversePropensityWeighting) {
-                    sampleWeight = 1 / (data.probability);
+                    sampleWeight = 1 / data.probability;
                 }
                 const pred = this._sigmoid(processedInput["logit"]);
                 const grad = sampleWeight * this.learningRate * (pred - y);
-                for (let feature in processedInput.inputs) {
+                for (const feature in processedInput.inputs) {
                     this.weights[feature] =
                         processedInput.weights[feature] -
                             grad * processedInput.inputs[feature];
