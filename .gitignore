@@ -39,3 +39,7 @@ lib/*.js
 test/*.js
 *.map
 dist/*
+examples/react/simplest/dist
+examples/react/simplest/node_modules
+examples/react/simplest/.cache
+.DS_Store
