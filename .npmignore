@@ -1,0 +1,23 @@
+# Development files
+src/
+*.test.ts
+tsconfig.json
+.eslintrc
+.jest/
+.prettierrc
+.gitignore
+coverage/
+
+# System files
+.DS_Store
+
+# Documentation & Examples
+/examples
+
+# Temporary files
+.tmp
+.cache
+
+# Editor directories
+.vscode/
+.idea/
