@@ -1,13 +1,18 @@
 {
   "name": "simplebandit",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "An npm library for contextual bandits",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "format": "npx prettier --write .",
+    "test": "jest",
+    "build": "tsc && npx browserify index.ts -p [ tsify --noImplicitAny ] > simpleBandit.js && npx uglifyjs simpleBandit.js -o simpleBandit.min.js -c -m",
+    "pretest": "tsc",
+    "prepublish": "tsc"
   },
   "keywords": [
     "contextual bandits",
+    "recommender",
     "bandit",
     "npm",
     "library"
