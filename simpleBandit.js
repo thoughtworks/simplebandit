@@ -111,24 +111,27 @@ class SimpleBandit {
         return scoredActions;
     }
     getScoredActionsPerOracle(context = {}) {
-        const actionScoresPerOracle = [];
-        for (const [actionId, action] of Object.entries(this.actionsMap)) {
-            for (const oracle of this.oracles) {
-                const score = oracle.predict(actionId, context, action.features);
-                actionScoresPerOracle.push({
-                    actionId: actionId,
-                    [oracle.targetLabel]: score,
-                    name: oracle.name,
-                    weight: oracle.oracleWeight,
-                });
+        const scoredActions = this.getScoredActions(context);
+        const scoredActionsPerOracle = [];
+        for (let scoredAction of scoredActions) {
+            const scoredActionPerOracle = {
+                actionId: scoredAction.actionId,
+                weightedScore: scoredAction.score,
+                probability: scoredAction.probability,
+            };
+            for (let oracle of this.oracles) {
+                const oracleScore = oracle.predict(scoredAction.actionId, context, this.actionsMap[scoredAction.actionId].features);
+                scoredActionPerOracle[oracle.name] = oracleScore;
             }
+            scoredActionsPerOracle.push(scoredActionPerOracle);
         }
-        return actionScoresPerOracle;
+        return scoredActionsPerOracle;
     }
     _generateClickOracleTrainingData(recommendation, selectedActionId = undefined) {
         if ("actionId" in recommendation) {
             const trainingData = [
                 {
+                    recommendationId: recommendation.recommendationId,
                     actionId: recommendation.actionId,
                     features: this.actionsMap[recommendation.actionId].features,
                     context: recommendation.context,
@@ -151,6 +154,7 @@ class SimpleBandit {
                 const click = recommendedAction.actionId === selectedActionId ? 1 : 0;
                 const probability = recommendation.slateActions[index].probability;
                 trainingData.push({
+                    recommendationId: recommendation.recommendationId,
                     actionId: actionId,
                     features: features,
                     context: context,
@@ -161,12 +165,16 @@ class SimpleBandit {
             return trainingData;
         }
     }
+    _generateRecommendationId() {
+        return 'id-' + Math.random().toString(36).substr(2, 16) + '-' + Date.now().toString(36);
+    }
     recommend(context = {}) {
         const scoredActions = this.getScoredActions(context);
         const probabilities = scoredActions.map((action) => action.probability);
         const sampleIndex = (0, Sampling_1.SampleFromProbabilityDistribution)(probabilities);
         const recommendedAction = scoredActions[sampleIndex];
         const recommendation = {
+            recommendationId: this._generateRecommendationId(),
             context: context,
             actionId: recommendedAction.actionId,
             score: recommendedAction.score,
@@ -185,6 +193,7 @@ class SimpleBandit {
             scoredActions.splice(sampleIndex, 1);
         }
         const slate = {
+            recommendationId: this._generateRecommendationId(),
             context: context,
             slateActions: slateActions,
         };
@@ -275,6 +284,7 @@ class SimpleBandit {
                 }
                 const trainingData = [
                     {
+                        recommendationId: recommendation_or_slate.recommendationId,
                         actionId: recommendedAction.actionId,
                         features: recommendedAction.features,
                         context: recommendation_or_slate.context,
@@ -311,7 +321,7 @@ exports.SimpleBandit = SimpleBandit;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SimpleOracle = void 0;
 class SimpleOracle {
-    constructor({ actionIds = undefined, context = undefined, features = undefined, learningRate = 1.0, actionIdFeatures = true, actionFeatures = true, contextActionIdInteractions = true, contextActionFeatureInteractions = true, useInversePropensityWeighting = true, targetLabel = "click", name = "click", oracleWeight = 1.0, weights = {}, } = {}) {
+    constructor({ actionIds = undefined, context = undefined, features = undefined, learningRate = 1.0, actionIdFeatures = true, actionFeatures = true, contextActionIdInteractions = true, contextActionFeatureInteractions = true, useInversePropensityWeighting = true, targetLabel = "click", name = undefined, oracleWeight = 1.0, weights = {}, } = {}) {
         if ((actionIds !== undefined &&
             !(Array.isArray(actionIds) &&
                 actionIds.every((item) => typeof item === "string"))) ||
@@ -344,7 +354,7 @@ class SimpleOracle {
         this.targetLabel = targetLabel;
         this.learningRate = learningRate;
         this.useInversePropensityWeighting = useInversePropensityWeighting;
-        this.name = name;
+        this.name = name || targetLabel;
         this.oracleWeight = oracleWeight;
         this.weights = weights;
     }

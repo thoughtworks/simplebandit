@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { SimpleBandit } from 'simplebandit'; // Assuming the library is exported as a module
+import { SimpleBandit } from "../../dist/index";
 
-function FruitBandit() {
+function BasicFruitBandit() {
   const [bandit, setBandit] = useState(null);
   const [recommendation, setRecommendation] = useState(null);
   const [scoredActions, setScoredActions] = useState([]);
@@ -21,25 +21,24 @@ function FruitBandit() {
   }, [bandit]);
 
   const generateNewRecommendation = () => {
-    const recommendation = bandit.recommend();
-    setRecommendation(recommendation);
-    const scoredActions = bandit.getScoredActions();
-    setScoredActions(scoredActions);
+    setScoredActions(bandit.getScoredActions());
+    setRecommendation(bandit.recommend());
+    
   };
 
-  const handleEat = async () => {
+  const handleAccept = async () => {
     await bandit.accept(recommendation);
     generateNewRecommendation();
   };
 
-  const handleDontEat = async () => {
+  const handleReject = async () => {
     await bandit.reject(recommendation);
     generateNewRecommendation();
   };
 
   return (
     <div>
-      <h1>Simplest Fruit Bandit</h1>
+      <h1>Simple Fruit Bandit</h1>
       <p>This is the simplest example of a bandit that is learning the preference among three types of fruit: apple, pear or orange.</p>
       <h2>Fruit probabilities:</h2>
       <div>
@@ -49,12 +48,12 @@ function FruitBandit() {
           </p>
         ))}
       </div>
-      <h2>Recommended fruit:</h2>
+      <h2>Fruit recommendation:</h2>
       {recommendation && <div>{recommendation.actionId}</div>}
-      <button onClick={handleEat}>Eat</button>
-      <button onClick={handleDontEat}>Don't eat</button>
+      <button onClick={handleAccept}>Accept</button>
+      <button onClick={handleReject}>Reject</button>
     </div>
   );
 }
 
-export default FruitBandit;
+export default BasicFruitBandit;

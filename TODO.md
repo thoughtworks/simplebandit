@@ -2,7 +2,8 @@
 
 ## Short run:
 
-- add include and exclude parameters to `recommend`` and `slate`
+- add include and exclude parameters to `recommend` and `slate`
+- add uuid recommendationId to recommendations
 - build proper npm package
 - Add react examples
 - Set up CI

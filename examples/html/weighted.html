@@ -112,27 +112,25 @@
           features: { fruit: 0, treat: 1 },
         },
       ];
-      const oracles = [
-        new SimpleOracle({
+      const clickOracle = new SimpleOracle({
           context: ["sunny", "rainy"],
           actionIds: actionIds,
           features: features,
           learningRate: learningRate,
           tartgetLabel: "click", // default
           oracleWeight: 0.3,
-        }),
-        new SimpleOracle({
+        })
+      const starsOracle = new SimpleOracle({
           context: ["sunny", "rainy"],
           actionIds: actionIds,
           features: features,
           learningRate: learningRate,
           targetLabel: "stars",
           oracleWeight: 0.7,
-        }),
-      ];
+        })
 
       const bandit = new SimpleBandit({
-        oracles: oracles,
+        oracles: [clickOracle, starsOracle],
         actions: actions,
         temperature: temperature,
         slateSize: 3,
