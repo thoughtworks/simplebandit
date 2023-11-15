@@ -1,4 +1,5 @@
 export interface ITrainingData {
+  recommendationId: string;
   actionId: string;
   probability: number;
   features?: Record<string, number> | undefined;

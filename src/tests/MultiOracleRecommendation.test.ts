@@ -137,11 +137,11 @@ describe("Multiple Oracles Recomendation", () => {
       expect(scoredActions).toBeInstanceOf(Array);
       scoredActions.forEach((scoredAction) => {
         expect(scoredAction).toHaveProperty("actionId");
-        expect(scoredAction).toHaveProperty("name");
-        expect(scoredAction).toHaveProperty("weight");
+        expect(scoredAction).toHaveProperty("click");
+        expect(scoredAction).toHaveProperty("rating");
+        expect(scoredAction).toHaveProperty("weightedScore");
+        expect(scoredAction).toHaveProperty("probability");
       });
-      expect(scoredActions[0]).toHaveProperty("click");
-      expect(scoredActions[1]).toHaveProperty("rating");
     });
   });
 
@@ -153,6 +153,7 @@ describe("Multiple Oracles Recomendation", () => {
         });
       const trainingData: ITrainingData[] = [
         {
+          recommendationId: "recommendation1",
           actionId: "apple",
           probability: 0.5,
           context: { morning: 1 },
@@ -160,6 +161,7 @@ describe("Multiple Oracles Recomendation", () => {
           click: 1,
         },
         {
+          recommendationId: "recommendation2",
           actionId: "pear",
           probability: 0.5,
           context: { morning: 1 },
@@ -167,6 +169,7 @@ describe("Multiple Oracles Recomendation", () => {
           click: 1,
         },
         {
+          recommendationId: "recommendation3",
           actionId: "chocolate",
           probability: 0.5,
           context: { morning: 1 },
@@ -174,6 +177,7 @@ describe("Multiple Oracles Recomendation", () => {
           click: 0,
         },
         {
+          recommendationId: "recommendation1",
           actionId: "chocolate",
           probability: 0.5,
           context: { morning: 1 },
@@ -181,6 +185,7 @@ describe("Multiple Oracles Recomendation", () => {
           rating: 1,
         },
         {
+          recommendationId: "recommendation3",
           actionId: "apple",
           probability: 0.5,
           context: { morning: 0 },

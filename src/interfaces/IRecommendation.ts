@@ -1,4 +1,5 @@
 export interface IRecommendation {
+  recommendationId: string;
   context: { [feature: string]: number };
   actionId: string;
   score: number;
@@ -12,6 +13,7 @@ export interface ISlateAction {
 }
 
 export interface ISlate {
+  recommendationId: string;
   context: { [feature: string]: number };
   slateActions: Array<ISlateAction>;
 }

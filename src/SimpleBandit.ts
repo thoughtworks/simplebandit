@@ -126,19 +126,21 @@ export class SimpleBandit implements ISimpleBandit {
   getScoredActionsPerOracle(
     context: { [feature: string]: number } = {},
   ): Array<{ [key: string]: number | string }> {
-    const actionScoresPerOracle: Array<{ [key: string]: number | string }> = [];
-    for (const [actionId, action] of Object.entries(this.actionsMap)) {
-      for (const oracle of this.oracles) {
-        const score = oracle.predict(actionId, context, action.features);
-        actionScoresPerOracle.push({
-          actionId: actionId,
-          [oracle.targetLabel]: score,
-          name: oracle.name,
-          weight: oracle.oracleWeight,
-        });
+    const scoredActions: IScoredAction[] = this.getScoredActions(context);
+    const scoredActionsPerOracle: Array<{ [key: string]: number | string }> = [];
+    for (let scoredAction of scoredActions) {
+      const scoredActionPerOracle: { [key: string]: number | string } = {
+        actionId: scoredAction.actionId,
+        weightedScore: scoredAction.score,
+        probability: scoredAction.probability,
+      };
+      for (let oracle of this.oracles) {
+        const oracleScore = oracle.predict(scoredAction.actionId, context, this.actionsMap[scoredAction.actionId].features);
+        scoredActionPerOracle[oracle.name] = oracleScore;
       }
+      scoredActionsPerOracle.push(scoredActionPerOracle);
     }
-    return actionScoresPerOracle;
+    return scoredActionsPerOracle;
   }
 
   _generateClickOracleTrainingData(
@@ -147,7 +149,8 @@ export class SimpleBandit implements ISimpleBandit {
   ): ITrainingData[] {
     if ("actionId" in recommendation) {
       const trainingData: ITrainingData[] = [
-        {
+        { 
+          recommendationId: recommendation.recommendationId,
           actionId: recommendation.actionId,
           features: this.actionsMap[recommendation.actionId].features,
           context: recommendation.context,
@@ -171,6 +174,7 @@ export class SimpleBandit implements ISimpleBandit {
         const click = recommendedAction.actionId === selectedActionId ? 1 : 0;
         const probability = recommendation.slateActions[index].probability;
         trainingData.push({
+          recommendationId: recommendation.recommendationId,
           actionId: actionId,
           features: features,
           context: context,
@@ -182,6 +186,10 @@ export class SimpleBandit implements ISimpleBandit {
     }
   }
 
+  _generateRecommendationId(): string {
+    return 'id-' + Math.random().toString(36).substr(2, 16) + '-' + Date.now().toString(36);
+  }
+
   recommend(context: { [feature: string]: number } = {}): IRecommendation {
     const scoredActions = this.getScoredActions(context);
     const probabilities = scoredActions.map((action) => action.probability);
@@ -189,6 +197,7 @@ export class SimpleBandit implements ISimpleBandit {
     const recommendedAction = scoredActions[sampleIndex];
 
     const recommendation: IRecommendation = {
+      recommendationId: this._generateRecommendationId(),
       context: context,
       actionId: recommendedAction.actionId,
       score: recommendedAction.score,
@@ -209,6 +218,7 @@ export class SimpleBandit implements ISimpleBandit {
       scoredActions.splice(sampleIndex, 1);
     }
     const slate: ISlate = {
+      recommendationId: this._generateRecommendationId(),
       context: context,
       slateActions: slateActions,
     };
@@ -328,6 +338,7 @@ export class SimpleBandit implements ISimpleBandit {
         }
         const trainingData: ITrainingData[] = [
           {
+            recommendationId: recommendation_or_slate.recommendationId,
             actionId: recommendedAction.actionId,
             features: recommendedAction.features,
             context: recommendation_or_slate.context,

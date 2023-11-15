@@ -118,6 +118,7 @@ describe("SimpleBandit with slates", () => {
       const oldWeights = { ...bandit.oracles[0].weights };
       const trainingData: ITrainingData[] = [
         {
+          recommendationId: "recommendation1",
           actionId: "apple",
           probability: 0.5,
           context: { morning: 1 },
@@ -125,6 +126,7 @@ describe("SimpleBandit with slates", () => {
           click: 1,
         },
         {
+          recommendationId: "recommendation2",
           actionId: "pear",
           probability: 0.5,
           context: { morning: 1 },
@@ -132,6 +134,7 @@ describe("SimpleBandit with slates", () => {
           click: 1,
         },
         {
+          recommendationId: "recommendation2",
           actionId: "chocolate",
           probability: 0.5,
           context: { morning: 1 },

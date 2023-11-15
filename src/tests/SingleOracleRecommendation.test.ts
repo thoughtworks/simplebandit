@@ -151,6 +151,7 @@ describe("Single Oracle Bandit Recommendation", () => {
       const oldWeights = { ...bandit.oracles[0].weights };
       const trainingData: ITrainingData[] = [
         {
+          recommendationId: "recommendation1",
           actionId: "apple",
           probability: 0.5,
           context: { morning: 1 },
@@ -158,13 +159,15 @@ describe("Single Oracle Bandit Recommendation", () => {
           click: 1,
         },
         {
+          recommendationId: "recommendation1",
           actionId: "pear",
           probability: 0.5,
           context: { morning: 1 },
           features: { fruit: 1 },
-          click: 1,
+          click: 0,
         },
         {
+          recommendationId: "recommendation1",
           actionId: "chocolate",
           probability: 0.5,
           context: { morning: 1 },
