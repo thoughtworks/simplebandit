@@ -48,7 +48,7 @@ export class SimpleOracle implements ISimpleOracle {
     contextActionFeatureInteractions = true,
     useInversePropensityWeighting = true,
     targetLabel = "click",
-    name = "click",
+    name = undefined,
     oracleWeight = 1.0,
     weights = {},
   }: SimpleOracleOptions = {}) {
@@ -106,7 +106,7 @@ export class SimpleOracle implements ISimpleOracle {
     this.learningRate = learningRate;
     this.useInversePropensityWeighting = useInversePropensityWeighting;
 
-    this.name = name;
+    this.name = name || targetLabel;
     this.oracleWeight = oracleWeight;
 
     this.weights = weights;
