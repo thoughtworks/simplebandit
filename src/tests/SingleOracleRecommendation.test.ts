@@ -209,5 +209,15 @@ describe("Single Oracle Bandit Recommendation", () => {
         expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
       });
     });
+    describe("recommendationId should match in trainingData", () => {
+      it("should have a trainingData entry with the same recommendationId", async () => {
+        const trainingData = await bandit.accept(recommendation);
+        expect(
+          trainingData.filter(
+            (data) => data.recommendationId === recommendation.recommendationId,
+          ).length,
+        ).toEqual(1);
+      });
+    });
   });
 });

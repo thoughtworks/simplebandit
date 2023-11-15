@@ -31,6 +31,7 @@ describe("SimpleBandit with slates", () => {
       features: { fruit: 0 },
     },
   ];
+  const slateSize = 2;
 
   beforeEach(() => {
     oracle = new SimpleOracle({
@@ -43,7 +44,7 @@ describe("SimpleBandit with slates", () => {
       oracles: oracle,
       actions: actions,
       temperature: 0.5,
-      slateSize: 2,
+      slateSize: slateSize,
     });
   });
 
@@ -177,6 +178,16 @@ describe("SimpleBandit with slates", () => {
         const oldWeights = { ...bandit.oracles[0].weights };
         bandit.reject(slate);
         expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
+      });
+    });
+    describe("recommendationId should match in trainingData", () => {
+      it("should have a trainingData entry with the same recommendationId", async () => {
+        const trainingData = await bandit.choose(slate, slate.slateActions[0].actionId);
+        expect(
+          trainingData.filter(
+            (data) => data.recommendationId === slate.recommendationId,
+          ).length,
+        ).toEqual(slateSize);
       });
     });
   });
