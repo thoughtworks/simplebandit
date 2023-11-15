@@ -2,7 +2,6 @@
 
 ## Short run:
 
-- add include and exclude parameters to `recommend` and `slate`
 - more flexible action definition:
     - pass features as string to set to 1
     - pass hash with actions={actionId: features, ...}
