@@ -15,8 +15,14 @@ export interface ISimpleBandit {
   toState(): ISimpleBanditState;
   toJSON(): string;
 
-  recommend(context: { [feature: string]: number }): IRecommendation;
-  slate(context: { [feature: string]: number }): ISlate;
+  recommend(
+    context: { [feature: string]: number },
+    options: { include?: string[], exclude?: string[] }
+  ): IRecommendation;
+  slate(
+    context: { [feature: string]: number },
+    options: { include?: string[], exclude?: string[] }
+  ): ISlate;
 
   accept(recommendation: IRecommendation): Promise<ITrainingData[]>;
   choose(slate: ISlate, actionId: string): Promise<ITrainingData[]>;
@@ -28,10 +34,16 @@ export interface ISimpleBandit {
     actionId: string | undefined,
   ): Promise<ITrainingData[]>;
 
-  getScoredActions(context: { [feature: string]: number }): IScoredAction[];
-  getScoredActionsPerOracle(context: {
-    [feature: string]: number;
-  }): Array<{ [key: string]: number | string }>;
+  getScoredActions(
+    context: { [feature: string]: number },
+    options: { include?: string[], exclude?: string[] }
+  ): IScoredAction[];
+  getScoredActionsPerOracle(
+    context: {
+      [feature: string]: number;
+    },
+    options: { include?: string[], exclude?: string[] }
+  ): Array<{ [key: string]: number | string }>;
 
   train(trainingData: ITrainingData[]): Promise<void>;
 }

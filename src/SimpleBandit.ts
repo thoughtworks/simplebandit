@@ -92,10 +92,13 @@ export class SimpleBandit implements ISimpleBandit {
 
   getScoredActions(
     context: { [feature: string]: number } = {},
+    options: { include?: string[], exclude?: string[] } = {},
   ): IScoredAction[] {
     let scoredActions: IScoredAction[] = [];
 
-    const actionIds = Object.keys(this.actionsMap);
+    let actionIds = Object.keys(this.actionsMap);
+    if (options?.include) actionIds = actionIds.filter((action) => options?.include?.includes(action));
+    if (options?.exclude) actionIds = actionIds.filter((action) => !options?.exclude?.includes(action));
     for (let i = 0; i < actionIds.length; i++) {
       const actionId = actionIds[i];
       const action = this.actionsMap[actionId];
@@ -125,9 +128,14 @@ export class SimpleBandit implements ISimpleBandit {
 
   getScoredActionsPerOracle(
     context: { [feature: string]: number } = {},
+    options: { include?: string[], exclude?: string[] } = {},
   ): Array<{ [key: string]: number | string }> {
-    const scoredActions: IScoredAction[] = this.getScoredActions(context);
-    const scoredActionsPerOracle: Array<{ [key: string]: number | string }> = [];
+    const scoredActions: IScoredAction[] = this.getScoredActions(
+      context,
+      options,
+    );
+    const scoredActionsPerOracle: Array<{ [key: string]: number | string }> =
+      [];
     for (let scoredAction of scoredActions) {
       const scoredActionPerOracle: { [key: string]: number | string } = {
         actionId: scoredAction.actionId,
@@ -135,7 +143,11 @@ export class SimpleBandit implements ISimpleBandit {
         probability: scoredAction.probability,
       };
       for (let oracle of this.oracles) {
-        const oracleScore = oracle.predict(scoredAction.actionId, context, this.actionsMap[scoredAction.actionId].features);
+        const oracleScore = oracle.predict(
+          scoredAction.actionId,
+          context,
+          this.actionsMap[scoredAction.actionId].features,
+        );
         scoredActionPerOracle[oracle.name] = oracleScore;
       }
       scoredActionsPerOracle.push(scoredActionPerOracle);
@@ -149,7 +161,7 @@ export class SimpleBandit implements ISimpleBandit {
   ): ITrainingData[] {
     if ("actionId" in recommendation) {
       const trainingData: ITrainingData[] = [
-        { 
+        {
           recommendationId: recommendation.recommendationId,
           actionId: recommendation.actionId,
           features: this.actionsMap[recommendation.actionId].features,
@@ -186,12 +198,20 @@ export class SimpleBandit implements ISimpleBandit {
     }
   }
 
-  _generateRecommendationId(): string {
-    return 'id-' + Math.random().toString(36).substr(2, 16) + '-' + Date.now().toString(36);
+  _generateRecommendationId(): string { // without uuid dependency
+    return (
+      "id-" +
+      Math.random().toString(36).substr(2, 16) +
+      "-" +
+      Date.now().toString(36)
+    );
   }
 
-  recommend(context: { [feature: string]: number } = {}): IRecommendation {
-    const scoredActions = this.getScoredActions(context);
+  recommend(
+    context: { [feature: string]: number } = {},
+    options: { include?: string[], exclude?: string[] } = {},
+  ): IRecommendation {
+    let scoredActions = this.getScoredActions(context, options);
     const probabilities = scoredActions.map((action) => action.probability);
     const sampleIndex = SampleFromProbabilityDistribution(probabilities);
     const recommendedAction = scoredActions[sampleIndex];
@@ -206,14 +226,15 @@ export class SimpleBandit implements ISimpleBandit {
     return recommendation;
   }
 
-  slate(context: { [feature: string]: number } = {}): ISlate {
-    const scoredActions = this.getScoredActions(context);
-
+  slate(
+    context: { [feature: string]: number } = {},
+    options: { include?: string[], exclude?: string[] } = {},
+  ): ISlate {
+    let scoredActions = this.getScoredActions(context, options);
     const slateActions: ISlateAction[] = [];
     for (let index = 0; index < this.slateSize; index++) {
       const probabilities = scoredActions.map((action) => action.probability);
       const sampleIndex = SampleFromProbabilityDistribution(probabilities);
-      // const sampleIndex = this._sampleFromActionScores(scoredActions);
       slateActions[index] = scoredActions[sampleIndex];
       scoredActions.splice(sampleIndex, 1);
     }

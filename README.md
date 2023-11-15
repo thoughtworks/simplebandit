@@ -174,16 +174,18 @@ bandit.feedback(
 );
 ```
 
-## Usage javascript
+## Excluding actions
 
-There are several pure html/javascript examples provided in the `examples/` directory:
+In some contexts you might want to apply business rules and exclude certain actionIds, or only include certain others:
 
-- `simplest.html`: only actionIds, no debug info
-- `simple.html`: adds a lot more debug info to see what's going on under the hood
-- `actionfeatures.html`: adds action features.
-- `contextfeatures.html`: adds context features
-- `slate.html`: multiple recommendations (slate)
-- `weighted.html`: multiple (weighted) oracles instead of just one
+```typescript
+recommendation = bandit.recommend(context, { exclude: ['apple'] })
+slate = bandit.slate(context, { include: ['banana', 'pear'] })
+```
+
+## Examples
+
+There are several usage examples provided in the `examples/` directory in both pure html/javascript and react. 
 
 ## Testing
 

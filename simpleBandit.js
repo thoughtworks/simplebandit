@@ -88,9 +88,13 @@ class SimpleBandit {
         return this.oracles.reduce((score, oracle) => score +
             oracle.oracleWeight * oracle.predict(actionId, context, features), 0);
     }
-    getScoredActions(context = {}) {
+    getScoredActions(context = {}, options = {}) {
         let scoredActions = [];
-        const actionIds = Object.keys(this.actionsMap);
+        let actionIds = Object.keys(this.actionsMap);
+        if (options === null || options === void 0 ? void 0 : options.include)
+            actionIds = actionIds.filter((action) => { var _a; return (_a = options === null || options === void 0 ? void 0 : options.include) === null || _a === void 0 ? void 0 : _a.includes(action); });
+        if (options === null || options === void 0 ? void 0 : options.exclude)
+            actionIds = actionIds.filter((action) => { var _a; return !((_a = options === null || options === void 0 ? void 0 : options.exclude) === null || _a === void 0 ? void 0 : _a.includes(action)); });
         for (let i = 0; i < actionIds.length; i++) {
             const actionId = actionIds[i];
             const action = this.actionsMap[actionId];
@@ -110,8 +114,8 @@ class SimpleBandit {
         }));
         return scoredActions;
     }
-    getScoredActionsPerOracle(context = {}) {
-        const scoredActions = this.getScoredActions(context);
+    getScoredActionsPerOracle(context = {}, options = {}) {
+        const scoredActions = this.getScoredActions(context, options);
         const scoredActionsPerOracle = [];
         for (let scoredAction of scoredActions) {
             const scoredActionPerOracle = {
@@ -166,10 +170,13 @@ class SimpleBandit {
         }
     }
     _generateRecommendationId() {
-        return 'id-' + Math.random().toString(36).substr(2, 16) + '-' + Date.now().toString(36);
+        return ("id-" +
+            Math.random().toString(36).substr(2, 16) +
+            "-" +
+            Date.now().toString(36));
     }
-    recommend(context = {}) {
-        const scoredActions = this.getScoredActions(context);
+    recommend(context = {}, options = {}) {
+        let scoredActions = this.getScoredActions(context, options);
         const probabilities = scoredActions.map((action) => action.probability);
         const sampleIndex = (0, Sampling_1.SampleFromProbabilityDistribution)(probabilities);
         const recommendedAction = scoredActions[sampleIndex];
@@ -182,13 +189,12 @@ class SimpleBandit {
         };
         return recommendation;
     }
-    slate(context = {}) {
-        const scoredActions = this.getScoredActions(context);
+    slate(context = {}, options = {}) {
+        let scoredActions = this.getScoredActions(context, options);
         const slateActions = [];
         for (let index = 0; index < this.slateSize; index++) {
             const probabilities = scoredActions.map((action) => action.probability);
             const sampleIndex = (0, Sampling_1.SampleFromProbabilityDistribution)(probabilities);
-            // const sampleIndex = this._sampleFromActionScores(scoredActions);
             slateActions[index] = scoredActions[sampleIndex];
             scoredActions.splice(sampleIndex, 1);
         }

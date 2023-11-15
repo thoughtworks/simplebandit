@@ -144,6 +144,24 @@ describe("Single Oracle Bandit Recommendation", () => {
         expect(scoredAction).toHaveProperty("probability");
       });
     });
+
+    it("should contain all the actionIds", () => {
+      const scoredActionIds = scoredActions.map((scoredAction) => scoredAction.actionId);
+      expect(scoredActionIds).toEqual(actionIds);
+    });
+
+    it("should respect the include parameter", () => {
+      const scoredActions = bandit.getScoredActions(context, {include:["apple"]});
+      expect(scoredActions.length).toEqual(1);
+      expect(scoredActions[0].actionId).toEqual("apple");
+    });
+
+    it("should respect the exclude parameter", () => {
+      const scoredActions = bandit.getScoredActions(context, {exclude:["apple"]});
+      expect(scoredActions.length).toEqual(2);
+      const scoredActionIds = scoredActions.map((scoredAction) => scoredAction.actionId);
+      expect(scoredActionIds).not.toContain("apple");
+    });
   });
 
   describe("train", () => {
