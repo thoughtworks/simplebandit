@@ -26,12 +26,17 @@
     <h2>Recommended fruit:</h2>
     <div id="recommended-fruit"></div>
 
-    <button id="eat-button">Eat</button>
-    <button id="dont-eat-button">Don't eat</button>
+    <button id="accept-button">Accept</button>
+    <button id="reject-button">Reject</button>
 
-    <script src="../simpleBandit.js"></script>
+
+
+    <p><a href="index.html">Back to index</a></p>
+
+    <script src="../../simpleBandit.js"></script>
     <script>
       let bandit = new SimpleBandit({
+        oracles: new SimpleOracle({ learningRate: 0.1 }),
         actions: ["apple", "pear", "orange"],
         temperature: 0.2,
       });
@@ -58,18 +63,20 @@
       generateNewRecommendation();
 
       document
-        .getElementById("eat-button")
+        .getElementById("accept-button")
         .addEventListener("click", async function () {
           await bandit.accept(recommendation);
           generateNewRecommendation();
         });
 
       document
-        .getElementById("dont-eat-button")
+        .getElementById("reject-button")
         .addEventListener("click", async function () {
           await bandit.reject(recommendation);
           generateNewRecommendation();
         });
     </script>
+
+
   </body>
 </html>

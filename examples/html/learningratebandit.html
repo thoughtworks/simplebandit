@@ -29,7 +29,7 @@
       Higher learning rates mean that the bandit will learn faster, but will
       also forget faster.
     </p>
-    <input type="number" id="learning-rate" value="1.0" step="0.1" />
+    <input type="number" id="learning-rate" value="0.1" step="0.1" />
 
     <h2>Temperature:</h2>
     <p>
@@ -49,16 +49,17 @@
     <h2>Recommended fruit:</h2>
     <div id="recommended-fruit"></div>
 
-    <button id="eat-button">Eat</button>
-    <button id="dont-eat-button">Don't eat</button>
+    <button id="accept-button">Accept</button>
+    <button id="reject-button">Reject</button>
 
     <h2>Training Data</h2>
     <div id="training-data"></div>
 
     <h2>JSON serialized bandit</h2>
     <div id="serialized-bandit"></div>
+    <p><a href="index.html">Back to index</a></p>
 
-    <script src="../simpleBandit.js"></script>
+    <script src="../../simpleBandit.js"></script>
     <script>
       let learningRateInput = document.getElementById("learning-rate");
       let temperatureInput = document.getElementById("temperature");
@@ -66,16 +67,16 @@
       let temperature = parseFloat(temperatureInput.value);
 
       let bandit = new SimpleBandit({
+        oracles: new SimpleOracle({ learningRate: learningRate }),
         actions: ["apple", "pear", "orange"],
         temperature: temperature,
-        learningRate: learningRate,
       });
       let recommendation;
       let trainingData = [];
 
       learningRateInput.addEventListener("change", function () {
         learningRate = parseFloat(learningRateInput.value);
-        bandit.oracle.learningRate = learningRate;
+        bandit.oracles[0].learningRate = learningRate;
       });
       temperatureInput.addEventListener("change", function () {
         temperature = parseFloat(temperatureInput.value);
@@ -97,7 +98,7 @@
       generateNewRecommendation();
 
       document
-        .getElementById("eat-button")
+        .getElementById("accept-button")
         .addEventListener("click", async function () {
           newTrainingData = await bandit.accept(recommendation);
           trainingData = trainingData.concat(newTrainingData);
@@ -109,7 +110,7 @@
         });
 
       document
-        .getElementById("dont-eat-button")
+        .getElementById("reject-button")
         .addEventListener("click", async function () {
           newTrainingData = await bandit.reject(recommendation);
           trainingData = trainingData.concat(newTrainingData);

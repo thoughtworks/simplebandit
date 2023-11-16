@@ -23,7 +23,7 @@
       Higher learning rates mean that the bandit will learn faster, but will
       also forget faster.
     </p>
-    <input type="number" id="learning-rate" value="0.5" step="0.1" />
+    <input type="number" id="learning-rate" value="0.1" step="0.1" />
 
     <h2>Temperature:</h2>
     <p>
@@ -57,7 +57,9 @@
     <h2>JSON serialized bandit</h2>
     <div id="serialized-bandit"></div>
 
-    <script src="../simpleBandit.js"></script>
+    <p><a href="index.html">Back to index</a></p>
+
+    <script src="../../simpleBandit.js"></script>
     <script>
       let learningRateInput = document.getElementById("learning-rate");
       let temperatureInput = document.getElementById("temperature");

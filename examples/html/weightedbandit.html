@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>WeightedMultiBandit Example</title>
+    <title>Multiple weighted oracles</title>
   </head>
   <body>
     <h1>Weighted Multi Fruit or Treats Bandit</h1>
@@ -18,19 +18,6 @@
       We also have action features, with items either being a fruit or a treat
     </p>
 
-    <h2>Learning Rate:</h2>
-    <p>
-      Higher learning rates mean that the bandit will learn faster, but will
-      also forget faster.
-    </p>
-    <input type="number" id="learning-rate" value="0.5" step="0.1" />
-
-    <h2>Temperature:</h2>
-    <p>
-      Higher temperature mean that the bandit will be more likely to explore
-      actions with a low score.
-    </p>
-    <input type="number" id="temperature" value="0.5" step="0.1" />
 
     <h2>All action scores:</h2>
     <div id="action-scores"></div>
@@ -40,9 +27,6 @@
 
     <h2>Recommendation JSON:</h2>
     <div id="recommendation-json"></div>
-
-    <h2>Weather:</h2>
-    <div id="weather"></div>
 
     <h2>Recommended fruits:</h2>
     <div id="recommended-fruits"></div>
@@ -70,12 +54,10 @@
     <h2>JSON serialized bandit</h2>
     <div id="serialized-bandit"></div>
 
-    <script src="../simpleBandit.js"></script>
+    <p><a href="index.html">Back to index</a></p>
+
+    <script src="../../simpleBandit.js"></script>
     <script>
-      let learningRateInput = document.getElementById("learning-rate");
-      let temperatureInput = document.getElementById("temperature");
-      let learningRate = parseFloat(learningRateInput.value);
-      let temperature = parseFloat(temperatureInput.value);
       const actionIds = [
         "apple",
         "pear",
@@ -113,18 +95,12 @@
         },
       ];
       const clickOracle = new SimpleOracle({
-          context: ["sunny", "rainy"],
-          actionIds: actionIds,
-          features: features,
-          learningRate: learningRate,
+          learningRate: 0.1,
           tartgetLabel: "click", // default
           oracleWeight: 0.3,
         })
       const starsOracle = new SimpleOracle({
-          context: ["sunny", "rainy"],
-          actionIds: actionIds,
-          features: features,
-          learningRate: learningRate,
+          learningRate: 0.1,
           targetLabel: "stars",
           oracleWeight: 0.7,
         })
@@ -132,7 +108,7 @@
       const bandit = new SimpleBandit({
         oracles: [clickOracle, starsOracle],
         actions: actions,
-        temperature: temperature,
+        temperature: 0.2,
         slateSize: 3,
       });
 
@@ -141,41 +117,13 @@
       let context;
       let chosenActionId;
 
-      learningRateInput.addEventListener("change", function () {
-        learningRate = parseFloat(learningRateInput.value);
-        bandit.oracle.learningRate = learningRate;
-      });
-      temperatureInput.addEventListener("change", function () {
-        temperature = parseFloat(temperatureInput.value);
-        bandit.temperature = temperature;
-        let scoredActions = bandit.getScoredActions(context);
-        scoredActions.sort(function (a, b) {
-          return b.probability - a.probability;
-        });
-        document.getElementById("action-probabilities").innerText =
-          scoredActions
-            .map(function (scoredAction) {
-              return (
-                scoredAction.actionId +
-                " (" +
-                (scoredAction.probability * 100).toFixed(1) +
-                "%)"
-              );
-            })
-            .join(", ");
-      });
-
       function generateNewRecommendation() {
-        const weather = ["sunny", "rainy"][Math.floor(Math.random() * 2)];
-        context =
-          weather == "sunny" ? { sunny: 1, rainy: 0 } : { sunny: 0, rainy: 1 };
-        slate = bandit.slate(context);
+        slate = bandit.slate();
 
         let slateActionsString = "";
         for (let i = 0; i < slate.slateActions.length; i++) {
           slateActionsString += `${i + 1}: ${slate.slateActions[i].actionId}\n`;
         }
-        document.getElementById("weather").innerText = weather;
         document.getElementById("recommended-fruits").innerText =
           slateActionsString;
         document.getElementById("recommendation-json").innerText =

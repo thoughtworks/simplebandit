@@ -20,30 +20,11 @@
       the bandit picks up on your new preference.
     </p>
 
-    <h2>Learning Rate:</h2>
-    <p>
-      Higher learning rates mean that the bandit will learn faster, but will
-      also forget faster.
-    </p>
-    <input type="number" id="learning-rate" value="1.0" step="0.1" />
-
-    <h2>Temperature:</h2>
-    <p>
-      Lower temperature mean that the bandit will be more likely to choose the
-      action with the highest score (exploit), higher temperature means that the
-      bandit is more likely to choose the actions with a lower score
-      (exploration)
-    </p>
-    <input type="number" id="temperature" value="0.2" step="0.1" />
-
     <h2>All action probabilities:</h2>
     <div id="action-probabilities"></div>
 
     <h2>Recommendation JSON:</h2>
     <div id="recommendation-json"></div>
-
-    <h2>Weather:</h2>
-    <div id="weather"></div>
 
     <h2>Recommended fruit:</h2>
     <div id="recommended-fruit"></div>
@@ -57,16 +38,41 @@
     <h2>JSON serialized bandit</h2>
     <div id="serialized-bandit"></div>
 
-    <script src="../simpleBandit.js"></script>
+    <p><a href="index.html">Back to index</a></p>
+
+    <script src="../../simpleBandit.js"></script>
     <script>
-      let learningRateInput = document.getElementById("learning-rate");
-      let temperatureInput = document.getElementById("temperature");
-      let learningRate = parseFloat(learningRateInput.value);
-      let temperature = parseFloat(temperatureInput.value);
+      const actions = [
+        {
+          actionId: "apple",
+          features: { fruit: 1 },
+        },
+        {
+          actionId: "pear",
+          features: { fruit: 1 },
+        },
+        {
+          actionId: "orange",
+          features: { fruit: 1 },
+        },
+        {
+          actionId: "chocolate",
+          features: { treat: 1 },
+        },
+        {
+          actionId: "candy",
+          features: { treat: 1 },
+        },
+        {
+          actionId: "cake",
+          features: { treat: 1 },
+        },
+      ];
 
       let bandit = new SimpleBandit({
-        oracles: new SimpleOracle({ learningRate: learningRate }),
-        temperature: temperature,
+        oracles: new SimpleOracle({ learningRate: 0.1 }),
+        actions: actions,
+        temperature: 0.2,
       });
       document.getElementById("serialized-bandit").innerText = bandit.toJSON();
 
@@ -74,30 +80,14 @@
       let trainingData = [];
       let context;
 
-      learningRateInput.addEventListener("change", function () {
-        learningRate = parseFloat(learningRateInput.value);
-        bandit.oracles[0].learningRate = learningRate;
-      });
-      temperatureInput.addEventListener("change", function () {
-        temperature = parseFloat(temperatureInput.value);
-        bandit.temperature = temperature;
-        document.getElementById("action-probabilities").innerText =
-          JSON.stringify(bandit.getScoredActions(context));
-      });
-
       function generateNewRecommendation() {
-        const weather = ["sunny", "rainy"][Math.floor(Math.random() * 2)];
-        context =
-          weather == "sunny" ? { sunny: 1, rainy: 0 } : { sunny: 0, rainy: 1 };
-        recommendation = bandit.recommend(context);
-
-        document.getElementById("weather").innerText = weather;
+        recommendation = bandit.recommend();
         document.getElementById("recommended-fruit").innerText =
           recommendation.actionId;
         document.getElementById("recommendation-json").innerText =
           JSON.stringify(recommendation);
         document.getElementById("action-probabilities").innerText =
-          JSON.stringify(bandit.getScoredActions(context));
+          JSON.stringify(bandit.getScoredActions());
       }
 
       generateNewRecommendation();
