@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { SimpleBandit, SimpleOracle } from "../../dist/index";
 
 function ContextFruitBandit() {
@@ -11,33 +11,15 @@ function ContextFruitBandit() {
 
   useEffect(() => {
     const banditInstance = new SimpleBandit({
-      oracles: new SimpleOracle({learningRate: 0.1}),
-      actions: [
-        {
-          actionId: "apple",
-          features: { fruit: 1 },
-        },
-        {
-          actionId: "pear",
-          features: { fruit: 1 },
-        },
-        {
-          actionId: "orange",
-          features: { fruit: 1 },
-        },
-        {
-          actionId: "chocolate",
-          features: { treat: 1 },
-        },
-        {
-          actionId: "candy",
-          features: { treat: 1 },
-        },
-        {
-          actionId: "cake",
-          features: { treat: 1 },
-        },
-      ],
+      oracles: new SimpleOracle({ learningRate: 0.1 }),
+      actions: {
+        apple: { fruit: 1 },
+        pear: { fruit: 1 },
+        orange: { fruit: 1 },
+        chocolate: { treat: 1 },
+        candy: { treat: 1 },
+        cake: { treat: 1 },
+      },
       temperature: 0.2,
       slateSize: 3,
     });
@@ -52,7 +34,7 @@ function ContextFruitBandit() {
 
   const randomWeather = () => {
     const weather = ["sunny", "rainy"][Math.floor(Math.random() * 2)];
-    const context = weather == "sunny" ? { sunny: 1 } : { sunny: -1};
+    const context = weather == "sunny" ? { sunny: 1 } : { sunny: -1 };
     setContext(context);
     const _scoredActions = bandit.getScoredActions(context);
     _scoredActions.forEach((scoredAction) => {
@@ -69,7 +51,10 @@ function ContextFruitBandit() {
   };
 
   const handleChoose = async (index) => {
-    const newTrainingData = await bandit.choose(slate, slate.slateActions[index].actionId);
+    const newTrainingData = await bandit.choose(
+      slate,
+      slate.slateActions[index].actionId,
+    );
     setTrainingData([...trainingData, ...newTrainingData]);
     setSerializedBandit(bandit.toJSON());
     generateNewRecommendation();
@@ -85,7 +70,10 @@ function ContextFruitBandit() {
   return (
     <div>
       <h1>Context dependent recommendations</h1>
-      <p>The recommender is both learning an interaction between the context (sunny or rainy) and the fruit or treat preferences.</p>
+      <p>
+        The recommender is both learning an interaction between the context
+        (sunny or rainy) and the fruit or treat preferences.
+      </p>
       <h2>Actions scores and probabilities:</h2>
       <div>
         <table>
@@ -112,15 +100,32 @@ function ContextFruitBandit() {
         </table>
       </div>
       <h2>Context:</h2>
-      <div>{context?.sunny == 1 ? 'sunny' : 'rainy'}</div>
-      <div><button onClick={() => {randomWeather();generateNewRecommendation();}}>RandomWeather</button> </div>
+      <div>{context?.sunny == 1 ? "sunny" : "rainy"}</div>
+      <div>
+        <button
+          onClick={() => {
+            randomWeather();
+            generateNewRecommendation();
+          }}
+        >
+          RandomWeather
+        </button>{" "}
+      </div>
       <h2>Recommended fruits:</h2>
-      {slate && slate.slateActions.map((action, index) => (
-        <div key={action.actionId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
-          {index + 1}: {action.actionId}
-          <button onClick={() => handleChoose(index)}>Choose</button>
-        </div>
-      ))}
+      {slate &&
+        slate.slateActions.map((action, index) => (
+          <div
+            key={action.actionId}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "start",
+            }}
+          >
+            {index + 1}: {action.actionId}
+            <button onClick={() => handleChoose(index)}>Choose</button>
+          </div>
+        ))}
       <button onClick={handleReject}>Reject all</button>
       <h2>Training Data</h2>
       <div>{JSON.stringify(trainingData)}</div>

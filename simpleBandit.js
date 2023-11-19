@@ -52,14 +52,41 @@ class SimpleBandit {
             : oracles
                 ? [oracles]
                 : [new SimpleOracle_1.SimpleOracle()];
-        this.targetLabels = this.oracles.map((oracle) => oracle.targetLabel);
-        const processedActions = actions.map((action) => typeof action === "string" ? { actionId: action, features: {} } : action);
-        this.actionsMap = processedActions.reduce((acc, obj) => {
-            acc[obj.actionId] = obj;
-            return acc;
-        }, {});
+        this.targetLabels = [...new Set(this.oracles.map((oracle) => oracle.targetLabel))];
+        this.actionsMap = this._processActions(actions);
         this.temperature = temperature;
         this.slateSize = slateSize;
+    }
+    _processActions(input) {
+        const actionsMap = {};
+        if (Array.isArray(input)) {
+            input.forEach((item) => {
+                if (typeof item === "string") {
+                    actionsMap[item] = { actionId: item, features: {} };
+                }
+                else {
+                    actionsMap[item.actionId] = item;
+                }
+            });
+        }
+        else {
+            Object.keys(input).forEach((key) => {
+                const value = input[key];
+                if (Array.isArray(value)) {
+                    actionsMap[key] = {
+                        actionId: key,
+                        features: value.reduce((acc, curr) => {
+                            acc[curr] = 1;
+                            return acc;
+                        }, {}),
+                    };
+                }
+                else {
+                    actionsMap[key] = { actionId: key, features: value };
+                }
+            });
+        }
+        return actionsMap;
     }
     toState() {
         return {
@@ -170,6 +197,7 @@ class SimpleBandit {
         }
     }
     _generateRecommendationId() {
+        // without uuid dependency
         return ("id-" +
             Math.random().toString(36).substr(2, 16) +
             "-" +

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { SimpleBandit, SimpleOracle } from "../../dist/index";
 
 function SlateFruitBandit() {
@@ -10,33 +10,15 @@ function SlateFruitBandit() {
 
   useEffect(() => {
     const banditInstance = new SimpleBandit({
-      oracles: new SimpleOracle({learningRate: 0.1}),
-      actions: [
-        {
-          actionId: "apple",
-          features: { fruit: 1 },
-        },
-        {
-          actionId: "pear",
-          features: { fruit: 1 },
-        },
-        {
-          actionId: "orange",
-          features: { fruit: 1 },
-        },
-        {
-          actionId: "chocolate",
-          features: { treat: 1 },
-        },
-        {
-          actionId: "candy",
-          features: { treat: 1 },
-        },
-        {
-          actionId: "cake",
-          features: { treat: 1 },
-        },
-      ],
+      oracles: new SimpleOracle({ learningRate: 0.1 }),
+      actions: {
+        apple: { fruit: 1 },
+        pear: ["fruit"], // equivalent: sets fruit:1
+        orange: { fruit: 1 },
+        chocolate: { treat: 1 },
+        candy: ["treat"], // equivalent: sets treat:1
+        cake: { treat: 1 },
+      },
       temperature: 0.2,
       slateSize: 3,
     });
@@ -61,7 +43,10 @@ function SlateFruitBandit() {
   };
 
   const handleChoose = async (index) => {
-    const newTrainingData = await bandit.choose(slate, slate.slateActions[index].actionId);
+    const newTrainingData = await bandit.choose(
+      slate,
+      slate.slateActions[index].actionId,
+    );
     setTrainingData([...trainingData, ...newTrainingData]);
     setSerializedBandit(bandit.toJSON());
     generateNewRecommendation();
@@ -78,7 +63,10 @@ function SlateFruitBandit() {
     <div>
       <h1>Slate of multiple recommendations</h1>
       <p>The slate items get sampled one by one from top to bottom.</p>
-      <p>The recommender is both learning preference for specific items and preferences for fruits or treats in general.</p>
+      <p>
+        The recommender is both learning preference for specific items and
+        preferences for fruits or treats in general.
+      </p>
       <h2>Actions scores and probabilities:</h2>
       <div>
         <table>
@@ -105,12 +93,20 @@ function SlateFruitBandit() {
         </table>
       </div>
       <h2>Recommended fruits:</h2>
-      {slate && slate.slateActions.map((action, index) => (
-        <div key={action.actionId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
-          {index + 1}: {action.actionId}
-          <button onClick={() => handleChoose(index)}>Choose</button>
-        </div>
-      ))}
+      {slate &&
+        slate.slateActions.map((action, index) => (
+          <div
+            key={action.actionId}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "start",
+            }}
+          >
+            {index + 1}: {action.actionId}
+            <button onClick={() => handleChoose(index)}>Choose</button>
+          </div>
+        ))}
       <button onClick={handleReject}>Reject all</button>
       <h2>Training Data</h2>
       <div>{JSON.stringify(trainingData)}</div>

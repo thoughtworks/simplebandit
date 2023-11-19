@@ -42,36 +42,16 @@
 
     <script src="../../simpleBandit.js"></script>
     <script>
-      const actions = [
-        {
-          actionId: "apple",
-          features: { fruit: 1 },
-        },
-        {
-          actionId: "pear",
-          features: { fruit: 1 },
-        },
-        {
-          actionId: "orange",
-          features: { fruit: 1 },
-        },
-        {
-          actionId: "chocolate",
-          features: { treat: 1 },
-        },
-        {
-          actionId: "candy",
-          features: { treat: 1 },
-        },
-        {
-          actionId: "cake",
-          features: { treat: 1 },
-        },
-      ];
-
       let bandit = new SimpleBandit({
         oracles: new SimpleOracle({ learningRate: 0.1 }),
-        actions: actions,
+        actions: {
+          apple: { fruit: 1 },
+          pear: { fruit: 1 },
+          orange: { fruit: 1 },
+          chocolate: { treat: 1 },
+          candy: { treat: 1 },
+          cake: { treat: 1 },
+        },
         temperature: 0.2,
       });
       document.getElementById("serialized-bandit").innerText = bandit.toJSON();

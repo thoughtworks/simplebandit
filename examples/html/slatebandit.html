@@ -66,36 +66,16 @@
       let learningRate = parseFloat(learningRateInput.value);
       let temperature = parseFloat(temperatureInput.value);
 
-      const actions = [
-        {
-          actionId: "apple",
-          features: { fruit: 1 },
-        },
-        {
-          actionId: "pear",
-          features: { fruit: 1 },
-        },
-        {
-          actionId: "orange",
-          features: { fruit: 1 },
-        },
-        {
-          actionId: "chocolate",
-          features: { treat: 1 },
-        },
-        {
-          actionId: "candy",
-          features: { treat: 1 },
-        },
-        {
-          actionId: "cake",
-          features: { treat: 1 },
-        },
-      ];
-
       let bandit = new SimpleBandit({
         oracles: new SimpleOracle({ learningRate: learningRate }),
-        actions: actions,
+        actions: {
+          apple: { fruit: 1 },
+          pear: { fruit: 1 },
+          orange: { fruit: 1 },
+          chocolate: { treat: 1 },
+          candy: { treat: 1 },
+          cake: { treat: 1 },
+        },
         temperature: temperature,
         slateSize: 3,
       });

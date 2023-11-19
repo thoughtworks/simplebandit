@@ -12,50 +12,31 @@ function WeightedFruitBandit() {
   const [starRating, setStarRating] = useState(null);
 
   useEffect(() => {
-    const actions = [
-      {
-        actionId: "apple",
-        features: { fruit: 1 },
-      },
-      {
-        actionId: "pear",
-        features: { fruit: 1 },
-      },
-      {
-        actionId: "orange",
-        features: { fruit: 1 },
-      },
-      {
-        actionId: "chocolate",
-        features: { treat: 1 },
-      },
-      {
-        actionId: "candy",
-        features: { treat: 1 },
-      },
-      {
-        actionId: "cake",
-        features: { treat: 1 },
-      },
-    ];
-    let oldClickWeights = bandit ? { ...bandit.oracles[0].weights } : {};
+    let oldClickOracleWeights = bandit ? { ...bandit.oracles[0].weights } : {};
     const clickOracle = new SimpleOracle({
       learningRate: 0.5,
       targetLabel: "click",
       oracleWeight: clickWeight,
-      weights: oldClickWeights,
+      weights: oldClickOracleWeights,
     });
 
-    let oldStarsWeights = bandit ? { ...bandit.oracles[1].weights } : {};
+    let oldStarsOracleWeights = bandit ? { ...bandit.oracles[1].weights } : {};
     const starsOracle = new SimpleOracle({
       targetLabel: "stars",
       oracleWeight: 1 - clickWeight,
-      weights: oldStarsWeights,
+      weights: oldStarsOracleWeights,
     });
 
     const banditInstance = new SimpleBandit({
       oracles: [clickOracle, starsOracle],
-      actions: actions,
+      actions: {
+        "apple": { fruit: 1 },
+        "pear" : ["fruit"], // equivalent: sets fruit:1
+        "orange": { fruit: 1 },
+        "chocolate": { treat: 1 },
+        "candy": ["treat"], // equivalent: sets treat:1
+        "cake": { treat: 1 },
+      },
       slateSize: 3,
     });
     setBandit(banditInstance);

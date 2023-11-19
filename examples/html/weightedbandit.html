@@ -18,7 +18,6 @@
       We also have action features, with items either being a fruit or a treat
     </p>
 
-
     <h2>All action scores:</h2>
     <div id="action-scores"></div>
 
@@ -58,56 +57,27 @@
 
     <script src="../../simpleBandit.js"></script>
     <script>
-      const actionIds = [
-        "apple",
-        "pear",
-        "orange",
-        "chocolate",
-        "candy",
-        "cake",
-      ];
-      const features = ["fruit", "treat"];
-
-      const actions = [
-        {
-          actionId: "apple",
-          features: { fruit: 1, treat: 0 },
-        },
-        {
-          actionId: "pear",
-          features: { fruit: 1, treat: 0 },
-        },
-        {
-          actionId: "orange",
-          features: { fruit: 1, treat: 0 },
-        },
-        {
-          actionId: "chocolate",
-          features: { fruit: 0, treat: 1 },
-        },
-        {
-          actionId: "candy",
-          features: { fruit: 0, treat: 1 },
-        },
-        {
-          actionId: "cake",
-          features: { fruit: 0, treat: 1 },
-        },
-      ];
       const clickOracle = new SimpleOracle({
-          learningRate: 0.1,
-          tartgetLabel: "click", // default
-          oracleWeight: 0.3,
-        })
+        learningRate: 0.1,
+        tartgetLabel: "click", // default
+        oracleWeight: 0.3,
+      });
       const starsOracle = new SimpleOracle({
-          learningRate: 0.1,
-          targetLabel: "stars",
-          oracleWeight: 0.7,
-        })
+        learningRate: 0.1,
+        targetLabel: "stars",
+        oracleWeight: 0.7,
+      });
 
       const bandit = new SimpleBandit({
         oracles: [clickOracle, starsOracle],
-        actions: actions,
+        actions: {
+          apple: { fruit: 1 },
+          pear: { fruit: 1 },
+          orange: { fruit: 1 },
+          chocolate: { treat: 1 },
+          candy: { treat: 1 },
+          cake: { treat: 1 },
+        },
         temperature: 0.2,
         slateSize: 3,
       });
@@ -192,8 +162,8 @@
       document
         .getElementById("eat-3")
         .addEventListener("click", async function () {
-          actionId = slate.slateActions[2].actionId;
-          newTrainingData = await bandit.choose(recommendation, actionId);
+          chosenActionId = slate.slateActions[2].actionId;
+          newTrainingData = await bandit.choose(slate, chosenActionId);
           trainingData = trainingData.concat(newTrainingData);
           document.getElementById(
             "chosen-action-id",
