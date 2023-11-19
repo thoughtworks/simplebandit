@@ -4,6 +4,11 @@ export interface IAction {
   clickCount?: number;
 }
 
+export type IActionsInput =
+  | (IAction | string)[]
+  | Record<string, string[]>
+  | Record<string, Record<string, number>>;
+
 export interface IScoredAction {
   actionId: string;
   score: number;

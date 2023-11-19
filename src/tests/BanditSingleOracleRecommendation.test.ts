@@ -5,6 +5,66 @@ import { IScoredAction } from "../interfaces/IAction";
 import { IRecommendation } from "../interfaces/IRecommendation";
 import { ITrainingData } from "../interfaces/ITrainingData";
 
+describe("SimpleBandit takes all accepted actions inputs", () => {
+  it("should accept an array of IActions", () => {
+    const bandit = new SimpleBandit({
+      actions: [
+        {
+          actionId: "action1",
+          features: { night: 1 },
+        },
+        {
+          actionId: "action2",
+          features: { night: 0 },
+        },
+      ],
+    });
+    expect(bandit.actionsMap).toHaveProperty("action1");
+    expect(bandit.actionsMap).toHaveProperty("action2");
+    expect(bandit.actionsMap["action1"]).toEqual({actionId: "action1", features: {night:1}})
+    expect(bandit.actionsMap["action2"]).toEqual({actionId: "action2", features: {night:0}})
+  });
+  it("should accept an array of actionIds", () => {
+    const bandit = new SimpleBandit({
+      actions: ["action1", "action2"],
+    });
+    expect(bandit.actionsMap).toHaveProperty("action1");
+    expect(bandit.actionsMap).toHaveProperty("action2");
+    expect(bandit.actionsMap["action1"]).toEqual({actionId: "action1", features: {}});
+    expect(bandit.actionsMap["action2"]).toEqual({actionId: "action2", features: {}});
+  });
+  it("should accept an object of actionIds with empty lists", () => {
+    const bandit = new SimpleBandit({
+      actions: { action1: [], action2: [] },
+    });
+    expect(bandit.actionsMap).toHaveProperty("action1");
+    expect(bandit.actionsMap).toHaveProperty("action2");
+    expect(bandit.actionsMap["action1"]).toEqual({actionId: "action1", features: {}});
+    expect(bandit.actionsMap["action2"]).toEqual({actionId: "action2", features: {}});
+  });
+  it("should accept an object of actionIds with string lists", () => {
+    const bandit = new SimpleBandit({
+      actions: { action1: ["night"], action2: ["morning", "day"] },
+    });
+    expect(bandit.actionsMap).toHaveProperty("action1");
+    expect(bandit.actionsMap).toHaveProperty("action2");
+    expect(bandit.actionsMap["action1"]).toEqual({actionId: "action1", features: {night:1}});
+    expect(bandit.actionsMap["action2"]).toEqual({actionId: "action2", features: {morning:1, day:1}});
+  });
+  it("should accept an object of actionsIds with feature hashes", () => {
+    const bandit = new SimpleBandit({
+      actions: {
+        action1: { night: 1 },
+        action2: { morning: 1, day: 1 },
+      },
+    });
+    expect(bandit.actionsMap).toHaveProperty("action1");
+    expect(bandit.actionsMap).toHaveProperty("action2");
+    expect(bandit.actionsMap["action1"]).toEqual({actionId: "action1", features: {night:1}});
+    expect(bandit.actionsMap["action2"]).toEqual({actionId: "action2", features: {morning:1, day:1}});
+  });
+});
+
 describe("Single Oracle Bandit Recommendation", () => {
   let oracle: SimpleOracle;
   let bandit: SimpleBandit;

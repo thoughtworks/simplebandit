@@ -1,14 +1,17 @@
-import { IAction, IScoredAction } from "./interfaces/IAction";
+import { IAction, IScoredAction, IActionsInput } from "./interfaces/IAction";
 import {
   IRecommendation,
   ISlate,
   ISlateAction,
 } from "./interfaces/IRecommendation";
 import { ITrainingData } from "./interfaces/ITrainingData";
-import { SampleFromProbabilityDistribution } from "./Sampling";
-import { SimpleOracle } from "./SimpleOracle";
 import { ISimpleBandit } from "./interfaces/ISimpleBandit";
 import { ISimpleBanditState } from "./interfaces/IState";
+
+import { SampleFromProbabilityDistribution } from "./Sampling";
+import { SimpleOracle } from "./SimpleOracle";
+
+
 
 export class SimpleBandit implements ISimpleBandit {
   oracles: SimpleOracle[];
@@ -24,7 +27,7 @@ export class SimpleBandit implements ISimpleBandit {
     slateSize = 1,
   }: {
     oracles?: SimpleOracle | SimpleOracle[];
-    actions: (IAction | string)[];
+    actions: IActionsInput;
     temperature?: number;
     slateSize?: number;
   }) {
@@ -33,16 +36,43 @@ export class SimpleBandit implements ISimpleBandit {
       : oracles
       ? [oracles]
       : [new SimpleOracle()];
-    this.targetLabels = this.oracles.map((oracle) => oracle.targetLabel);
-    const processedActions = actions.map((action) =>
-      typeof action === "string" ? { actionId: action, features: {} } : action,
-    );
-    this.actionsMap = processedActions.reduce((acc, obj) => {
-      (acc as any)[obj.actionId] = obj;
-      return acc;
-    }, {});
+    this.targetLabels = [...new Set(this.oracles.map((oracle) => oracle.targetLabel))];
+    this.actionsMap = this._processActions(actions);
     this.temperature = temperature;
     this.slateSize = slateSize;
+  }
+
+  _processActions(input: IActionsInput): Record<string, IAction> {
+    const actionsMap: Record<string, IAction> = {};
+
+    if (Array.isArray(input)) {
+      input.forEach((item) => {
+        if (typeof item === "string") {
+          actionsMap[item] = { actionId: item, features: {} };
+        } else {
+          actionsMap[item.actionId] = item;
+        }
+      });
+    } else {
+      Object.keys(input).forEach((key) => {
+        const value = input[key];
+        if (Array.isArray(value)) {
+          actionsMap[key] = {
+            actionId: key,
+            features: value.reduce(
+              (acc, curr) => {
+                acc[curr] = 1;
+                return acc;
+              },
+              {} as { [feature: string]: number },
+            ),
+          };
+        } else {
+          actionsMap[key] = { actionId: key, features: value };
+        }
+      });
+    }
+    return actionsMap;
   }
 
   toState(): ISimpleBanditState {
@@ -92,13 +122,19 @@ export class SimpleBandit implements ISimpleBandit {
 
   getScoredActions(
     context: { [feature: string]: number } = {},
-    options: { include?: string[], exclude?: string[] } = {},
+    options: { include?: string[]; exclude?: string[] } = {},
   ): IScoredAction[] {
     let scoredActions: IScoredAction[] = [];
 
     let actionIds = Object.keys(this.actionsMap);
-    if (options?.include) actionIds = actionIds.filter((action) => options?.include?.includes(action));
-    if (options?.exclude) actionIds = actionIds.filter((action) => !options?.exclude?.includes(action));
+    if (options?.include)
+      actionIds = actionIds.filter(
+        (action) => options?.include?.includes(action),
+      );
+    if (options?.exclude)
+      actionIds = actionIds.filter(
+        (action) => !options?.exclude?.includes(action),
+      );
     for (let i = 0; i < actionIds.length; i++) {
       const actionId = actionIds[i];
       const action = this.actionsMap[actionId];
@@ -128,7 +164,7 @@ export class SimpleBandit implements ISimpleBandit {
 
   getScoredActionsPerOracle(
     context: { [feature: string]: number } = {},
-    options: { include?: string[], exclude?: string[] } = {},
+    options: { include?: string[]; exclude?: string[] } = {},
   ): Array<{ [key: string]: number | string }> {
     const scoredActions: IScoredAction[] = this.getScoredActions(
       context,
@@ -198,7 +234,8 @@ export class SimpleBandit implements ISimpleBandit {
     }
   }
 
-  _generateRecommendationId(): string { // without uuid dependency
+  _generateRecommendationId(): string {
+    // without uuid dependency
     return (
       "id-" +
       Math.random().toString(36).substr(2, 16) +
@@ -209,7 +246,7 @@ export class SimpleBandit implements ISimpleBandit {
 
   recommend(
     context: { [feature: string]: number } = {},
-    options: { include?: string[], exclude?: string[] } = {},
+    options: { include?: string[]; exclude?: string[] } = {},
   ): IRecommendation {
     let scoredActions = this.getScoredActions(context, options);
     const probabilities = scoredActions.map((action) => action.probability);
@@ -228,7 +265,7 @@ export class SimpleBandit implements ISimpleBandit {
 
   slate(
     context: { [feature: string]: number } = {},
-    options: { include?: string[], exclude?: string[] } = {},
+    options: { include?: string[]; exclude?: string[] } = {},
   ): ISlate {
     let scoredActions = this.getScoredActions(context, options);
     const slateActions: ISlateAction[] = [];
