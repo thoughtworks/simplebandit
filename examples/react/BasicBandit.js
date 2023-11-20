@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { SimpleBandit } from "../../dist/index";
 
 function BasicFruitBandit() {
@@ -23,7 +23,6 @@ function BasicFruitBandit() {
   const generateNewRecommendation = () => {
     setScoredActions(bandit.getScoredActions());
     setRecommendation(bandit.recommend());
-    
   };
 
   const handleAccept = async () => {
@@ -39,12 +38,16 @@ function BasicFruitBandit() {
   return (
     <div>
       <h1>Simple Fruit Bandit</h1>
-      <p>This is the simplest example of a bandit that is learning the preference among three types of fruit: apple, pear or orange.</p>
+      <p>
+        This is the simplest example of a bandit that is learning the preference
+        among three types of fruit: apple, pear or orange.
+      </p>
       <h2>Fruit probabilities:</h2>
       <div>
         {scoredActions.map((scoredAction) => (
           <p key={scoredAction.actionId}>
-            {scoredAction.actionId} ({(scoredAction.probability * 100).toFixed(1)}%)
+            {scoredAction.actionId} (
+            {(scoredAction.probability * 100).toFixed(1)}%)
           </p>
         ))}
       </div>
