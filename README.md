@@ -8,7 +8,7 @@ Under the hood it's a logistic regression oracle with softmax exploration.
 
 ## Installation
 
-Project is not yet uploaded to npm, but can be installed locally with
+The project is not (yet) uploaded to npm, but can be installed locally with
 
 ```sh
 npm install
@@ -25,9 +25,9 @@ import { SimpleBandit } from "simplebandit";
 
 const bandit = new SimpleBandit({ actions: ["apple", "pear"] });
 
-let recommendation = bandit.recommend();
-await bandit.accept(recommendation);
-consolo.log(recommendation.actionId);
+let recommendation1 = bandit.recommend();
+await bandit.accept(recommendation1);
+consolo.log(recommendation1.actionId);
 
 recommendation2 = bandit.recommend();
 await bandit.reject(recommendation2);
@@ -47,7 +47,7 @@ const actions: IAction[] = [
 const bandit = new SimpleBandit({ actions: actions });
 ```
 
-There are a few short hand ways of defining actions. For actions without features you can simply pass a list of `actionsIds`: `actions = ["apple", "pear"]`. For actions with features you can use a list of `IActions` as above or use a hash as a short-hand:
+There are a few short hand ways of defining actions. For actions without features you can simply pass a list of `actionsIds` as above: `actions = ["apple", "pear"]`. For actions with features you can use a list of `IActions` or use a hash as a short-hand:
 
 ```typescript
 actions = {
@@ -76,7 +76,7 @@ actions = {
 
 ### Adding context
 
-We can also learn preferences depending on a context, by passing the relevant context it into the `recommend` method. After feedback the bandit will learn to give better recommendations given a certain context, for example whether it is raining or not. Like feature values, context values should also be encoded between -1 and 1.
+We can also learn preferences depending on a context, by passing the relevant context into the `recommend` method. After feedback the bandit will learn to give better recommendations given a certain context, for example whether it is raining or not. Like feature values, context values should also be encoded between `-1` and `1`.
 
 ```typescript
 const recommendation = bandit.recommend({ rain: 1 });
@@ -85,7 +85,7 @@ await bandit.accept(recommendation);
 
 ### Configuring exploration and exploitation tradeoff with the temperature parameter
 
-You can adjust how much the bandit exploits (meaning higher probability for higher scoring actions, mostly choosing the best option according to current prediction) or explores (meaning higher probability for lower scoring actions, allowing it to explore the actions to gather more evidence):
+You can adjust how much the bandit exploits (assigning higher probability to higher scoring actions) or explores (assigning less low probability to lower scoring actions):
 
 ```typescript
 const bandit = new SimpleBandit({
@@ -98,15 +98,15 @@ It is worthwhile playing around with this parameter for your use case. Too much 
 
 ### Slates: Getting multiple recommendations
 
-In order to get multiple recommendation (or a 'slate') instead of just one, call slate:
+In order to get multiple recommendation (or a 'slate') instead of just one, call `bandit.slate()`:
 
 ```typescript
 const bandit = new SimpleBandit({
   actions: ["apple", "pear", "banana"],
-  slateSize: 3,
+  slateSize: 2,
 });
 let slate = bandit.slate();
-await bandit.choose(slate, slate.slateActions[2].actionId);
+await bandit.choose(slate, slate.slateActions[1].actionId);
 //bandit.reject(slate)
 ```
 
@@ -131,7 +131,7 @@ bandit2.train(trainingData);
 
 ## Defining custom oracle
 
-For more control you can define your own oracle before passing it on to the bandit:
+For more control over the behaviour of your bandit, you customize the oracle:
 
 ```typescript
 oracle = new SimpleOracle({
@@ -144,8 +144,10 @@ oracle = new SimpleOracle({
   contextActionIdInteractions = true, // learn interaction between context and actionId preference
   contextActionFeatureInteractions = true, // learn interaction between context and action features preference
   useInversePropensityWeighting = true, // oracle uses ipw by default (sample weight = 1/p), but can be switched off
-  targetLabel = "click", // target label for oracle, defaults to click, but can also be e.g. 'rating'
-  weights = {}, // initialize oracle with weights
+  targetLabel = "click", // target label for oracle, defaults to 'click', but can also be e.g. 'rating'
+  oracleWeight = 1.0, // if using multiple oracles, how this one is weighted
+  name = "click1", // name is by default equal to targetLabel, but can give unique name if needed
+  weights = {}, // initialize oracle with feature weights hash
 });
 
 bandit = new SimpleBandit({
@@ -164,8 +166,8 @@ const clickOracle = new SimpleOracle({
   })
 const starOracle = new SimpleOracle({
     targetLabel: "stars", // if users leave a star rating after an action
-    oracleWeight: 2.0, // this oracle is weighted twice as heavily as the first
-    learningRate: 0.5, // can adjust other settings as well
+    oracleWeight: 2.0, // this oracle is weighted twice as heavily as the clickOracle
+    learningRate: 0.5, // can customize settings for each oracle
   }),
 ];
 
@@ -203,7 +205,7 @@ bandit.feedback(
 
 ## Excluding actions
 
-In some contexts you might want to apply business rules and exclude certain actionIds, or only include certain others:
+In some contexts you might want to apply business rules and exclude certain `actionIds``, or only include certain others:
 
 ```typescript
 recommendation = bandit.recommend(context, { exclude: ["apple"] });
@@ -214,7 +216,7 @@ slate = bandit.slate(context, { include: ["banana", "pear"] });
 
 There are several usage examples provided in the `examples/` directory in both pure html/javascript and react.
 
-The `html` examples can be simply opened in the browser (after having run `make build` first ofcourse)
+The `html` examples can be simply opened in the browser (after having run `make build` first of course)
 
 The `react` examples can be built with e.g. parcel:
 
