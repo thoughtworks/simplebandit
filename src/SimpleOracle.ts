@@ -41,7 +41,7 @@ export class SimpleOracle implements ISimpleOracle {
     actionIds = undefined,
     context = undefined,
     features = undefined,
-    learningRate = 1.0,
+    learningRate = 0.1,
     actionIdFeatures = true,
     actionFeatures = true,
     contextActionIdInteractions = true,
