@@ -129,7 +129,7 @@ const bandit2 = new SimpleBandit({ actions: ["apple", "pear"] });
 bandit2.train(trainingData);
 ```
 
-## Defining your own oracle
+## Defining custom oracle
 
 For more control you can define your own oracle before passing it on to the bandit:
 
@@ -149,7 +149,7 @@ oracle = new SimpleOracle({
 });
 
 bandit = new SimpleBandit({
-  oracles: oracle,
+  oracle: oracle,
   temperature: 0.2,
 });
 ```
@@ -170,7 +170,7 @@ const starOracle = new SimpleOracle({
 ];
 
 const bandit = new SimpleBandit({
-  oracles: [clickOracle, starOracle],
+  oracle: [clickOracle, starOracle],
   actions: actions,
   temperature: temperature,
 });
@@ -213,6 +213,15 @@ slate = bandit.slate(context, { include: ["banana", "pear"] });
 ## Examples
 
 There are several usage examples provided in the `examples/` directory in both pure html/javascript and react.
+
+The `html` examples can be simply opened in the browser (after having run `make build` first ofcourse)
+
+The `react` examples can be built with e.g. parcel:
+
+```sh
+cd examples/react
+parcel index.html
+```
 
 ## Testing
 

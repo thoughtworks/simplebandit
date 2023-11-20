@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { SimpleBandit, SimpleOracle } from "../../dist/index";
 
 function TemperatureFruitBandit() {
@@ -12,7 +12,7 @@ function TemperatureFruitBandit() {
 
   useEffect(() => {
     const banditInstance = new SimpleBandit({
-      oracles: new SimpleOracle({learningRate: learningRate}),
+      oracle: new SimpleOracle({ learningRate: learningRate }),
       actions: ["apple", "pear", "orange"],
       temperature: temperature,
     });
@@ -47,12 +47,28 @@ function TemperatureFruitBandit() {
   return (
     <div>
       <h1>Adjusting the Fruit Bandit</h1>
-      <p>This example shows the underlying scores per actionId (fruit), the generated training data, and the serialized bandit state. </p>
-      <p>You can adjust the learning rate of the oracle, and the temperature of the bandit. </p>
+      <p>
+        This example shows the underlying scores per actionId (fruit), the
+        generated training data, and the serialized bandit state.{" "}
+      </p>
+      <p>
+        You can adjust the learning rate of the oracle, and the temperature of
+        the bandit.{" "}
+      </p>
       <h2>Learning Rate:</h2>
-      <input type="number" value={learningRate} step="0.1" onChange={(e) => setLearningRate(parseFloat(e.target.value))} />
+      <input
+        type="number"
+        value={learningRate}
+        step="0.1"
+        onChange={(e) => setLearningRate(parseFloat(e.target.value))}
+      />
       <h2>Temperature:</h2>
-      <input type="number" value={temperature} step="0.1" onChange={(e) => setTemperature(parseFloat(e.target.value))} />
+      <input
+        type="number"
+        value={temperature}
+        step="0.1"
+        onChange={(e) => setTemperature(parseFloat(e.target.value))}
+      />
       <h2>Actions scores and probabilities:</h2>
       <div>
         <table>

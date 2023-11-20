@@ -6,7 +6,7 @@ import { ISimpleBanditState } from "./IState";
 import { IRecommendation, ISlate } from "./IRecommendation";
 
 export interface ISimpleBandit {
-  oracles: ISimpleOracle[];
+  oracle: ISimpleOracle[];
   targetLabels: string[];
   temperature: number;
   actionsMap: Record<string, IAction>;
@@ -17,11 +17,11 @@ export interface ISimpleBandit {
 
   recommend(
     context: { [feature: string]: number },
-    options: { include?: string[], exclude?: string[] }
+    options: { include?: string[]; exclude?: string[] },
   ): IRecommendation;
   slate(
     context: { [feature: string]: number },
-    options: { include?: string[], exclude?: string[] }
+    options: { include?: string[]; exclude?: string[] },
   ): ISlate;
 
   accept(recommendation: IRecommendation): Promise<ITrainingData[]>;
@@ -36,13 +36,13 @@ export interface ISimpleBandit {
 
   getScoredActions(
     context: { [feature: string]: number },
-    options: { include?: string[], exclude?: string[] }
+    options: { include?: string[]; exclude?: string[] },
   ): IScoredAction[];
   getScoredActionsPerOracle(
     context: {
       [feature: string]: number;
     },
-    options: { include?: string[], exclude?: string[] }
+    options: { include?: string[]; exclude?: string[] },
   ): Array<{ [key: string]: number | string }>;
 
   train(trainingData: ITrainingData[]): Promise<void>;

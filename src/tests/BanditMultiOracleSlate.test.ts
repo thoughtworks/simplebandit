@@ -42,7 +42,7 @@ describe("Multiple Oracles Recomendation", () => {
     ];
 
     bandit = new SimpleBandit({
-      oracles: oracles,
+      oracle: oracles,
       actions: actions,
       temperature: temperature,
       slateSize: 2,
@@ -51,7 +51,7 @@ describe("Multiple Oracles Recomendation", () => {
 
   describe("constructor", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
-      expect(bandit.oracles).toEqual(oracles);
+      expect(bandit.oracle).toEqual(oracles);
       expect(bandit.temperature).toEqual(temperature);
       expect(bandit.slateSize).toEqual(2);
     });
@@ -66,7 +66,7 @@ describe("Multiple Oracles Recomendation", () => {
 
   describe("oracle should update upon responding to a slate", () => {
     it("choose should update weights for click oracle", () => {
-      const oldClickWeights = { ...bandit.oracles[0].weights };
+      const oldClickWeights = { ...bandit.oracle[0].weights };
       const oldRatingWeights = { ...oracles[1].weights };
       const slate = bandit.slate({ morning: 1 });
       const selectedActionId = slate.slateActions[0].actionId;
@@ -76,7 +76,7 @@ describe("Multiple Oracles Recomendation", () => {
     });
 
     it("reject should update weights for click oracle", () => {
-      const oldClickWeights = { ...bandit.oracles[0].weights };
+      const oldClickWeights = { ...bandit.oracle[0].weights };
       const oldRatingWeights = { ...oracles[1].weights };
       const slate = bandit.slate({ morning: 1 });
 
@@ -86,7 +86,7 @@ describe("Multiple Oracles Recomendation", () => {
     });
 
     it("feedback should update weights for rating oracle", () => {
-      const oldClickWeights = { ...bandit.oracles[0].weights };
+      const oldClickWeights = { ...bandit.oracle[0].weights };
       const oldRatingWeights = { ...oracles[1].weights };
       const slate = bandit.slate({ morning: 1 });
       const selectedActionId = slate.slateActions[0].actionId;

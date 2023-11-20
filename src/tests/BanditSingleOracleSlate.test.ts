@@ -41,7 +41,7 @@ describe("SimpleBandit with slates", () => {
       learningRate: 1.0,
     });
     bandit = new SimpleBandit({
-      oracles: oracle,
+      oracle: oracle,
       actions: actions,
       temperature: 0.5,
       slateSize: slateSize,
@@ -50,7 +50,7 @@ describe("SimpleBandit with slates", () => {
 
   describe("constructor", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
-      expect(bandit.oracles).toEqual([oracle]);
+      expect(bandit.oracle).toEqual([oracle]);
       expect(bandit.temperature).toEqual(0.5);
       expect(bandit.slateSize).toEqual(2);
     });
@@ -116,7 +116,7 @@ describe("SimpleBandit with slates", () => {
 
   describe("train", () => {
     it("training the bandit should change the weights of the oracle", () => {
-      const oldWeights = { ...bandit.oracles[0].weights };
+      const oldWeights = { ...bandit.oracle[0].weights };
       const trainingData: ITrainingData[] = [
         {
           recommendationId: "recommendation1",
@@ -144,7 +144,7 @@ describe("SimpleBandit with slates", () => {
         },
       ];
       bandit.train(trainingData);
-      expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
+      expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
     });
   });
 
@@ -168,21 +168,24 @@ describe("SimpleBandit with slates", () => {
     });
     describe("choose", () => {
       it("the weights of the oracle should be changed", () => {
-        const oldWeights = { ...bandit.oracles[0].weights };
+        const oldWeights = { ...bandit.oracle[0].weights };
         bandit.choose(slate, slate.slateActions[0].actionId);
-        expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
+        expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
       });
     });
     describe("rejectAll", () => {
       it("the weights of the oracle should be changed", () => {
-        const oldWeights = { ...bandit.oracles[0].weights };
+        const oldWeights = { ...bandit.oracle[0].weights };
         bandit.reject(slate);
-        expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
+        expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
       });
     });
     describe("recommendationId should match in trainingData", () => {
       it("should have a trainingData entry with the same recommendationId", async () => {
-        const trainingData = await bandit.choose(slate, slate.slateActions[0].actionId);
+        const trainingData = await bandit.choose(
+          slate,
+          slate.slateActions[0].actionId,
+        );
         expect(
           trainingData.filter(
             (data) => data.recommendationId === slate.recommendationId,

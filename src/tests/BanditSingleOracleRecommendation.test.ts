@@ -21,8 +21,14 @@ describe("SimpleBandit takes all accepted actions inputs", () => {
     });
     expect(bandit.actionsMap).toHaveProperty("action1");
     expect(bandit.actionsMap).toHaveProperty("action2");
-    expect(bandit.actionsMap["action1"]).toEqual({actionId: "action1", features: {night:1}})
-    expect(bandit.actionsMap["action2"]).toEqual({actionId: "action2", features: {night:0}})
+    expect(bandit.actionsMap["action1"]).toEqual({
+      actionId: "action1",
+      features: { night: 1 },
+    });
+    expect(bandit.actionsMap["action2"]).toEqual({
+      actionId: "action2",
+      features: { night: 0 },
+    });
   });
   it("should accept an array of actionIds", () => {
     const bandit = new SimpleBandit({
@@ -30,8 +36,14 @@ describe("SimpleBandit takes all accepted actions inputs", () => {
     });
     expect(bandit.actionsMap).toHaveProperty("action1");
     expect(bandit.actionsMap).toHaveProperty("action2");
-    expect(bandit.actionsMap["action1"]).toEqual({actionId: "action1", features: {}});
-    expect(bandit.actionsMap["action2"]).toEqual({actionId: "action2", features: {}});
+    expect(bandit.actionsMap["action1"]).toEqual({
+      actionId: "action1",
+      features: {},
+    });
+    expect(bandit.actionsMap["action2"]).toEqual({
+      actionId: "action2",
+      features: {},
+    });
   });
   it("should accept an object of actionIds with empty lists", () => {
     const bandit = new SimpleBandit({
@@ -39,8 +51,14 @@ describe("SimpleBandit takes all accepted actions inputs", () => {
     });
     expect(bandit.actionsMap).toHaveProperty("action1");
     expect(bandit.actionsMap).toHaveProperty("action2");
-    expect(bandit.actionsMap["action1"]).toEqual({actionId: "action1", features: {}});
-    expect(bandit.actionsMap["action2"]).toEqual({actionId: "action2", features: {}});
+    expect(bandit.actionsMap["action1"]).toEqual({
+      actionId: "action1",
+      features: {},
+    });
+    expect(bandit.actionsMap["action2"]).toEqual({
+      actionId: "action2",
+      features: {},
+    });
   });
   it("should accept an object of actionIds with string lists", () => {
     const bandit = new SimpleBandit({
@@ -48,8 +66,14 @@ describe("SimpleBandit takes all accepted actions inputs", () => {
     });
     expect(bandit.actionsMap).toHaveProperty("action1");
     expect(bandit.actionsMap).toHaveProperty("action2");
-    expect(bandit.actionsMap["action1"]).toEqual({actionId: "action1", features: {night:1}});
-    expect(bandit.actionsMap["action2"]).toEqual({actionId: "action2", features: {morning:1, day:1}});
+    expect(bandit.actionsMap["action1"]).toEqual({
+      actionId: "action1",
+      features: { night: 1 },
+    });
+    expect(bandit.actionsMap["action2"]).toEqual({
+      actionId: "action2",
+      features: { morning: 1, day: 1 },
+    });
   });
   it("should accept an object of actionsIds with feature hashes", () => {
     const bandit = new SimpleBandit({
@@ -60,8 +84,14 @@ describe("SimpleBandit takes all accepted actions inputs", () => {
     });
     expect(bandit.actionsMap).toHaveProperty("action1");
     expect(bandit.actionsMap).toHaveProperty("action2");
-    expect(bandit.actionsMap["action1"]).toEqual({actionId: "action1", features: {night:1}});
-    expect(bandit.actionsMap["action2"]).toEqual({actionId: "action2", features: {morning:1, day:1}});
+    expect(bandit.actionsMap["action1"]).toEqual({
+      actionId: "action1",
+      features: { night: 1 },
+    });
+    expect(bandit.actionsMap["action2"]).toEqual({
+      actionId: "action2",
+      features: { morning: 1, day: 1 },
+    });
   });
 });
 
@@ -92,7 +122,7 @@ describe("Single Oracle Bandit Recommendation", () => {
       learningRate: 1.0,
     });
     bandit = new SimpleBandit({
-      oracles: [oracle],
+      oracle: [oracle],
       actions: actions,
       temperature: 0.5,
       slateSize: 1,
@@ -101,7 +131,7 @@ describe("Single Oracle Bandit Recommendation", () => {
 
   describe("constructor", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
-      expect(bandit.oracles).toEqual([oracle]);
+      expect(bandit.oracle).toEqual([oracle]);
       expect(bandit.temperature).toEqual(0.5);
       expect(bandit.slateSize).toEqual(1);
       expect(bandit.actionsMap).toBeDefined();
@@ -116,7 +146,7 @@ describe("Single Oracle Bandit Recommendation", () => {
       const bandit = new SimpleBandit({
         actions: ["action1", "action2"],
       });
-      expect(bandit.oracles).toBeDefined();
+      expect(bandit.oracle).toBeDefined();
       expect(bandit.temperature).toEqual(0.5);
       expect(bandit.slateSize).toEqual(1);
       expect(bandit.actionsMap).toBeDefined();
@@ -130,7 +160,7 @@ describe("Single Oracle Bandit Recommendation", () => {
       const bandit = new SimpleBandit({
         actions: [{ actionId: "action1", features: { night: 1 } }, "action2"],
       });
-      expect(bandit.oracles).toBeDefined();
+      expect(bandit.oracle).toBeDefined();
       expect(bandit.temperature).toEqual(0.5);
       expect(bandit.slateSize).toEqual(1);
       expect(bandit.actionsMap).toBeDefined();
@@ -206,27 +236,35 @@ describe("Single Oracle Bandit Recommendation", () => {
     });
 
     it("should contain all the actionIds", () => {
-      const scoredActionIds = scoredActions.map((scoredAction) => scoredAction.actionId);
+      const scoredActionIds = scoredActions.map(
+        (scoredAction) => scoredAction.actionId,
+      );
       expect(scoredActionIds).toEqual(actionIds);
     });
 
     it("should respect the include parameter", () => {
-      const scoredActions = bandit.getScoredActions(context, {include:["apple"]});
+      const scoredActions = bandit.getScoredActions(context, {
+        include: ["apple"],
+      });
       expect(scoredActions.length).toEqual(1);
       expect(scoredActions[0].actionId).toEqual("apple");
     });
 
     it("should respect the exclude parameter", () => {
-      const scoredActions = bandit.getScoredActions(context, {exclude:["apple"]});
+      const scoredActions = bandit.getScoredActions(context, {
+        exclude: ["apple"],
+      });
       expect(scoredActions.length).toEqual(2);
-      const scoredActionIds = scoredActions.map((scoredAction) => scoredAction.actionId);
+      const scoredActionIds = scoredActions.map(
+        (scoredAction) => scoredAction.actionId,
+      );
       expect(scoredActionIds).not.toContain("apple");
     });
   });
 
   describe("train", () => {
     it("training the bandit should change the weights of the oracle", () => {
-      const oldWeights = { ...bandit.oracles[0].weights };
+      const oldWeights = { ...bandit.oracle[0].weights };
       const trainingData: ITrainingData[] = [
         {
           recommendationId: "recommendation1",
@@ -254,7 +292,7 @@ describe("Single Oracle Bandit Recommendation", () => {
         },
       ];
       bandit.train(trainingData);
-      expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
+      expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
     });
   });
 
@@ -275,16 +313,16 @@ describe("Single Oracle Bandit Recommendation", () => {
     });
     describe("accept", () => {
       it("the weights of the oracle should be changed", () => {
-        const oldWeights = { ...bandit.oracles[0].weights };
+        const oldWeights = { ...bandit.oracle[0].weights };
         bandit.accept(recommendation);
-        expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
+        expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
       });
     });
     describe("reject", () => {
       it("the weights of the oracle should be changed", () => {
-        const oldWeights = { ...bandit.oracles[0].weights };
+        const oldWeights = { ...bandit.oracle[0].weights };
         bandit.reject(recommendation);
-        expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
+        expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
       });
     });
     describe("recommendationId should match in trainingData", () => {

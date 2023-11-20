@@ -67,7 +67,7 @@
       let temperature = parseFloat(temperatureInput.value);
 
       let bandit = new SimpleBandit({
-        oracles: new SimpleOracle({ learningRate: learningRate }),
+        oracle: new SimpleOracle({ learningRate: learningRate }),
         actions: ["apple", "pear", "orange"],
         temperature: temperature,
       });
@@ -76,7 +76,7 @@
 
       learningRateInput.addEventListener("change", function () {
         learningRate = parseFloat(learningRateInput.value);
-        bandit.oracles[0].learningRate = learningRate;
+        bandit.oracle[0].learningRate = learningRate;
       });
       temperatureInput.addEventListener("change", function () {
         temperature = parseFloat(temperatureInput.value);

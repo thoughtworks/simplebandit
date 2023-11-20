@@ -67,7 +67,7 @@
       let temperature = parseFloat(temperatureInput.value);
 
       let bandit = new SimpleBandit({
-        oracles: new SimpleOracle({ learningRate: learningRate }),
+        oracle: new SimpleOracle({ learningRate: learningRate }),
         actions: {
           apple: { fruit: 1 },
           pear: { fruit: 1 },

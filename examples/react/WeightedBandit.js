@@ -12,7 +12,7 @@ function WeightedFruitBandit() {
   const [starRating, setStarRating] = useState(null);
 
   useEffect(() => {
-    let oldClickOracleWeights = bandit ? { ...bandit.oracles[0].weights } : {};
+    let oldClickOracleWeights = bandit ? { ...bandit.oracle[0].weights } : {};
     const clickOracle = new SimpleOracle({
       learningRate: 0.5,
       targetLabel: "click",
@@ -20,7 +20,7 @@ function WeightedFruitBandit() {
       weights: oldClickOracleWeights,
     });
 
-    let oldStarsOracleWeights = bandit ? { ...bandit.oracles[1].weights } : {};
+    let oldStarsOracleWeights = bandit ? { ...bandit.oracle[1].weights } : {};
     const starsOracle = new SimpleOracle({
       targetLabel: "stars",
       oracleWeight: 1 - clickWeight,
@@ -28,14 +28,14 @@ function WeightedFruitBandit() {
     });
 
     const banditInstance = new SimpleBandit({
-      oracles: [clickOracle, starsOracle],
+      oracle: [clickOracle, starsOracle],
       actions: {
-        "apple": { fruit: 1 },
-        "pear" : ["fruit"], // equivalent: sets fruit:1
-        "orange": { fruit: 1 },
-        "chocolate": { treat: 1 },
-        "candy": ["treat"], // equivalent: sets treat:1
-        "cake": { treat: 1 },
+        apple: { fruit: 1 },
+        pear: ["fruit"], // equivalent: sets fruit:1
+        orange: { fruit: 1 },
+        chocolate: { treat: 1 },
+        candy: ["treat"], // equivalent: sets treat:1
+        cake: { treat: 1 },
       },
       slateSize: 3,
     });
@@ -83,8 +83,9 @@ function WeightedFruitBandit() {
     <div>
       <h1>Weighted oracles</h1>
       <p>
-        This is an example of a bandit that combines two scores: a click score and a star rating score.
-        You can select which to weight more for the final score and recommendation.
+        This is an example of a bandit that combines two scores: a click score
+        and a star rating score. You can select which to weight more for the
+        final score and recommendation.
       </p>
 
       <h2>Oracle Weights:</h2>

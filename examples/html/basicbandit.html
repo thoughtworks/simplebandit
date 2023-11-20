@@ -34,7 +34,7 @@
     <script src="../../dist/browser/simpleBandit.js"></script>
     <script>
       let bandit = new SimpleBandit({
-        oracles: new SimpleOracle({ learningRate: 0.1 }),
+        oracle: new SimpleOracle({ learningRate: 0.1 }),
         actions: ["apple", "pear", "orange"],
         temperature: 0.2,
       });

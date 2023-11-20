@@ -11,32 +11,32 @@ import { ISimpleBanditState } from "./interfaces/IState";
 import { SampleFromProbabilityDistribution } from "./Sampling";
 import { SimpleOracle } from "./SimpleOracle";
 
-
-
 export class SimpleBandit implements ISimpleBandit {
-  oracles: SimpleOracle[];
+  oracle: SimpleOracle[];
   targetLabels: string[];
   temperature: number;
   actionsMap: Record<string, IAction>;
   slateSize: number;
 
   constructor({
-    oracles,
+    oracle: oracle,
     actions,
     temperature = 0.5,
     slateSize = 1,
   }: {
-    oracles?: SimpleOracle | SimpleOracle[];
+    oracle?: SimpleOracle | SimpleOracle[];
     actions: IActionsInput;
     temperature?: number;
     slateSize?: number;
   }) {
-    this.oracles = Array.isArray(oracles)
-      ? oracles
-      : oracles
-      ? [oracles]
+    this.oracle = Array.isArray(oracle)
+      ? oracle
+      : oracle
+      ? [oracle]
       : [new SimpleOracle()];
-    this.targetLabels = [...new Set(this.oracles.map((oracle) => oracle.targetLabel))];
+    this.targetLabels = [
+      ...new Set(this.oracle.map((oracle) => oracle.targetLabel)),
+    ];
     this.actionsMap = this._processActions(actions);
     this.temperature = temperature;
     this.slateSize = slateSize;
@@ -77,7 +77,7 @@ export class SimpleBandit implements ISimpleBandit {
 
   toState(): ISimpleBanditState {
     return {
-      oracleStates: this.oracles.map((oracle) => oracle.getOracleState()),
+      oracleStates: this.oracle.map((oracle) => oracle.getOracleState()),
       temperature: this.temperature,
       slateSize: this.slateSize,
     };
@@ -91,7 +91,7 @@ export class SimpleBandit implements ISimpleBandit {
       SimpleOracle.fromOracleState(oracleState),
     );
     return new SimpleBandit({
-      oracles: oracles,
+      oracle: oracles,
       actions: actions,
       temperature: state.temperature,
       slateSize: state.slateSize,
@@ -112,7 +112,7 @@ export class SimpleBandit implements ISimpleBandit {
     context: { [feature: string]: number },
     features: { [feature: string]: number },
   ): number {
-    return this.oracles.reduce(
+    return this.oracle.reduce(
       (score, oracle) =>
         score +
         oracle.oracleWeight * oracle.predict(actionId, context, features),
@@ -178,7 +178,7 @@ export class SimpleBandit implements ISimpleBandit {
         weightedScore: scoredAction.score,
         probability: scoredAction.probability,
       };
-      for (let oracle of this.oracles) {
+      for (let oracle of this.oracle) {
         const oracleScore = oracle.predict(
           scoredAction.actionId,
           context,
@@ -415,7 +415,7 @@ export class SimpleBandit implements ISimpleBandit {
   train(trainingData: ITrainingData[]): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        for (const oracle of this.oracles) {
+        for (const oracle of this.oracle) {
           oracle.fit(trainingData);
         }
         resolve();

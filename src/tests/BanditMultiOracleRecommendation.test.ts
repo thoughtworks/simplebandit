@@ -7,7 +7,7 @@ import { ITrainingData } from "../interfaces/ITrainingData";
 
 describe("Multiple Oracles Recomendation", () => {
   let bandit: SimpleBandit;
-  let oracles: SimpleOracle[];
+  let oracle: SimpleOracle[];
   const actionIds = ["apple", "pear", "chocolate"];
   const actions = [
     {
@@ -26,7 +26,7 @@ describe("Multiple Oracles Recomendation", () => {
   const temperature = 0.5;
 
   beforeEach(() => {
-    oracles = [
+    oracle = [
       new SimpleOracle({
         actionIds: actionIds,
         context: ["morning"],
@@ -46,7 +46,7 @@ describe("Multiple Oracles Recomendation", () => {
     ];
 
     bandit = new SimpleBandit({
-      oracles: oracles,
+      oracle: oracle,
       actions: actions,
       temperature: temperature,
     });
@@ -54,7 +54,7 @@ describe("Multiple Oracles Recomendation", () => {
 
   describe("constructor", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
-      expect(bandit.oracles).toEqual(oracles);
+      expect(bandit.oracle).toEqual(oracle);
       expect(bandit.temperature).toEqual(temperature);
     });
   });
@@ -62,10 +62,7 @@ describe("Multiple Oracles Recomendation", () => {
   describe("getBanditState", () => {
     it("should return the correct state", () => {
       const state: ISimpleBanditState = {
-        oracleStates: [
-          oracles[0].getOracleState(),
-          oracles[1].getOracleState(),
-        ],
+        oracleStates: [oracle[0].getOracleState(), oracle[1].getOracleState()],
         temperature: 0.5,
         slateSize: 1,
       };
@@ -76,10 +73,7 @@ describe("Multiple Oracles Recomendation", () => {
   describe("toJSON", () => {
     it("should return the correct JSON string", () => {
       const state: ISimpleBanditState = {
-        oracleStates: [
-          oracles[0].getOracleState(),
-          oracles[1].getOracleState(),
-        ],
+        oracleStates: [oracle[0].getOracleState(), oracle[1].getOracleState()],
         temperature: 0.5,
         slateSize: 1,
       };
@@ -90,10 +84,7 @@ describe("Multiple Oracles Recomendation", () => {
   describe("fromJSON", () => {
     it("should return the correct instance", () => {
       const state: ISimpleBanditState = {
-        oracleStates: [
-          oracles[0].getOracleState(),
-          oracles[1].getOracleState(),
-        ],
+        oracleStates: [oracle[0].getOracleState(), oracle[1].getOracleState()],
         temperature: 0.5,
         slateSize: 1,
       };
@@ -148,7 +139,7 @@ describe("Multiple Oracles Recomendation", () => {
   describe("train", () => {
     it("training the bandit should change the weights of the oracle", () => {
       const oldWeights: Array<{ [feature: string]: number }> =
-        bandit.oracles.map((oracle) => {
+        bandit.oracle.map((oracle) => {
           return { ...oracle.weights };
         });
       const trainingData: ITrainingData[] = [
@@ -194,8 +185,8 @@ describe("Multiple Oracles Recomendation", () => {
         },
       ];
       bandit.train(trainingData);
-      for (let i = 0; i < bandit.oracles.length; i++) {
-        expect(bandit.oracles[i].weights).not.toEqual(oldWeights[i]);
+      for (let i = 0; i < bandit.oracle.length; i++) {
+        expect(bandit.oracle[i].weights).not.toEqual(oldWeights[i]);
       }
     });
   });
@@ -217,24 +208,24 @@ describe("Multiple Oracles Recomendation", () => {
     });
     describe("accept", () => {
       it("the weights of the oracle should be changed", () => {
-        const oldWeights = { ...bandit.oracles[0].weights };
+        const oldWeights = { ...bandit.oracle[0].weights };
         bandit.accept(recommendation);
-        expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
+        expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
       });
     });
     describe("reject", () => {
       it("the weights of the oracle should be changed", () => {
         bandit.accept(recommendation);
-        const oldWeights = { ...bandit.oracles[0].weights };
+        const oldWeights = { ...bandit.oracle[0].weights };
         bandit.reject(recommendation);
-        expect(bandit.oracles[0].weights).not.toEqual(oldWeights);
+        expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
       });
     });
     describe("feedback", () => {
       it("the weights of the oracle should be changed", () => {
-        const oldWeights = { ...bandit.oracles[1].weights };
+        const oldWeights = { ...bandit.oracle[1].weights };
         bandit.feedback(recommendation, "rating", 1);
-        expect(bandit.oracles[1].weights).not.toEqual(oldWeights);
+        expect(bandit.oracle[1].weights).not.toEqual(oldWeights);
       });
     });
   });

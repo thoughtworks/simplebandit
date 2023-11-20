@@ -11,7 +11,7 @@ function ContextFruitBandit() {
 
   useEffect(() => {
     const banditInstance = new SimpleBandit({
-      oracles: new SimpleOracle({ learningRate: 0.1 }),
+      oracle: new SimpleOracle({ learningRate: 0.1 }),
       actions: {
         apple: { fruit: 1 },
         pear: { fruit: 1 },
