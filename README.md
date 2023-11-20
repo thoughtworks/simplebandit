@@ -139,8 +139,8 @@ oracle = new SimpleOracle({
   context: ["rainy"], // only encode certain context features, ignore others
   features: ["fruit"], // only encode certain action features, ignore others
   learningRate: 0.1, // how quick the oracle learns (and forgets)
-  actionIdFeatures: true // learn preference for individual actions, regardless of context
-  actionFeatures: true // learn preference over action features, regardless of context
+  actionIdFeatures: true, // learn preference for individual actions, regardless of context
+  actionFeatures: true, // learn preference over action features, regardless of context
   contextActionIdInteractions = true, // learn interaction between context and actionId preference
   contextActionFeatureInteractions = true, // learn interaction between context and action features preference
   useInversePropensityWeighting = true, // oracle uses ipw by default (sample weight = 1/p), but can be switched off
