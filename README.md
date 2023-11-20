@@ -1,6 +1,6 @@
 # SimpleBandit
 
-SimpleBandit is a lightweight typescript/javascript library for contextual bandits, with no external dependencies, transpiling to <600 lines of javascript.
+SimpleBandit is a lightweight typescript/javascript library for contextual bandit recommenders, with no external dependencies, transpiling to <600 lines of javascript.
 
 It provides classes and interfaces to create and manage bandit models, generate recommendations, select actions, and update your models. Easily integrates with e.g. React Native to support privacy sensitive and fully interpretable recommendations right on a user's device.
 
@@ -35,7 +35,7 @@ await bandit.reject(recommendation2);
 
 ### With action features
 
-By defining action features we can also learn across actions: e.g. by choosing a fruit we make other fruits also more likely for the next recommendation. All features values should be > -1 and < 1.
+By defining action features we can also learn across actions: e.g. by choosing a fruit we make other fruits also more likely for the next recommendation. N.B. all features values should be encoded between -1 and 1.
 
 ```typescript
 const actions: IAction[] = [
@@ -47,19 +47,45 @@ const actions: IAction[] = [
 const bandit = new SimpleBandit({ actions: actions });
 ```
 
-### Adding context
-
-We can also learn preferences depending on a context, by passing it into the `recommend` method.
-For example whether it is raining or not.
-All context values should be > -1 and < 1.
+There are a few short hand ways of defining actions. For actions without features you can simply pass a list of `actionsIds`: `actions = ["apple", "pear"]`. For actions with features you can use a list of `IActions` as above or use a hash as a short-hand:
 
 ```typescript
-let recommendation = bandit.recommend({ rain: 1 });
+actions = {
+  apple: { fruit: 1 },
+  chocolate: { fruit: 0, treat: 1 },
+};
 ```
 
-### Configuring exploration and exploitation with temperature
+If all your features have the value `1`, you can also pass them as a list:
 
-You can adjust how much the bandit exploits (low `temperature` means higher probability for higher scoring actions) or explores (higher `temperature` means higher probability for lower scoring actions):
+```typescript
+actions = {
+  apple: ["fruit", "healthy"],
+  chocolate: ["treat", "tasty"],
+};
+```
+
+is equivalent to
+
+```typescript
+actions = {
+  apple: { fruit: 1, healthy: 1 },
+  chocolate: { treat: 1, tasty: 1 },
+};
+```
+
+### Adding context
+
+We can also learn preferences depending on a context, by passing the relevant context it into the `recommend` method. After feedback the bandit will learn to give better recommendations given a certain context, for example whether it is raining or not. Like feature values, context values should also be encoded between -1 and 1.
+
+```typescript
+const recommendation = bandit.recommend({ rain: 1 });
+await bandit.accept(recommendation);
+```
+
+### Configuring exploration and exploitation tradeoff with the temperature parameter
+
+You can adjust how much the bandit exploits (meaning higher probability for higher scoring actions, mostly choosing the best option according to current prediction) or explores (meaning higher probability for lower scoring actions, allowing it to explore the actions to gather more evidence):
 
 ```typescript
 const bandit = new SimpleBandit({
@@ -68,17 +94,19 @@ const bandit = new SimpleBandit({
 });
 ```
 
-### Getting multiple recommendations
+It is worthwhile playing around with this parameter for your use case. Too much exploitation (low temperature) might mean you get stuck in a suboptimal optimization. Too much exploration (high temperature), might mean you are not giving the best recommendations often enough.
 
-In order to get multiple recommendation (or a 'slate') instead of just one:
+### Slates: Getting multiple recommendations
+
+In order to get multiple recommendation (or a 'slate') instead of just one, call slate:
 
 ```typescript
 const bandit = new SimpleBandit({
   actions: ["apple", "pear", "banana"],
-  slateSize: 2,
+  slateSize: 3,
 });
 let slate = bandit.slate();
-await bandit.choose(slate, slate.slateActions[0].actionId);
+await bandit.choose(slate, slate.slateActions[2].actionId);
 //bandit.reject(slate)
 ```
 
@@ -92,7 +120,7 @@ const bandit2 = SimpleBandit.fromJSON(bandit1.toJSON());
 
 ### Retaining training data
 
-The `accept`, `reject` and `choose` methods also return a `trainingData` object.
+The `accept`, `reject` and `choose` methods also return a `trainingData[]` object.
 These can be stored so that you can re-train the bandit at a later point (perhaps with e.g. a different learningRate, or with different initial weights):
 
 ```typescript
@@ -110,7 +138,7 @@ oracle = new SimpleOracle({
   actionIds: ["apple", "pear"], // only encode certain actionIds, ignore others
   context: ["rainy"], // only encode certain context features, ignore others
   features: ["fruit"], // only encode certain action features, ignore others
-  learningRate: 1.0, // how quick the oracle learns (and forgets)
+  learningRate: 0.1, // how quick the oracle learns (and forgets)
   actionIdFeatures: true // learn preference for individual actions, regardless of context
   actionFeatures: true // learn preference over action features, regardless of context
   contextActionIdInteractions = true, // learn interaction between context and actionId preference
@@ -128,22 +156,21 @@ bandit = new SimpleBandit({
 
 ## Multiple oracles
 
-The default oracle only optimizes for accepts/clicks, but in many cases you want to optimize for other objectives or maybe a mixture of different objectives. You can pass a list of oracles that each learn to predict a different `targetLabel`:
+The default oracle only optimizes for accepts/clicks, but in many cases you may want to optimize for other objectives or maybe a mixture of different objectives. You can pass a list of oracles that each learn to predict a different `targetLabel`:
 
 ```typescript
-const oracles = [
-  new SimpleOracle({
+const clickOracle = new SimpleOracle({
     targetLabel: "click", // default
-  }),
-  new SimpleOracle({
+  })
+const starOracle = new SimpleOracle({
     targetLabel: "stars", // if users leave a star rating after an action
-    oracleWeight: 2.0, // this oracle is twice as important as the first
+    oracleWeight: 2.0, // this oracle is weighted twice as heavily as the first
     learningRate: 0.5, // can adjust other settings as well
   }),
 ];
 
 const bandit = new SimpleBandit({
-  oracles: oracles,
+  oracles: [clickOracle, starOracle],
   actions: actions,
   temperature: temperature,
 });
