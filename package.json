@@ -8,7 +8,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "test": "jest",
-    "build": "tsc && npx browserify index.ts -p [ tsify --noImplicitAny ] > simpleBandit.js && npx uglifyjs simpleBandit.js -o simpleBandit.min.js -c -m",
+    "build": "tsc && npx browserify index.ts -p [ tsify --noImplicitAny ] > dist/browser/simpleBandit.js && npx uglifyjs dist/browser/simpleBandit.js -o dist/browser/simpleBandit.min.js -c -m",
     "pretest": "tsc",
     "prepublish": "tsc"
   },
