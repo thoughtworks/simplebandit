@@ -15,5 +15,5 @@ export interface ISlateAction {
 export interface ISlate {
   recommendationId: string;
   context: { [feature: string]: number };
-  slateActions: Array<ISlateAction>;
+  slateItems: Array<ISlateAction>;
 }

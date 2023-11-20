@@ -130,7 +130,7 @@ function WeightedFruitBandit() {
       </div>
       <h2>Recommended fruits:</h2>
       {slate &&
-        slate.slateActions.map((action, index) => (
+        slate.slateItems.map((action, index) => (
           <div
             key={action.actionId}
             style={{

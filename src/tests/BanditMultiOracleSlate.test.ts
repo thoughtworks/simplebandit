@@ -60,7 +60,7 @@ describe("Multiple Oracles Recomendation", () => {
   describe("slate", () => {
     it("should return a slate of the correct size", () => {
       const slate = bandit.slate({ morning: 1 });
-      expect(slate.slateActions.length).toEqual(2);
+      expect(slate.slateItems.length).toEqual(2);
     });
   });
 
@@ -69,7 +69,7 @@ describe("Multiple Oracles Recomendation", () => {
       const oldClickWeights = { ...bandit.oracle[0].weights };
       const oldRatingWeights = { ...oracles[1].weights };
       const slate = bandit.slate({ morning: 1 });
-      const selectedActionId = slate.slateActions[0].actionId;
+      const selectedActionId = slate.slateItems[0].actionId;
       bandit.choose(slate, selectedActionId);
       expect(oracles[0].weights).not.toEqual(oldClickWeights);
       expect(oracles[1].weights).toEqual(oldRatingWeights);
@@ -89,7 +89,7 @@ describe("Multiple Oracles Recomendation", () => {
       const oldClickWeights = { ...bandit.oracle[0].weights };
       const oldRatingWeights = { ...oracles[1].weights };
       const slate = bandit.slate({ morning: 1 });
-      const selectedActionId = slate.slateActions[0].actionId;
+      const selectedActionId = slate.slateItems[0].actionId;
       bandit.feedback(slate, "rating", 1, selectedActionId);
       expect(oracles[0].weights).toEqual(oldClickWeights);
       expect(oracles[1].weights).not.toEqual(oldRatingWeights);

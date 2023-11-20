@@ -90,12 +90,12 @@
       function generateNewRecommendation() {
         slate = bandit.slate();
 
-        let slateActionsString = "";
-        for (let i = 0; i < slate.slateActions.length; i++) {
-          slateActionsString += `${i + 1}: ${slate.slateActions[i].actionId}\n`;
+        let slateItemsString = "";
+        for (let i = 0; i < slate.slateItems.length; i++) {
+          slateItemsString += `${i + 1}: ${slate.slateItems[i].actionId}\n`;
         }
         document.getElementById("recommended-fruits").innerText =
-          slateActionsString;
+          slateItemsString;
         document.getElementById("recommendation-json").innerText =
           JSON.stringify(slate);
         document.getElementById("chosen-action-id").innerText = "";
@@ -124,7 +124,7 @@
       document
         .getElementById("eat-1")
         .addEventListener("click", async function () {
-          chosenActionId = slate.slateActions[0].actionId;
+          chosenActionId = slate.slateItems[0].actionId;
           newTrainingData = await bandit.choose(slate, chosenActionId);
           trainingData = trainingData.concat(newTrainingData);
           document.getElementById(
@@ -143,7 +143,7 @@
       document
         .getElementById("eat-2")
         .addEventListener("click", async function () {
-          chosenActionId = slate.slateActions[1].actionId;
+          chosenActionId = slate.slateItems[1].actionId;
           newTrainingData = await bandit.choose(slate, chosenActionId);
           trainingData = trainingData.concat(newTrainingData);
           document.getElementById(
@@ -162,7 +162,7 @@
       document
         .getElementById("eat-3")
         .addEventListener("click", async function () {
-          chosenActionId = slate.slateActions[2].actionId;
+          chosenActionId = slate.slateItems[2].actionId;
           newTrainingData = await bandit.choose(slate, chosenActionId);
           trainingData = trainingData.concat(newTrainingData);
           document.getElementById(

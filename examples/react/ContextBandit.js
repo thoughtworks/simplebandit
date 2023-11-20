@@ -53,7 +53,7 @@ function ContextFruitBandit() {
   const handleChoose = async (index) => {
     const newTrainingData = await bandit.choose(
       slate,
-      slate.slateActions[index].actionId,
+      slate.slateItems[index].actionId,
     );
     setTrainingData([...trainingData, ...newTrainingData]);
     setSerializedBandit(bandit.toJSON());
@@ -113,7 +113,7 @@ function ContextFruitBandit() {
       </div>
       <h2>Recommended fruits:</h2>
       {slate &&
-        slate.slateActions.map((action, index) => (
+        slate.slateItems.map((action, index) => (
           <div
             key={action.actionId}
             style={{

@@ -176,8 +176,8 @@ class SimpleBandit {
         }
         else {
             const trainingData = [];
-            for (let index = 0; index < recommendation.slateActions.length; index++) {
-                const actionId = recommendation.slateActions[index].actionId;
+            for (let index = 0; index < recommendation.slateItems.length; index++) {
+                const actionId = recommendation.slateItems[index].actionId;
                 const recommendedAction = this.actionsMap[actionId];
                 if (!recommendedAction) {
                     throw new Error(`Failed to generate training data for recommended exercise at index ${index}.`);
@@ -185,7 +185,7 @@ class SimpleBandit {
                 const context = recommendation.context;
                 const features = recommendedAction.features;
                 const click = recommendedAction.actionId === selectedActionId ? 1 : 0;
-                const probability = recommendation.slateActions[index].probability;
+                const probability = recommendation.slateItems[index].probability;
                 trainingData.push({
                     recommendationId: recommendation.recommendationId,
                     actionId: actionId,
@@ -221,17 +221,17 @@ class SimpleBandit {
     }
     slate(context = {}, options = {}) {
         let scoredActions = this.getScoredActions(context, options);
-        const slateActions = [];
+        const slateItems = [];
         for (let index = 0; index < this.slateSize; index++) {
             const probabilities = scoredActions.map((action) => action.probability);
             const sampleIndex = (0, Sampling_1.SampleFromProbabilityDistribution)(probabilities);
-            slateActions[index] = scoredActions[sampleIndex];
+            slateItems[index] = scoredActions[sampleIndex];
             scoredActions.splice(sampleIndex, 1);
         }
         const slate = {
             recommendationId: this._generateRecommendationId(),
             context: context,
-            slateActions: slateActions,
+            slateItems: slateItems,
         };
         return slate;
     }
@@ -259,9 +259,9 @@ class SimpleBandit {
                 if (actionId == undefined) {
                     throw new Error(`need to provide actionId`);
                 }
-                const actionIds = slate.slateActions.map((action) => action.actionId);
+                const actionIds = slate.slateItems.map((action) => action.actionId);
                 if (!actionIds.includes(actionId)) {
-                    throw new Error(`ActionId ${actionId} is not in slateActions`);
+                    throw new Error(`ActionId ${actionId} is not in slateItems`);
                 }
                 const trainingData = this._generateClickOracleTrainingData(slate, actionId);
                 this.train(trainingData);
@@ -308,7 +308,7 @@ class SimpleBandit {
                     if (actionId === undefined) {
                         throw new Error(`actionId must be provided for slate`);
                     }
-                    const foundAction = recommendation_or_slate.slateActions.find((action) => action.actionId === actionId);
+                    const foundAction = recommendation_or_slate.slateItems.find((action) => action.actionId === actionId);
                     if (!foundAction) {
                         throw new Error(`No action found in slate with actionId ${actionId}`);
                     }

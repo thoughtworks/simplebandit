@@ -106,7 +106,7 @@ const bandit = new SimpleBandit({
   slateSize: 2,
 });
 let slate = bandit.slate();
-await bandit.choose(slate, slate.slateActions[1].actionId);
+await bandit.choose(slate, slate.slateItems[1].actionId);
 //bandit.reject(slate)
 ```
 
@@ -199,7 +199,7 @@ bandit.feedback(
   slate,
   "stars",
   1.0,
-  slate.slateActions[0].actionId, // if first item was chosen
+  slate.slateItems[0].actionId, // if first item was chosen
 );
 ```
 

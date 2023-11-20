@@ -159,8 +159,8 @@ describe("SimpleBandit with slates", () => {
       expect(slate.context).toEqual(context);
     });
     it("slate should have both an actionId a score and a probability that is defined", () => {
-      expect(slate.slateActions).toBeInstanceOf(Array);
-      slate.slateActions.forEach((action) => {
+      expect(slate.slateItems).toBeInstanceOf(Array);
+      slate.slateItems.forEach((action) => {
         expect(action.actionId).toBeDefined();
         expect(action.score).toBeDefined();
         expect(action.probability).toBeDefined();
@@ -169,7 +169,7 @@ describe("SimpleBandit with slates", () => {
     describe("choose", () => {
       it("the weights of the oracle should be changed", () => {
         const oldWeights = { ...bandit.oracle[0].weights };
-        bandit.choose(slate, slate.slateActions[0].actionId);
+        bandit.choose(slate, slate.slateItems[0].actionId);
         expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
       });
     });
@@ -184,7 +184,7 @@ describe("SimpleBandit with slates", () => {
       it("should have a trainingData entry with the same recommendationId", async () => {
         const trainingData = await bandit.choose(
           slate,
-          slate.slateActions[0].actionId,
+          slate.slateItems[0].actionId,
         );
         expect(
           trainingData.filter(
