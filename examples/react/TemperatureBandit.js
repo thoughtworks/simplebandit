@@ -21,7 +21,7 @@ function TemperatureFruitBandit() {
       temperature: temperature,
     });
     setBandit(banditInstance);
-  }, [temperature]);
+  }, [temperature, learningRate]);
 
   useEffect(() => {
     if (bandit) {
@@ -61,11 +61,15 @@ function TemperatureFruitBandit() {
       </p>
       <h2>Learning Rate:</h2>
       <input
-        type="number"
+        id="learningRateSlider"
+        type="range"
+        min="0.01"
+        max="1.00"
         value={learningRate}
-        step="0.1"
+        step="0.01"
         onChange={(e) => setLearningRate(parseFloat(e.target.value))}
       />
+      <label htmlFor="learningRateSlider">{learningRate.toFixed(2)}</label>
       <h2>Temperature:</h2>
       <input
         id="temperatureSlider"
