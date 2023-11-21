@@ -11,13 +11,17 @@ function TemperatureFruitBandit() {
   const [temperature, setTemperature] = useState(0.2);
 
   useEffect(() => {
+    let oldWeights = bandit ? { ...bandit.oracle[0].weights } : {};
     const banditInstance = new SimpleBandit({
-      oracle: new SimpleOracle({ learningRate: learningRate }),
+      oracle: new SimpleOracle({
+        learningRate: learningRate,
+        weights: oldWeights,
+      }),
       actions: ["apple", "pear", "orange"],
       temperature: temperature,
     });
     setBandit(banditInstance);
-  }, []);
+  }, [temperature]);
 
   useEffect(() => {
     if (bandit) {
@@ -63,12 +67,17 @@ function TemperatureFruitBandit() {
         onChange={(e) => setLearningRate(parseFloat(e.target.value))}
       />
       <h2>Temperature:</h2>
+      <label htmlFor="temperatureSlider">0.05</label>
       <input
-        type="number"
+        id="temperatureSlider"
+        type="range"
+        min="0.05"
+        max="2.00"
         value={temperature}
-        step="0.1"
+        step="0.05"
         onChange={(e) => setTemperature(parseFloat(e.target.value))}
       />
+      <label htmlFor="temperatureSlider">2</label>
       <h2>Actions scores and probabilities:</h2>
       <div>
         <table>
