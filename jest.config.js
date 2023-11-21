@@ -9,7 +9,7 @@ module.exports = {
   coverageReporters: ["json", "lcov", "text", "clover"],
   testMatch: [
     "<rootDir>/src/**/*.test.{ts,tsx}",
-    "<rootDir>/examples/react/tests/*.test.{jsx,ts,tsx}",
+    "<rootDir>/examples/tests/*.test.{jsx,ts,tsx}",
   ],
   transform: {
     "^.+\\.tsx?$": "ts-jest",

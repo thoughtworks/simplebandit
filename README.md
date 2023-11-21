@@ -214,16 +214,8 @@ slate = bandit.slate(context, { include: ["banana", "pear"] });
 
 ## Examples
 
-There are several usage examples provided in the `examples/` directory in both pure html/javascript and react.
-
-The `html` examples can be simply opened in the browser (after having run `make build` first of course)
-
-The `react` examples can be built with e.g. parcel:
-
-```sh
-cd examples/react
-parcel index.html
-```
+There are several usage examples provided in the `examples/` folder made with react.
+You can run the examples with e.g. `parcel index.html` or `make examples` and then view them on `http://localhost:1234`.
 
 ## Testing
 

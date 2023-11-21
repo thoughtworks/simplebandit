@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SimpleBandit } from "../../dist/index";
+import { SimpleBandit } from "../dist/index";
 
 function BasicFruitBandit() {
   const [bandit, setBandit] = useState(null);

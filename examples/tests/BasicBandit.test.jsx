@@ -2,9 +2,9 @@ import React from "react";
 import { render, fireEvent, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import BasicFruitBandit from "../BasicBandit";
-import { SimpleBandit } from "../../../dist/index";
+import { SimpleBandit } from "../../dist/index";
 
-jest.mock("../../../dist/index", () => {
+jest.mock("../../dist/index", () => {
   return {
     SimpleBandit: jest.fn().mockImplementation(function () {
       this.accept = jest.fn().mockResolvedValue([]);

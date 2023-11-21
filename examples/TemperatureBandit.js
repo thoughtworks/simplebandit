@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SimpleBandit, SimpleOracle } from "../../dist/index";
+import { SimpleBandit, SimpleOracle } from "../dist/index";
 
 function TemperatureFruitBandit() {
   const [bandit, setBandit] = useState(null);
