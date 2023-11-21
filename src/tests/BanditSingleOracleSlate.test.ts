@@ -148,7 +148,7 @@ describe("SimpleBandit with slates", () => {
     });
   });
 
-  describe("recommend", () => {
+  describe("slate", () => {
     const context: { [feature: string]: number } = { morning: 1 };
     let slate: ISlate;
     beforeEach(() => {
@@ -192,6 +192,24 @@ describe("SimpleBandit with slates", () => {
           ).length,
         ).toEqual(slateSize);
       });
+    });
+  });
+
+  describe("for different slate sizes", () => {
+    beforeEach(() => {
+      bandit = new SimpleBandit({ actions: actions, slateSize: 2 });
+    });
+    it("should return the default slate size by default", () => {
+      const slate = bandit.slate();
+      expect(slate.slateItems.length).toEqual(2);
+    });
+    it("should return the correct slate size when specified", () => {
+      const slate = bandit.slate({}, { slateSize: 3 });
+      expect(slate.slateItems.length).toEqual(3);
+    });
+    it("should slate size of actions if slateSize is larger than actions", () => {
+      const slate = bandit.slate({}, { slateSize: 10 });
+      expect(slate.slateItems.length).toEqual(actions.length);
     });
   });
 });

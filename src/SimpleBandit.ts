@@ -265,11 +265,19 @@ export class SimpleBandit implements ISimpleBandit {
 
   slate(
     context: { [feature: string]: number } = {},
-    options: { include?: string[]; exclude?: string[] } = {},
+    options: {
+      include?: string[];
+      exclude?: string[];
+      slateSize?: number;
+    } = {},
   ): ISlate {
     let scoredActions = this.getScoredActions(context, options);
     const slateItems: ISlateAction[] = [];
-    for (let index = 0; index < this.slateSize; index++) {
+    const slateSize = Math.min(
+      options.slateSize ?? this.slateSize,
+      Object.keys(this.actionsMap).length,
+    );
+    for (let index = 0; index < slateSize; index++) {
       const probabilities = scoredActions.map((action) => action.probability);
       const sampleIndex = SampleFromProbabilityDistribution(probabilities);
       slateItems[index] = scoredActions[sampleIndex];

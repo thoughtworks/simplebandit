@@ -4,6 +4,7 @@ import { SimpleBandit, SimpleOracle } from "../../dist/index";
 function SlateFruitBandit() {
   const [bandit, setBandit] = useState(null);
   const [slate, setSlate] = useState(null);
+  const [slateSize, setSlateSize] = useState(3);
   const [scoredActions, setScoredActions] = useState([]);
   const [trainingData, setTrainingData] = useState([]);
   const [serializedBandit, setSerializedBandit] = useState("");
@@ -13,10 +14,10 @@ function SlateFruitBandit() {
       oracle: new SimpleOracle({ learningRate: 0.1 }),
       actions: {
         apple: { fruit: 1 },
-        pear: ["fruit"], // equivalent: sets fruit:1
+        pear: ["fruit"], // equivalent to { fruit:1 }
         orange: { fruit: 1 },
         chocolate: { treat: 1 },
-        candy: ["treat"], // equivalent: sets treat:1
+        candy: { treat: 1 },
         cake: { treat: 1 },
       },
       temperature: 0.2,
@@ -29,10 +30,10 @@ function SlateFruitBandit() {
     if (bandit) {
       generateNewRecommendation();
     }
-  }, [bandit]);
+  }, [bandit, slateSize]);
 
   const generateNewRecommendation = () => {
-    setSlate(bandit.slate());
+    setSlate(bandit.slate({}, { slateSize: slateSize }));
     const _scoredActions = bandit.getScoredActions();
     _scoredActions.forEach((scoredAction) => {
       const actionFeatures = bandit.actionsMap[scoredAction.actionId].features;
@@ -92,6 +93,20 @@ function SlateFruitBandit() {
           </tbody>
         </table>
       </div>
+      <h2>slateSize:</h2>
+      <label htmlFor="weightSlider">1</label>
+      <input
+        id="slateSizeSlider"
+        type="range"
+        min="1"
+        max="6"
+        value={slateSize}
+        step="1"
+        onChange={(e) => {
+          setSlateSize(parseInt(e.target.value));
+        }}
+      />
+      <label htmlFor="weightSlider">6</label>
       <h2>Recommended fruits:</h2>
       {slate &&
         slate.slateItems.map((action, index) => (
