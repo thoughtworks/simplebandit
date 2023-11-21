@@ -18,7 +18,7 @@ npm install
 
 ### With actionIds only
 
-In the simplest case you are simply learning a preference over a list of possible actions, without regards to context or action features. By accepting a recommendation you make the recommended action more likely in the future. By rejecting it, you make it less likely. The bandit learns from your feedback, and adjusts.
+In the simplest case you are simply learning a preference over a list of possible actions, without regards to context or action features. By accepting a recommendation you make the recommended action more likely in future recommendations. By rejecting it, you make it less likely. The bandit learns from your feedback, updates, and adjusts.
 
 ```typescript
 import { SimpleBandit } from "simplebandit";
@@ -27,7 +27,7 @@ const bandit = new SimpleBandit({ actions: ["apple", "pear"] });
 
 let recommendation1 = bandit.recommend();
 await bandit.accept(recommendation1);
-consolo.log(recommendation1.actionId);
+console.log(recommendation1.actionId);
 
 recommendation2 = bandit.recommend();
 await bandit.reject(recommendation2);
@@ -35,7 +35,7 @@ await bandit.reject(recommendation2);
 
 ### With action features
 
-By defining action features we can also learn across actions: e.g. by choosing a fruit we make other fruits also more likely for the next recommendation. N.B. all features values should be encoded between -1 and 1.
+By defining action features we can also learn across actions: e.g. by choosing a fruit we make other fruits also more likely for the next recommendation.
 
 ```typescript
 const actions: IAction[] = [
@@ -47,7 +47,9 @@ const actions: IAction[] = [
 const bandit = new SimpleBandit({ actions: actions });
 ```
 
-There are a few short hand ways of defining actions. For actions without features you can simply pass a list of `actionsIds` as above: `actions = ["apple", "pear"]`. For actions with features you can use a list of `IActions` or use a hash as a short-hand:
+If you accept an `apple` recommendations, the probability of both `apple` and `pear` will go up for the next recommendation. (N.B. all features values should be encoded between -1 and 1.)
+
+There are a few short hand ways of defining actions. For actions without features you can simply pass a list of `actionsIds` as above: `actions = ["apple", "pear"]`. For actions with features you can use the list of `IActions` or use a hash as a short-hand:
 
 ```typescript
 actions = {
@@ -56,7 +58,7 @@ actions = {
 };
 ```
 
-If all your features have the value `1`, you can also pass them as a list:
+If all your features have the value `1`, you can also pass them as a list, so:
 
 ```typescript
 actions = {
@@ -74,18 +76,20 @@ actions = {
 };
 ```
 
+(but slightly more readable when you have lots of features)
+
 ### Adding context
 
-We can also learn preferences depending on a context, by passing the relevant context into the `recommend` method. After feedback the bandit will learn to give better recommendations given a certain context, for example whether it is raining or not. Like feature values, context values should also be encoded between `-1` and `1`.
+We can also learn preferences depending on a context, by passing the relevant context as a hash into the `recommend` method. After positive feedback the bandit will learn to give similar recommendations given a similar context. For example when it is raining, recommend chocolate, when it is not, recommend apples. Like feature values, also context values should be encoded between `-1` and `1`.
 
 ```typescript
 const recommendation = bandit.recommend({ rain: 1 });
 await bandit.accept(recommendation);
 ```
 
-### Configuring exploration and exploitation tradeoff with the temperature parameter
+### Configuring the exploration-exploitation tradeoff with the temperature parameter
 
-You can adjust how much the bandit exploits (assigning higher probability to higher scoring actions) or explores (assigning less low probability to lower scoring actions):
+You can adjust how much the bandit exploits (assigning higher probability to higher scoring actions) or explores (assigning less low probability to lower scoring actions). In the most extreme case `temperature=0.0` you only ever pick the highest scoring action, never randomly exploring.
 
 ```typescript
 const bandit = new SimpleBandit({
@@ -94,7 +98,7 @@ const bandit = new SimpleBandit({
 });
 ```
 
-It is worthwhile playing around with this parameter for your use case. Too much exploitation (low temperature) might mean you get stuck in a suboptimal optimization. Too much exploration (high temperature), might mean you are not giving the best recommendations often enough.
+It is worthwhile playing around with this parameter for your use case. Too much exploitation (low temperature) might mean you get stuck in a suboptimal optimization, and you do not adjust to changing preferences or circumstances. Too much exploration (high temperature), might mean you are not giving the best recommendations often enough.
 
 ### Slates: Getting multiple recommendations
 
@@ -110,6 +114,12 @@ await bandit.choose(slate, slate.slateItems[1].actionId);
 //bandit.reject(slate)
 ```
 
+You can pass slateSize as a parameter to the bandit, or to the slate method itself:
+
+```typescript
+slate = bandit.slate({ rain: 1 }, { slateSize: 3 });
+```
+
 ### Serializing and storing bandits
 
 You can easily serialize/deserialize bandits to/from JSON. So you can store e.g. a personalized bandit for each user and load them on demand.
@@ -121,7 +131,7 @@ const bandit2 = SimpleBandit.fromJSON(bandit1.toJSON());
 ### Retaining training data
 
 The `accept`, `reject` and `choose` methods also return a `trainingData[]` object.
-These can be stored so that you can re-train the bandit at a later point (perhaps with e.g. a different learningRate, or with different initial weights):
+These can be stored so that you can re-train the bandit at a later point (perhaps with e.g. a different oracle learningRate, or with different initial weights):
 
 ```typescript
 const trainingData = await bandit.accept(recommendation);
@@ -141,13 +151,13 @@ oracle = new SimpleOracle({
   learningRate: 0.1, // how quick the oracle learns (and forgets)
   actionIdFeatures: true, // learn preference for individual actions, regardless of context
   actionFeatures: true, // learn preference over action features, regardless of context
-  contextActionIdInteractions = true, // learn interaction between context and actionId preference
-  contextActionFeatureInteractions = true, // learn interaction between context and action features preference
-  useInversePropensityWeighting = true, // oracle uses ipw by default (sample weight = 1/p), but can be switched off
-  targetLabel = "click", // target label for oracle, defaults to 'click', but can also be e.g. 'rating'
-  oracleWeight = 1.0, // if using multiple oracles, how this one is weighted
-  name = "click1", // name is by default equal to targetLabel, but can give unique name if needed
-  weights = {}, // initialize oracle with feature weights hash
+  contextActionIdInteractions: true, // learn interaction between context and actionId preference
+  contextActionFeatureInteractions: true, // learn interaction between context and action features preference
+  useInversePropensityWeighting: true, // oracle uses ipw by default (sample weight = 1/p), but can be switched off
+  targetLabel: "click", // target label for oracle, defaults to 'click', but can also be e.g. 'rating'
+  oracleWeight: 1.0, // if using multiple oracles, how this one is weighted
+  name: "click1", // name is by default equal to targetLabel, but can give unique name if needed
+  weights: {}, // initialize oracle with feature weights hash
 });
 
 bandit = new SimpleBandit({
@@ -183,7 +193,7 @@ The `accept`, `reject` and `choose` methods still work the same for for all orac
 For other `targetLabels` there is the `feedback` method. You need to specify the `label` and the `value` (which should be between `0` and `1`):
 
 ```typescript
-recommendation = bandit.recommend(context);
+recommendation = bandit.recommend();
 bandit.feedback(
   recommendation,
   "stars", // targetLabel
@@ -194,7 +204,7 @@ bandit.feedback(
 For a slate you also have to specify which action was chosen:
 
 ```typescript
-slate = bandit.recommend(context);
+slate = bandit.slate();
 bandit.feedback(
   slate,
   "stars",
@@ -205,7 +215,7 @@ bandit.feedback(
 
 ## Excluding actions
 
-In some contexts you might want to apply business rules and exclude certain `actionIds``, or only include certain others:
+In some contexts you might want to apply business rules and exclude certain `actionIds`, or only include certain others:
 
 ```typescript
 recommendation = bandit.recommend(context, { exclude: ["apple"] });
