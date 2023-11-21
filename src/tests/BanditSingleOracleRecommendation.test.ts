@@ -129,6 +129,20 @@ describe("Single Oracle Bandit Recommendation", () => {
     });
   });
 
+  describe("should always pick the highest scored action with temperature=0", () => {
+    it("should always pick the highest scored action with temperature=0", () => {
+      const bandit = new SimpleBandit({
+        oracle: new SimpleOracle({ weights: { action2: 1 } }),
+        actions: ["action1", "action2"],
+        temperature: 0,
+      });
+      for (let i = 0; i < 10; i++) {
+        const recommendation = bandit.recommend();
+        expect(recommendation.actionId).toEqual("action2");
+      }
+    });
+  });
+
   describe("constructor", () => {
     it("should create an instance of SimpleBandit with the correct properties", () => {
       expect(bandit.oracle).toEqual([oracle]);

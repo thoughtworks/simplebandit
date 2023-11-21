@@ -273,7 +273,7 @@ export class SimpleOracle implements ISimpleOracle {
           );
         }
         let sampleWeight = 1;
-        if (this.useInversePropensityWeighting) {
+        if (this.useInversePropensityWeighting && data.probability > 0) {
           sampleWeight = 1 / data.probability;
         }
 

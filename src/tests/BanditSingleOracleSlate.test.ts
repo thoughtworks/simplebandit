@@ -166,6 +166,24 @@ describe("SimpleBandit with slates", () => {
         expect(action.probability).toBeDefined();
       });
     });
+
+    describe("should always pick the highest scored actions with temperature=0", () => {
+      it("should always pick the highest scored actions with temperature=0", () => {
+        const bandit = new SimpleBandit({
+          oracle: new SimpleOracle({ weights: { action2: 1, action3: 2 } }),
+          actions: ["action1", "action2", "action3"],
+          temperature: 0,
+          slateSize: 3,
+        });
+        for (let i = 0; i < 10; i++) {
+          const slate = bandit.slate();
+          expect(slate.slateItems[0].actionId).toEqual("action3");
+          expect(slate.slateItems[1].actionId).toEqual("action2");
+          expect(slate.slateItems[2].actionId).toEqual("action1");
+        }
+      });
+    });
+
     describe("choose", () => {
       it("the weights of the oracle should be changed", () => {
         const oldWeights = { ...bandit.oracle[0].weights };
@@ -173,6 +191,7 @@ describe("SimpleBandit with slates", () => {
         expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
       });
     });
+
     describe("rejectAll", () => {
       it("the weights of the oracle should be changed", () => {
         const oldWeights = { ...bandit.oracle[0].weights };
@@ -180,6 +199,7 @@ describe("SimpleBandit with slates", () => {
         expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
       });
     });
+
     describe("recommendationId should match in trainingData", () => {
       it("should have a trainingData entry with the same recommendationId", async () => {
         const trainingData = await bandit.choose(

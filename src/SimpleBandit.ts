@@ -150,15 +150,25 @@ export class SimpleBandit implements ISimpleBandit {
         probability: softmaxNumerator,
       });
     }
-    const SoftmaxDenominator = scoredActions.reduce(
-      (a, b) => a + b.probability,
-      0,
-    );
-    scoredActions = scoredActions.map((ex) => ({
-      actionId: ex.actionId,
-      score: ex.score,
-      probability: ex.probability / SoftmaxDenominator,
-    }));
+    if (this.temperature > 0) {
+      const SoftmaxDenominator = scoredActions.reduce(
+        (a, b) => a + b.probability,
+        0,
+      );
+      scoredActions = scoredActions.map((ex) => ({
+        actionId: ex.actionId,
+        score: ex.score,
+        probability: ex.probability / SoftmaxDenominator,
+      }));
+    } else {
+      const maxScore = Math.max(...scoredActions.map((action) => action.score));
+      scoredActions = scoredActions.map((ex) => ({
+        actionId: ex.actionId,
+        score: ex.score,
+        probability: ex.score === maxScore ? 1 : 0,
+      }));
+    }
+
     return scoredActions;
   }
 
@@ -249,8 +259,17 @@ export class SimpleBandit implements ISimpleBandit {
     options: { include?: string[]; exclude?: string[] } = {},
   ): IRecommendation {
     let scoredActions = this.getScoredActions(context, options);
-    const probabilities = scoredActions.map((action) => action.probability);
-    const sampleIndex = SampleFromProbabilityDistribution(probabilities);
+    let sampleIndex;
+    if (this.temperature === 0) {
+      sampleIndex = scoredActions.findIndex(
+        (action) =>
+          action.score ===
+          Math.max(...scoredActions.map((action) => action.score)),
+      );
+    } else {
+      const probabilities = scoredActions.map((action) => action.probability);
+      sampleIndex = SampleFromProbabilityDistribution(probabilities);
+    }
     const recommendedAction = scoredActions[sampleIndex];
 
     const recommendation: IRecommendation = {
@@ -277,9 +296,18 @@ export class SimpleBandit implements ISimpleBandit {
       options.slateSize ?? this.slateSize,
       Object.keys(this.actionsMap).length,
     );
+    let sampleIndex;
     for (let index = 0; index < slateSize; index++) {
-      const probabilities = scoredActions.map((action) => action.probability);
-      const sampleIndex = SampleFromProbabilityDistribution(probabilities);
+      if (this.temperature === 0) {
+        sampleIndex = scoredActions.findIndex(
+          (action) =>
+            action.score ===
+            Math.max(...scoredActions.map((action) => action.score)),
+        );
+      } else {
+        const probabilities = scoredActions.map((action) => action.probability);
+        sampleIndex = SampleFromProbabilityDistribution(probabilities);
+      }
       slateItems[index] = scoredActions[sampleIndex];
       scoredActions.splice(sampleIndex, 1);
     }

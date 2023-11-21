@@ -20,6 +20,9 @@ lint:
 fix:
 	npm run lint:fix
 
+example:
+	cd examples/react && parcel index.html
+
 
 
 

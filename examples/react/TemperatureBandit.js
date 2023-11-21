@@ -67,17 +67,16 @@ function TemperatureFruitBandit() {
         onChange={(e) => setLearningRate(parseFloat(e.target.value))}
       />
       <h2>Temperature:</h2>
-      <label htmlFor="temperatureSlider">0.05</label>
       <input
         id="temperatureSlider"
         type="range"
-        min="0.05"
-        max="2.00"
+        min="0.00"
+        max="3.00"
         value={temperature}
-        step="0.05"
+        step="0.01"
         onChange={(e) => setTemperature(parseFloat(e.target.value))}
       />
-      <label htmlFor="temperatureSlider">2</label>
+      <label htmlFor="temperatureSlider">{temperature.toFixed(2)}</label>
       <h2>Actions scores and probabilities:</h2>
       <div>
         <table>
