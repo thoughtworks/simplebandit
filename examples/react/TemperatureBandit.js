@@ -8,7 +8,7 @@ function TemperatureFruitBandit() {
   const [trainingData, setTrainingData] = useState([]);
   const [serializedBandit, setSerializedBandit] = useState("");
   const [learningRate, setLearningRate] = useState(0.1);
-  const [temperature, setTemperature] = useState(0.2);
+  const [temperature, setTemperature] = useState(0.1);
 
   useEffect(() => {
     let oldWeights = bandit ? { ...bandit.oracle[0].weights } : {};

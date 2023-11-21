@@ -20,7 +20,7 @@ function ContextFruitBandit() {
         candy: { treat: 1 },
         cake: { treat: 1 },
       },
-      temperature: 0.2,
+      temperature: 0.1,
       slateSize: 3,
     });
     setBandit(banditInstance);

@@ -9,7 +9,7 @@ function BasicFruitBandit() {
   useEffect(() => {
     const banditInstance = new SimpleBandit({
       actions: ["apple", "pear", "orange"],
-      temperature: 0.2,
+      temperature: 0.1,
     });
     setBandit(banditInstance);
   }, []);

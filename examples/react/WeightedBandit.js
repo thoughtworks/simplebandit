@@ -37,6 +37,7 @@ function WeightedFruitBandit() {
         candy: ["treat"], // equivalent: sets treat:1
         cake: { treat: 1 },
       },
+      temperature: 0.1,
       slateSize: 3,
     });
     setBandit(banditInstance);
