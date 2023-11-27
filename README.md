@@ -25,11 +25,11 @@ import { SimpleBandit } from "simplebandit";
 
 const bandit = new SimpleBandit({ actions: ["apple", "pear"] });
 
-let recommendation1 = bandit.recommend();
+const recommendation1 = bandit.recommend();
 await bandit.accept(recommendation1);
 console.log(recommendation1.actionId);
 
-recommendation2 = bandit.recommend();
+const recommendation2 = bandit.recommend();
 await bandit.reject(recommendation2);
 ```
 
