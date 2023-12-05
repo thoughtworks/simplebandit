@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SimpleBandit, SimpleOracle } from "../dist/index";
+import { SimpleBandit, SimpleOracle } from "../dist/cjs/index";
 
 function ContextFruitBandit() {
   const [bandit, setBandit] = useState(null);

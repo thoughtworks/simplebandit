@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SimpleBandit, SimpleOracle } from "../dist/index";
+import { SimpleBandit, SimpleOracle } from "../dist/cjs/index";
 
 function SlateFruitBandit() {
   const [bandit, setBandit] = useState(null);
@@ -11,7 +11,7 @@ function SlateFruitBandit() {
 
   useEffect(() => {
     const banditInstance = new SimpleBandit({
-      oracle: new SimpleOracle({ learningRate: 0.1 }),
+      oracle: new SimpleOracle({ learningRate: 0.05 }),
       actions: {
         apple: { fruit: 1 },
         pear: ["fruit"], // equivalent to { fruit:1 }
@@ -20,7 +20,7 @@ function SlateFruitBandit() {
         candy: { treat: 1 },
         cake: { treat: 1 },
       },
-      temperature: 0.1,
+      temperature: 0.2,
       slateSize: 3,
     });
     setBandit(banditInstance);
@@ -64,11 +64,13 @@ function SlateFruitBandit() {
     <div>
       <h1>Slate of multiple recommendations</h1>
       <p>The slate items get sampled one by one from top to bottom.</p>
-      <p>
-        The recommender is both learning preference for specific items and
-        preferences for fruits or treats in general.
-      </p>
+
       <h2>Actions scores and probabilities:</h2>
+      <p>
+        This slate recommender is both learning preference for specific items
+        and preferences for fruits or treats in general. By choosing a fruit,
+        all fruits go up in probability.
+      </p>
       <div>
         <table>
           <thead>
@@ -108,6 +110,10 @@ function SlateFruitBandit() {
       />
       <label htmlFor="weightSlider">6</label>
       <h2>Recommended fruits:</h2>
+      <p>
+        By selecting one item it will go up in probability, but you also reject
+        the others and they will go down in probability.
+      </p>
       {slate &&
         slate.slateItems.map((action, index) => (
           <div

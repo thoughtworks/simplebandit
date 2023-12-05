@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SimpleBandit } from "../dist/index";
+import { SimpleBandit } from "../dist/cjs/index";
 
 function BasicFruitBandit() {
   const [bandit, setBandit] = useState(null);
@@ -42,6 +42,10 @@ function BasicFruitBandit() {
         This is the simplest example of a bandit that is learning the preference
         among three types of fruit: apple, pear or orange.
       </p>
+      <p>
+        When you eat a fruit, the probability of that fruit goes up. When you
+        reject a fruit, the probability goes down
+      </p>
       <h2>Fruit probabilities:</h2>
       <div>
         {scoredActions.map((scoredAction) => (
@@ -53,8 +57,8 @@ function BasicFruitBandit() {
       </div>
       <h2>Fruit recommendation:</h2>
       {recommendation && <div>{recommendation.actionId}</div>}
-      <button onClick={handleAccept}>Accept</button>
-      <button onClick={handleReject}>Reject</button>
+      <button onClick={handleAccept}>Eat</button>
+      <button onClick={handleReject}>Don't eat</button>
     </div>
   );
 }

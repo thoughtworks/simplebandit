@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SimpleBandit, SimpleOracle } from "../dist/index";
+import { SimpleBandit, SimpleOracle } from "../dist/cjs/index";
 
 function WeightedFruitBandit() {
   const [bandit, setBandit] = useState(null);
@@ -14,7 +14,7 @@ function WeightedFruitBandit() {
   useEffect(() => {
     let oldClickOracleWeights = bandit ? { ...bandit.oracle[0].weights } : {};
     const clickOracle = new SimpleOracle({
-      learningRate: 0.5,
+      learningRate: 0.1,
       targetLabel: "click",
       oracleWeight: clickWeight,
       weights: oldClickOracleWeights,
@@ -22,6 +22,7 @@ function WeightedFruitBandit() {
 
     let oldStarsOracleWeights = bandit ? { ...bandit.oracle[1].weights } : {};
     const starsOracle = new SimpleOracle({
+      learningRate: 0.1,
       targetLabel: "stars",
       oracleWeight: 1 - clickWeight,
       weights: oldStarsOracleWeights,
@@ -37,7 +38,7 @@ function WeightedFruitBandit() {
         candy: ["treat"], // equivalent: sets treat:1
         cake: { treat: 1 },
       },
-      temperature: 0.1,
+      temperature: 0.2,
       slateSize: 3,
     });
     setBandit(banditInstance);
@@ -85,11 +86,14 @@ function WeightedFruitBandit() {
       <h1>Weighted oracles</h1>
       <p>
         This is an example of a bandit that combines two scores: a click score
-        and a star rating score. You can select which to weight more for the
-        final score and recommendation.
+        and a star rating score.
       </p>
 
       <h2>Oracle Weights:</h2>
+      <p>
+        You can select to put more weight on the predicted number of stars or
+        the predicted likelihood of a click.
+      </p>
       <label htmlFor="weightSlider">Stars</label>
       <input
         id="weightSlider"
@@ -130,6 +134,11 @@ function WeightedFruitBandit() {
         </table>
       </div>
       <h2>Recommended fruits:</h2>
+      <p>
+        You can try to e.g. mostly select fruits and give them low rating, and
+        sometimes select treats and give them a high rating. Then play with the
+        weight slider to see how that affects the recommendations probabilities.
+      </p>
       {slate &&
         slate.slateItems.map((action, index) => (
           <div
