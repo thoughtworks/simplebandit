@@ -1,9 +1,4 @@
-const { SimpleOracle, SimpleBandit } = require("./src");
+import { SimpleOracle } from "./src/index";
+import { SimpleBandit } from "./src/index";
 
-(window as any).SimpleOracle = SimpleOracle;
-(window as any).SimpleBandit = SimpleBandit;
-
-module.exports = {
-  SimpleOracle,
-  SimpleBandit,
-};
+export default { SimpleOracle, SimpleBandit };
