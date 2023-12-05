@@ -43,3 +43,4 @@ examples/react/dist
 examples/react/node_modules
 examples/react/.cache
 .DS_Store
+.cache
