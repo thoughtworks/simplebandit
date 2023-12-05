@@ -7,6 +7,7 @@ describe("SimpleOracle", () => {
   const actionIds = ["action1", "action2"];
   const learningRate = 0.1;
   const regularizer = 0.0;
+  const laplaceSmoothing = 0.0;
   const actionIdFeatures = true;
   const actionFeatures = true;
   const contextActionIdInteractions = false;
@@ -80,6 +81,8 @@ describe("SimpleOracle", () => {
       context: context,
       features: features,
       learningRate: learningRate,
+      regularizer: regularizer,
+      laplaceSmoothing: laplaceSmoothing,
       actionIdFeatures: actionIdFeatures,
       actionFeatures: actionFeatures,
       contextActionIdInteractions: contextActionIdInteractions,
@@ -96,6 +99,8 @@ describe("SimpleOracle", () => {
       expect(oracle.features).toEqual(features);
       expect(oracle.actionIds).toEqual(actionIds);
       expect(oracle.learningRate).toEqual(learningRate);
+      expect(oracle.regularizer).toEqual(regularizer);
+      expect(oracle.laplaceSmoothing).toEqual(laplaceSmoothing);
       expect(oracle.addIntercept).toEqual(true);
       expect(oracle.actionIdFeatures).toEqual(actionIdFeatures);
       expect(oracle.contextActionIdInteractions).toEqual(
@@ -120,6 +125,7 @@ describe("SimpleOracle", () => {
         actionIds: actionIds,
         learningRate,
         regularizer,
+        laplaceSmoothing,
         actionIdFeatures,
         actionFeatures,
         contextActionIdInteractions,
@@ -150,6 +156,7 @@ describe("SimpleOracle", () => {
         features,
         learningRate,
         regularizer,
+        laplaceSmoothing,
         actionIdFeatures,
         actionFeatures,
         contextActionIdInteractions,
@@ -172,6 +179,8 @@ describe("SimpleOracle", () => {
       expect(newOracle.features).toEqual(features);
       expect(newOracle.actionIds).toEqual(actionIds);
       expect(newOracle.learningRate).toEqual(learningRate);
+      expect(newOracle.regularizer).toEqual(regularizer);
+      expect(newOracle.laplaceSmoothing).toEqual(laplaceSmoothing);
       expect(newOracle.addIntercept).toEqual(true);
       expect(newOracle.contextActionIdInteractions).toEqual(
         contextActionIdInteractions,
@@ -434,7 +443,7 @@ describe("SimpleOracle", () => {
   describe("toJSON", () => {
     it("should return a JSON object with the correct properties", () => {
       expect(oracle.toJSON()).toEqual(
-        '{"actionIds":["action1","action2"],"context":["context1","context2"],"features":["feature1","feature2"],"learningRate":0.1,"regularizer":0,"actionIdFeatures":true,"actionFeatures":true,"contextActionIdInteractions":false,"contextActionFeatureInteractions":true,"useInversePropensityWeighting":false,"targetLabel":"click","name":"click","oracleWeight":1,"weights":{"intercept":0,"action1":0.1,"action2":0.2,"feature1":0.3,"feature2":0.4,"context1*feature1":1}}',
+        '{"actionIds":["action1","action2"],"context":["context1","context2"],"features":["feature1","feature2"],"learningRate":0.1,"regularizer":0,"laplaceSmoothing":0,"actionIdFeatures":true,"actionFeatures":true,"contextActionIdInteractions":false,"contextActionFeatureInteractions":true,"useInversePropensityWeighting":false,"targetLabel":"click","name":"click","oracleWeight":1,"weights":{"intercept":0,"action1":0.1,"action2":0.2,"feature1":0.3,"feature2":0.4,"context1*feature1":1}}',
       );
     });
   });

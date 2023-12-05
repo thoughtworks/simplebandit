@@ -11,6 +11,7 @@ export interface SimpleOracleOptions {
   features?: string[];
   learningRate?: number;
   regularizer?: number;
+  laplaceSmoothing?: number;
   actionIdFeatures?: boolean;
   actionFeatures?: boolean;
   contextActionIdInteractions?: boolean;
@@ -29,6 +30,7 @@ export class SimpleOracle implements ISimpleOracle {
   addIntercept!: boolean;
   learningRate: number;
   regularizer!: number;
+  laplaceSmoothing!: number;
   actionIdFeatures!: boolean;
   actionFeatures!: boolean;
   contextActionIdInteractions!: boolean;
@@ -45,6 +47,7 @@ export class SimpleOracle implements ISimpleOracle {
     features = undefined,
     learningRate = 0.1,
     regularizer = 0.0,
+    laplaceSmoothing = 0.0,
     actionIdFeatures = true,
     actionFeatures = true,
     contextActionIdInteractions = true,
@@ -87,6 +90,11 @@ export class SimpleOracle implements ISimpleOracle {
         "Invalid argument: regularizer must be a positive number.",
       );
     }
+    if (typeof laplaceSmoothing !== "number" || laplaceSmoothing < 0) {
+      throw new Error(
+        "Invalid argument: laplaceSmoothing must be a positive number.",
+      );
+    }
 
     if (
       typeof actionIdFeatures !== "boolean" ||
@@ -113,6 +121,7 @@ export class SimpleOracle implements ISimpleOracle {
     this.targetLabel = targetLabel;
     this.learningRate = learningRate;
     this.regularizer = regularizer;
+    this.laplaceSmoothing = laplaceSmoothing;
     this.useInversePropensityWeighting = useInversePropensityWeighting;
 
     this.name = name || targetLabel;
@@ -128,6 +137,7 @@ export class SimpleOracle implements ISimpleOracle {
       features: this.features,
       learningRate: this.learningRate,
       regularizer: this.regularizer,
+      laplaceSmoothing: this.laplaceSmoothing,
       actionIdFeatures: this.actionIdFeatures,
       actionFeatures: this.actionFeatures,
       contextActionIdInteractions: this.contextActionIdInteractions,
@@ -147,6 +157,7 @@ export class SimpleOracle implements ISimpleOracle {
       features: oracleState.features,
       learningRate: oracleState.learningRate,
       regularizer: oracleState.regularizer,
+      laplaceSmoothing: oracleState.laplaceSmoothing,
       actionIdFeatures: oracleState.actionIdFeatures,
       actionFeatures: oracleState.actionFeatures,
       contextActionIdInteractions: oracleState.contextActionIdInteractions,

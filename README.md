@@ -1,18 +1,20 @@
 # SimpleBandit
 
-SimpleBandit is a lightweight typescript/javascript library for contextual bandit recommenders, with no external dependencies, transpiling to <700 lines of javascript.
+Simplebandit is a lightweight typescript/javascript library for contextual bandit recommenders, with no external dependencies, transpiling to <700 lines of javascript.
 
 It provides classes and interfaces to create and manage bandit models, generate recommendations, select actions, and update your models. Easily integrates with e.g. React Native to support privacy sensitive and fully interpretable recommendations right on a user's device.
 
-Under the hood it's a logistic regression oracle with softmax exploration.
+Under the hood it's a online logistic regression oracle with softmax exploration.
 
 ## Installation
 
-The project is not (yet) uploaded to npm, but can be installed locally with
+The project is still in alpha, but can be installed with
 
 ```sh
-npm install
+npm install simplebandit
 ```
+
+All feedback is welcome.
 
 ## Usage
 
@@ -149,6 +151,8 @@ oracle = new SimpleOracle({
   context: ["rainy"], // only encode certain context features, ignore others
   features: ["fruit"], // only encode certain action features, ignore others
   learningRate: 0.1, // how quick the oracle learns (and forgets)
+  regularizer: 0.0, // L2 (ridge) regularization parameter on the weights
+  laplaceSmoothing: 0.0, // add constant to probability before applying ipw
   actionIdFeatures: true, // learn preference for individual actions, regardless of context
   actionFeatures: true, // learn preference over action features, regardless of context
   contextActionIdInteractions: true, // learn interaction between context and actionId preference
