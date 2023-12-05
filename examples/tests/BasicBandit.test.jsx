@@ -2,9 +2,9 @@ import React from "react";
 import { render, fireEvent, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import BasicFruitBandit from "../BasicBandit";
-import { SimpleBandit } from "../../dist/index";
+import { SimpleBandit } from "../../dist/cjs/index";
 
-jest.mock("../../dist/index", () => {
+jest.mock("../../dist/cjs/index", () => {
   return {
     SimpleBandit: jest.fn().mockImplementation(function () {
       this.accept = jest.fn().mockResolvedValue([]);
@@ -50,8 +50,8 @@ describe("BasicFruitBandit", () => {
 
   it("handles accept and reject", async () => {
     render(<BasicFruitBandit />);
-    const acceptButton = screen.getByText("Accept");
-    const rejectButton = screen.getByText("Reject");
+    const acceptButton = screen.getByText("Eat");
+    const rejectButton = screen.getByText("Don't eat");
 
     fireEvent.click(acceptButton);
     await waitFor(() =>
