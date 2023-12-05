@@ -1,11 +1,12 @@
 import { SimpleOracle, SimpleOracleOptions } from "../SimpleOracle";
-import { ITrainingData, ISimpleOracleState } from "../interfaces";
+import { ITrainingData, ISimpleOracleState } from "../interfaces/index";
 
 describe("SimpleOracle", () => {
   const context = ["context1", "context2"];
   const features = ["feature1", "feature2"];
   const actionIds = ["action1", "action2"];
   const learningRate = 0.1;
+  const regularizer = 0.0;
   const actionIdFeatures = true;
   const actionFeatures = true;
   const contextActionIdInteractions = false;
@@ -118,6 +119,7 @@ describe("SimpleOracle", () => {
         features,
         actionIds: actionIds,
         learningRate,
+        regularizer,
         actionIdFeatures,
         actionFeatures,
         contextActionIdInteractions,
@@ -147,6 +149,7 @@ describe("SimpleOracle", () => {
         context,
         features,
         learningRate,
+        regularizer,
         actionIdFeatures,
         actionFeatures,
         contextActionIdInteractions,

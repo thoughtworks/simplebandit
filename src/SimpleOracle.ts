@@ -3,13 +3,14 @@ import {
   ISimpleOracle,
   WeightsHash,
   ITrainingData,
-} from "./interfaces";
+} from "./interfaces/index";
 
 export interface SimpleOracleOptions {
   actionIds?: string[];
   context?: string[];
   features?: string[];
   learningRate?: number;
+  regularizer?: number;
   actionIdFeatures?: boolean;
   actionFeatures?: boolean;
   contextActionIdInteractions?: boolean;
@@ -27,6 +28,7 @@ export class SimpleOracle implements ISimpleOracle {
   features?: string[];
   addIntercept!: boolean;
   learningRate: number;
+  regularizer!: number;
   actionIdFeatures!: boolean;
   actionFeatures!: boolean;
   contextActionIdInteractions!: boolean;
@@ -42,6 +44,7 @@ export class SimpleOracle implements ISimpleOracle {
     context = undefined,
     features = undefined,
     learningRate = 0.1,
+    regularizer = 0.0,
     actionIdFeatures = true,
     actionFeatures = true,
     contextActionIdInteractions = true,
@@ -79,6 +82,11 @@ export class SimpleOracle implements ISimpleOracle {
         "Invalid argument: learningRate must be a positive number.",
       );
     }
+    if (typeof regularizer !== "number" || regularizer < 0) {
+      throw new Error(
+        "Invalid argument: regularizer must be a positive number.",
+      );
+    }
 
     if (
       typeof actionIdFeatures !== "boolean" ||
@@ -104,6 +112,7 @@ export class SimpleOracle implements ISimpleOracle {
 
     this.targetLabel = targetLabel;
     this.learningRate = learningRate;
+    this.regularizer = regularizer;
     this.useInversePropensityWeighting = useInversePropensityWeighting;
 
     this.name = name || targetLabel;
@@ -118,6 +127,7 @@ export class SimpleOracle implements ISimpleOracle {
       context: this.context,
       features: this.features,
       learningRate: this.learningRate,
+      regularizer: this.regularizer,
       actionIdFeatures: this.actionIdFeatures,
       actionFeatures: this.actionFeatures,
       contextActionIdInteractions: this.contextActionIdInteractions,
@@ -136,6 +146,7 @@ export class SimpleOracle implements ISimpleOracle {
       context: oracleState.context,
       features: oracleState.features,
       learningRate: oracleState.learningRate,
+      regularizer: oracleState.regularizer,
       actionIdFeatures: oracleState.actionIdFeatures,
       actionFeatures: oracleState.actionFeatures,
       contextActionIdInteractions: oracleState.contextActionIdInteractions,
@@ -279,11 +290,13 @@ export class SimpleOracle implements ISimpleOracle {
 
         const pred = this._sigmoid(processedInput["logit"]);
         const grad = sampleWeight * this.learningRate * (pred - y);
+        const reg = this.regularizer * this.learningRate;
 
         for (const feature in processedInput.inputs) {
           this.weights[feature] =
             processedInput.weights[feature] -
-            grad * processedInput.inputs[feature];
+            grad * processedInput.inputs[feature] -
+            reg * processedInput.weights[feature];
         }
       } else {
         // silently ignore training data without targetLabel: not meant for this oracle
