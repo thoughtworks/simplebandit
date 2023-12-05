@@ -5,6 +5,7 @@ export type ISimpleOracleState = {
   context?: string[];
   features?: string[];
   learningRate: number;
+  regularizer: number;
   actionIdFeatures: boolean;
   actionFeatures: boolean;
   contextActionIdInteractions: boolean;
