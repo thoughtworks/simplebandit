@@ -11,12 +11,12 @@ export interface SimpleOracleOptions {
   features?: string[];
   learningRate?: number;
   regularizer?: number;
-  laplaceSmoothing?: number;
   actionIdFeatures?: boolean;
   actionFeatures?: boolean;
   contextActionIdInteractions?: boolean;
   contextActionFeatureInteractions?: boolean;
   useInversePropensityWeighting?: boolean;
+  laplaceSmoothing?: number;
   targetLabel?: string;
   name?: string;
   oracleWeight?: number;
@@ -30,12 +30,12 @@ export class SimpleOracle implements ISimpleOracle {
   addIntercept!: boolean;
   learningRate: number;
   regularizer!: number;
-  laplaceSmoothing!: number;
   actionIdFeatures!: boolean;
   actionFeatures!: boolean;
   contextActionIdInteractions!: boolean;
   contextActionFeatureInteractions!: boolean;
   useInversePropensityWeighting: boolean;
+  laplaceSmoothing!: number;
   targetLabel: string;
   name: string;
   oracleWeight: number;
@@ -47,12 +47,12 @@ export class SimpleOracle implements ISimpleOracle {
     features = undefined,
     learningRate = 0.1,
     regularizer = 0.0,
-    laplaceSmoothing = 0.0,
     actionIdFeatures = true,
     actionFeatures = true,
     contextActionIdInteractions = true,
     contextActionFeatureInteractions = true,
     useInversePropensityWeighting = true,
+    laplaceSmoothing = 0.01,
     targetLabel = "click",
     name = undefined,
     oracleWeight = 1.0,
@@ -137,12 +137,12 @@ export class SimpleOracle implements ISimpleOracle {
       features: this.features,
       learningRate: this.learningRate,
       regularizer: this.regularizer,
-      laplaceSmoothing: this.laplaceSmoothing,
       actionIdFeatures: this.actionIdFeatures,
       actionFeatures: this.actionFeatures,
       contextActionIdInteractions: this.contextActionIdInteractions,
       contextActionFeatureInteractions: this.contextActionFeatureInteractions,
       useInversePropensityWeighting: this.useInversePropensityWeighting,
+      laplaceSmoothing: this.laplaceSmoothing,
       targetLabel: this.targetLabel,
       name: this.name,
       oracleWeight: this.oracleWeight,
@@ -157,13 +157,13 @@ export class SimpleOracle implements ISimpleOracle {
       features: oracleState.features,
       learningRate: oracleState.learningRate,
       regularizer: oracleState.regularizer,
-      laplaceSmoothing: oracleState.laplaceSmoothing,
       actionIdFeatures: oracleState.actionIdFeatures,
       actionFeatures: oracleState.actionFeatures,
       contextActionIdInteractions: oracleState.contextActionIdInteractions,
       contextActionFeatureInteractions:
         oracleState.contextActionFeatureInteractions,
       useInversePropensityWeighting: oracleState.useInversePropensityWeighting,
+      laplaceSmoothing: oracleState.laplaceSmoothing,
       targetLabel: oracleState.targetLabel,
       name: oracleState.name,
       oracleWeight: oracleState.oracleWeight,
@@ -296,7 +296,7 @@ export class SimpleOracle implements ISimpleOracle {
         }
         let sampleWeight = 1;
         if (this.useInversePropensityWeighting && data.probability > 0) {
-          sampleWeight = 1 / data.probability;
+          sampleWeight = 1 / (this.laplaceSmoothing + data.probability);
         }
 
         const pred = this._sigmoid(processedInput["logit"]);

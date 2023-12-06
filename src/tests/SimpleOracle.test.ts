@@ -443,7 +443,7 @@ describe("SimpleOracle", () => {
   describe("toJSON", () => {
     it("should return a JSON object with the correct properties", () => {
       expect(oracle.toJSON()).toEqual(
-        '{"actionIds":["action1","action2"],"context":["context1","context2"],"features":["feature1","feature2"],"learningRate":0.1,"regularizer":0,"laplaceSmoothing":0,"actionIdFeatures":true,"actionFeatures":true,"contextActionIdInteractions":false,"contextActionFeatureInteractions":true,"useInversePropensityWeighting":false,"targetLabel":"click","name":"click","oracleWeight":1,"weights":{"intercept":0,"action1":0.1,"action2":0.2,"feature1":0.3,"feature2":0.4,"context1*feature1":1}}',
+        '{"actionIds":["action1","action2"],"context":["context1","context2"],"features":["feature1","feature2"],"learningRate":0.1,"regularizer":0,"actionIdFeatures":true,"actionFeatures":true,"contextActionIdInteractions":false,"contextActionFeatureInteractions":true,"useInversePropensityWeighting":false,"laplaceSmoothing":0,"targetLabel":"click","name":"click","oracleWeight":1,"weights":{"intercept":0,"action1":0.1,"action2":0.2,"feature1":0.3,"feature2":0.4,"context1*feature1":1}}',
       );
     });
   });
@@ -501,7 +501,7 @@ describe("SimpleOracle", () => {
 
   describe("fit", () => {
     it("should return an array of weights that are different from the previous weights", () => {
-      const oracle = new SimpleOracle({ learningRate: 1 });
+      const oracle = new SimpleOracle({ learningRate: 1, laplaceSmoothing: 0 });
       const trainingData: ITrainingData = {
         recommendationId: "recommendation1",
         actionId: "action1",
@@ -515,8 +515,8 @@ describe("SimpleOracle", () => {
       expect(oracle.weights["action1"]).toBeCloseTo(1, 2);
     });
 
-    it("should return an array of weights that are different from the previous weights", () => {
-      const oracle = new SimpleOracle({ learningRate: 1 });
+    it("should correctly update the weights", () => {
+      const oracle = new SimpleOracle({ learningRate: 1, laplaceSmoothing: 0 });
       const trainingData: ITrainingData = {
         recommendationId: "recommendation1",
         actionId: "action1",
@@ -535,9 +535,61 @@ describe("SimpleOracle", () => {
       expect(oracle.weights["feature1"]).toBeCloseTo(1, 2);
     });
 
+    it("should correctly update the weights with laplaceSmoothing", () => {
+      const oracle = new SimpleOracle({
+        learningRate: 1,
+        laplaceSmoothing: 0.5,
+      });
+      const trainingData: ITrainingData = {
+        recommendationId: "recommendation1",
+        actionId: "action1",
+        probability: 0.5,
+        context: { context1: 1 },
+        features: { feature1: 1 },
+        click: 1,
+      };
+      const oldWeights = { ...oracle.weights };
+      oracle.fit(trainingData as any);
+      expect(oracle.weights).not.toEqual(oldWeights);
+      // 0 - 1/(laplaceSmoothing+probability) * this.learningRate * (pred - y) * inputs[feature] = 1/(0.5+0.5) * 1.0 * (0.5 - 1) * 1 = 0.5
+      expect(oracle.weights["action1"]).toBeCloseTo(0.5, 2);
+      expect(oracle.weights["context1*action1"]).toBeCloseTo(0.5, 2);
+      expect(oracle.weights["context1*feature1"]).toBeCloseTo(0.5, 2);
+      expect(oracle.weights["feature1"]).toBeCloseTo(0.5, 2);
+    });
+
+    it("should correctly update the weights with regularizer", () => {
+      const oracle = new SimpleOracle({
+        learningRate: 1,
+        laplaceSmoothing: 0.0,
+        regularizer: 0.5,
+        weights: { action1: 1 },
+      });
+      const trainingData: ITrainingData = {
+        recommendationId: "recommendation1",
+        actionId: "action1",
+        probability: 0.5,
+        context: { context1: 1 },
+        features: { feature1: 1 },
+        click: 1,
+      };
+      const oldWeights = { ...oracle.weights };
+      oracle.fit(trainingData as any);
+      expect(oracle.weights).not.toEqual(oldWeights);
+      // pred = 1/(1+e^-(1+1)) = 0.731
+      // weights[feature] - (1/probability) * this.learningRate * (pred - y) * inputs[feature] - regularizer * learningRate * weights[feature]
+      // = 1 - 1/0.5 * 1.0 * (0.731 - 1) * 1 - 0.5 * 1 * 1 = 1.038
+      expect(oracle.weights["action1"]).toBeCloseTo(1.038, 2);
+      // = 1 - 1/0.5 * 1.0 * (0.731 - 1) * 1 - 0.5 * 1 * 1 = 0.538
+      expect(oracle.weights["context1*action1"]).toBeCloseTo(0.538, 2);
+      expect(oracle.weights["context1*feature1"]).toBeCloseTo(0.538, 2);
+      expect(oracle.weights["feature1"]).toBeCloseTo(0.538, 2);
+    });
+
     it("should return an array of weights that are different from the previous weights", () => {
       const oracle = new SimpleOracle({
         learningRate: 1,
+        laplaceSmoothing: 0,
         weights: {
           intercept: 1,
           action1: 1,

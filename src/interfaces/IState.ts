@@ -6,12 +6,12 @@ export type ISimpleOracleState = {
   features?: string[];
   learningRate: number;
   regularizer: number;
-  laplaceSmoothing: number;
   actionIdFeatures: boolean;
   actionFeatures: boolean;
   contextActionIdInteractions: boolean;
   contextActionFeatureInteractions: boolean;
   useInversePropensityWeighting: boolean;
+  laplaceSmoothing: number;
   targetLabel: string;
   name: string;
   oracleWeight: number;

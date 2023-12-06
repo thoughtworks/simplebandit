@@ -152,12 +152,12 @@ oracle = new SimpleOracle({
   features: ["fruit"], // only encode certain action features, ignore others
   learningRate: 0.1, // how quick the oracle learns (and forgets)
   regularizer: 0.0, // L2 (ridge) regularization parameter on the weights
-  laplaceSmoothing: 0.0, // add constant to probability before applying ipw
   actionIdFeatures: true, // learn preference for individual actions, regardless of context
   actionFeatures: true, // learn preference over action features, regardless of context
   contextActionIdInteractions: true, // learn interaction between context and actionId preference
   contextActionFeatureInteractions: true, // learn interaction between context and action features preference
   useInversePropensityWeighting: true, // oracle uses ipw by default (sample weight = 1/p), but can be switched off
+  laplaceSmoothing: 0.01, // add constant to probability before applying ipw
   targetLabel: "click", // target label for oracle, defaults to 'click', but can also be e.g. 'rating'
   oracleWeight: 1.0, // if using multiple oracles, how this one is weighted
   name: "click1", // name is by default equal to targetLabel, but can give unique name if needed
