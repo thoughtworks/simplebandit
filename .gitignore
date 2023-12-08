@@ -44,3 +44,4 @@ examples/node_modules
 examples/.cache
 .DS_Store
 .cache
+.parcel-cache
