@@ -4,23 +4,28 @@ import { SimpleBandit, SimpleOracle } from "../dist/cjs/index";
 function ContextFruitBandit() {
   const [bandit, setBandit] = useState(null);
   const [recommendation, setRecommendation] = useState(null);
-  const [context, setContext] = useState(null);
+  const [context, setContext] = useState({ sunny: 1 });
   const [scoredActions, setScoredActions] = useState([]);
   const [trainingData, setTrainingData] = useState([]);
   const [serializedBandit, setSerializedBandit] = useState("");
 
   useEffect(() => {
     const banditInstance = new SimpleBandit({
-      oracle: new SimpleOracle({ learningRate: 0.1 }),
+      oracle: new SimpleOracle({
+        learningRate: 0.1,
+        actionIdFeatures: false, // only learn interactions with context
+        actionFeatures: false, // only learn interactions with context
+        contextActionIdInteractions: false, // only learn feature interactions with context
+      }),
       actions: {
-        apple: { fruit: 1 },
-        pear: { fruit: 1 },
-        orange: { fruit: 1 },
-        chocolate: { treat: 1 },
-        candy: { treat: 1 },
-        cake: { treat: 1 },
+        apple: { fruit: 1, treat: -1 },
+        pear: { fruit: 1, treat: -1 },
+        orange: { fruit: 1, treat: -1 },
+        chocolate: { fruit: -1, treat: 1 },
+        candy: { fruit: -1, treat: 1 },
+        cake: { fruit: -1, treat: 1 },
       },
-      temperature: 0.1,
+      temperature: 0.3,
     });
     setBandit(banditInstance);
   }, []);
@@ -32,8 +37,7 @@ function ContextFruitBandit() {
   }, [bandit]);
 
   const randomWeather = () => {
-    const weather = ["sunny", "rainy"][Math.floor(Math.random() * 2)];
-    const context = weather == "sunny" ? { sunny: 1 } : { sunny: -1 };
+    const context = [{ sunny: 1 }, { rainy: 1 }][Math.floor(Math.random() * 2)];
     setContext(context);
     const _scoredActions = bandit.getScoredActions(context);
     _scoredActions.forEach((scoredAction) => {
@@ -42,11 +46,12 @@ function ContextFruitBandit() {
       scoredAction.treat = actionFeatures.treat || 0;
     });
     setScoredActions(_scoredActions);
+    return context;
   };
 
   const generateNewRecommendation = () => {
-    randomWeather();
-    setRecommendation(bandit.recommend(context));
+    const newContext = randomWeather();
+    setRecommendation(bandit.recommend(newContext));
   };
 
   const handleAccept = async () => {
@@ -67,7 +72,7 @@ function ContextFruitBandit() {
     <div>
       <h1>Context dependent recommendations</h1>
       <p>
-        The recommender is both learning an interaction between the context
+        The recommender is only learning an interaction between the context
         (sunny or rainy) and the fruit or treat preferences.
       </p>
       <h2>Actions scores and probabilities:</h2>

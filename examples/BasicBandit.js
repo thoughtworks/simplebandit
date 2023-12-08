@@ -56,7 +56,17 @@ function BasicFruitBandit() {
         ))}
       </div>
       <h2>Fruit recommendation:</h2>
-      {recommendation && <div>{recommendation.actionId}</div>}
+      <div>
+        <p>
+          Keep eating apples, and rejecting the other options, and see how
+          quickly the bandit learns your preference:
+        </p>
+      </div>
+      {recommendation && (
+        <div>
+          <b>{recommendation.actionId}</b>
+        </div>
+      )}
       <button onClick={handleAccept}>Eat</button>
       <button onClick={handleReject}>Don't eat</button>
     </div>
