@@ -39,8 +39,8 @@ lib/*.js
 test/*.js
 *.map
 dist/*
-examples/react/dist
-examples/react/node_modules
-examples/react/.cache
+examples/dist
+examples/node_modules
+examples/.cache
 .DS_Store
 .cache
