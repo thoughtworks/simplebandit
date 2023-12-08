@@ -6,6 +6,8 @@ Simplebandit is a lightweight typescript/javascript library for contextual bandi
 
 It provides classes and interfaces to create and manage bandit models, generate recommendations, select actions, and update your models. Easily integrates with e.g. React Native to support privacy sensitive and fully interpretable recommendations right on a user's device.
 
+You can find the live examples deployed at [https://thoughtworks.github.io/simplebandit/](https://thoughtworks.github.io/simplebandit/).
+
 Under the hood it's a online logistic regression oracle with softmax exploration.
 
 ## Installation
@@ -230,8 +232,10 @@ slate = bandit.slate(context, { include: ["banana", "pear"] });
 
 ## Examples
 
-There are several usage examples provided in the `examples/` folder made with react.
-You can run the examples with e.g. `parcel index.html` or `make examples` and then view them on `http://localhost:1234`.
+There are several usage examples provided in the `examples/` folder (built with react).
+You can run the examples with e.g. `parcel examples/index.html` or `make example` and then view them on e.g. `http://localhost:1234`.
+
+Or simply visit [https://thoughtworks.github.io/simplebandit/](https://thoughtworks.github.io/simplebandit/).
 
 ## Testing
 
