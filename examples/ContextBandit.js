@@ -3,7 +3,7 @@ import { SimpleBandit, SimpleOracle } from "../dist/cjs/index";
 
 function ContextFruitBandit() {
   const [bandit, setBandit] = useState(null);
-  const [slate, setSlate] = useState(null);
+  const [recommendation, setRecommendation] = useState(null);
   const [context, setContext] = useState(null);
   const [scoredActions, setScoredActions] = useState([]);
   const [trainingData, setTrainingData] = useState([]);
@@ -21,7 +21,6 @@ function ContextFruitBandit() {
         cake: { treat: 1 },
       },
       temperature: 0.1,
-      slateSize: 3,
     });
     setBandit(banditInstance);
   }, []);
@@ -47,21 +46,18 @@ function ContextFruitBandit() {
 
   const generateNewRecommendation = () => {
     randomWeather();
-    setSlate(bandit.slate(context));
+    setRecommendation(bandit.recommend(context));
   };
 
-  const handleChoose = async (index) => {
-    const newTrainingData = await bandit.choose(
-      slate,
-      slate.slateItems[index].actionId,
-    );
+  const handleAccept = async () => {
+    const newTrainingData = await bandit.accept(recommendation);
     setTrainingData([...trainingData, ...newTrainingData]);
     setSerializedBandit(bandit.toJSON());
     generateNewRecommendation();
   };
 
   const handleReject = async () => {
-    const newTrainingData = await bandit.reject(slate);
+    const newTrainingData = await bandit.reject(recommendation);
     setTrainingData([...trainingData, ...newTrainingData]);
     setSerializedBandit(bandit.toJSON());
     generateNewRecommendation();
@@ -100,33 +96,27 @@ function ContextFruitBandit() {
         </table>
       </div>
       <h2>Context:</h2>
-      <div>{context?.sunny == 1 ? "sunny" : "rainy"}</div>
       <div>
         <button
           onClick={() => {
-            randomWeather();
             generateNewRecommendation();
           }}
         >
-          RandomWeather
+          Generate Random Weather
         </button>{" "}
+        <div>{context?.sunny == 1 ? "sunny" : "rainy"}</div>
       </div>
-      <h2>Recommended fruits:</h2>
-      {slate &&
-        slate.slateItems.map((action, index) => (
-          <div
-            key={action.actionId}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "start",
-            }}
-          >
-            {index + 1}: {action.actionId}
-            <button onClick={() => handleChoose(index)}>Choose</button>
-          </div>
-        ))}
-      <button onClick={handleReject}>Reject all</button>
+      <h2>Food recommendation:</h2>
+      <div>
+        <p>
+          You can try only eating fruit when it's sunny and only treats when
+          it's rainy. Then see how fast the algorithm learns your context
+          dependent preference.
+        </p>
+      </div>{" "}
+      {recommendation && <div>{recommendation.actionId}</div>}
+      <button onClick={handleAccept}>Eat</button>
+      <button onClick={handleReject}>Don't eat</button>
       <h2>Training Data</h2>
       <div>{JSON.stringify(trainingData)}</div>
       <h2>JSON serialized bandit</h2>
