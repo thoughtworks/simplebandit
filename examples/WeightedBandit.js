@@ -3,7 +3,7 @@ import { SimpleBandit, SimpleOracle } from "../dist/cjs/index";
 
 function WeightedFruitBandit() {
   const [bandit, setBandit] = useState(null);
-  const [slate, setSlate] = useState(null);
+  const [recommendation, setRecommendation] = useState(null);
   const [ScoredActionPerOracle, setScoredActionPerOracle] = useState([[]]);
   const [trainingData, setTrainingData] = useState([]);
   const [serializedBandit, setSerializedBandit] = useState("");
@@ -52,25 +52,31 @@ function WeightedFruitBandit() {
   }, [bandit]);
 
   const generateNewRecommendation = () => {
-    const slate = bandit.slate();
-    setSlate(slate);
-    const scoredActionPerOracle = bandit.getScoredActionsPerOracle();
-    setScoredActionPerOracle(scoredActionPerOracle);
+    setRecommendation(bandit.recommend());
+    setScoredActionPerOracle(bandit.getScoredActionsPerOracle());
   };
 
-  const handleSubmit = async () => {
-    const newClickTrainingData = await bandit.choose(slate, selectedAction);
+  const handleAccept = async () => {
+    const newClickTrainingData = await bandit.accept(recommendation);
     const newStarsTrainingData = await bandit.feedback(
-      slate,
+      recommendation,
       "stars",
       starRating,
-      selectedAction,
     );
     setTrainingData([
       ...trainingData,
       ...newClickTrainingData,
       ...newStarsTrainingData,
     ]);
+    setSerializedBandit(bandit.toJSON());
+    setSelectedAction(null);
+    setStarRating(null);
+    generateNewRecommendation();
+  };
+
+  const handleReject = async () => {
+    const newClickTrainingData = await bandit.reject(recommendation);
+    setTrainingData([...trainingData, ...newClickTrainingData]);
     setSerializedBandit(bandit.toJSON());
     setSelectedAction(null);
     setStarRating(null);
@@ -133,61 +139,56 @@ function WeightedFruitBandit() {
           </tbody>
         </table>
       </div>
-      <h2>Recommended fruits:</h2>
+      <h2>Recommended foods:</h2>
       <p>
         You can try to e.g. mostly select fruits and give them low rating, and
         sometimes select treats and give them a high rating. Then play with the
         weight slider to see how that affects the recommendations probabilities.
       </p>
-      {slate &&
-        slate.slateItems.map((action, index) => (
-          <div
-            key={action.actionId}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "start",
+      {recommendation && <div>{recommendation.actionId}</div>}
+      <button
+        onClick={() => {
+          setSelectedAction(recommendation.actionId);
+          setStarRating(null);
+        }}
+      >
+        Eat
+      </button>
+      {selectedAction !== null && (
+        <div>
+          Stars:
+          <select
+            value=""
+            onChange={(e) => {
+              setStarRating(parseFloat(e.target.value));
             }}
           >
-            {index + 1}: {action.actionId}
-            <button
-              onClick={() => {
-                setSelectedAction(action.actionId);
-                setStarRating(null);
-              }}
-            >
-              Select
-            </button>
-            {selectedAction === action.actionId && (
-              <div>
-                Stars:
-                <select
-                  value=""
-                  onChange={(e) => {
-                    setStarRating(parseFloat(e.target.value));
-                  }}
-                >
-                  <option value="" disabled={true}>
-                    Select rating
-                  </option>
-                  <option value="0.0">1</option>
-                  <option value="0.25">2</option>
-                  <option value="0.5">3</option>
-                  <option value="0.75">4</option>
-                  <option value="1.0">5</option>
-                </select>
-                <button
-                  disabled={starRating === null}
-                  onClick={() => {
-                    handleSubmit();
-                  }}
-                >
-                  Submit
-                </button>
-              </div>
-            )}
-          </div>
-        ))}
+            <option value="" disabled={true}>
+              Select rating
+            </option>
+            <option value="0.0">1</option>
+            <option value="0.25">2</option>
+            <option value="0.5">3</option>
+            <option value="0.75">4</option>
+            <option value="1.0">5</option>
+          </select>
+          <button
+            disabled={starRating === null}
+            onClick={() => {
+              handleAccept();
+            }}
+          >
+            Submit
+          </button>
+        </div>
+      )}
+      <button
+        onClick={() => {
+          handleReject();
+        }}
+      >
+        Don't eat
+      </button>
       <h2>Training Data</h2>
       <div>{JSON.stringify(trainingData)}</div>
       <h2>JSON serialized bandit</h2>
