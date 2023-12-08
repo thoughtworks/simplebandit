@@ -294,9 +294,10 @@ export class SimpleOracle implements ISimpleOracle {
             "Target label must be between 0 and 1! But got `${this.targetLabel}`=`${y}`",
           );
         }
-        let sampleWeight = 1;
+        let sampleWeight =
+          data.sampleWeight !== undefined ? data.sampleWeight : 1.0;
         if (this.useInversePropensityWeighting && data.probability > 0) {
-          sampleWeight = 1 / (this.laplaceSmoothing + data.probability);
+          sampleWeight *= 1 / (this.laplaceSmoothing + data.probability);
         }
 
         const pred = this._sigmoid(processedInput["logit"]);

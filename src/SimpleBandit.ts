@@ -17,17 +17,20 @@ export class SimpleBandit implements ISimpleBandit {
   temperature: number;
   actionsMap: Record<string, IAction>;
   slateSize: number;
+  slateNegativeSampleWeight: number;
 
   constructor({
     oracle: oracle,
     actions,
     temperature = 0.5,
     slateSize = 1,
+    slateNegativeSampleWeight = 1,
   }: {
     oracle?: SimpleOracle | SimpleOracle[];
     actions: IActionsInput;
     temperature?: number;
     slateSize?: number;
+    slateNegativeSampleWeight?: number;
   }) {
     this.oracle = Array.isArray(oracle)
       ? oracle
@@ -40,6 +43,7 @@ export class SimpleBandit implements ISimpleBandit {
     this.actionsMap = this._processActions(actions);
     this.temperature = temperature;
     this.slateSize = slateSize;
+    this.slateNegativeSampleWeight = slateNegativeSampleWeight;
   }
 
   _processActions(input: IActionsInput): Record<string, IAction> {
@@ -206,6 +210,7 @@ export class SimpleBandit implements ISimpleBandit {
     selectedActionId: string | undefined = undefined,
   ): ITrainingData[] {
     if ("actionId" in recommendation) {
+      // IRecommendation
       const trainingData: ITrainingData[] = [
         {
           recommendationId: recommendation.recommendationId,
@@ -218,6 +223,7 @@ export class SimpleBandit implements ISimpleBandit {
       ];
       return trainingData;
     } else {
+      // ISlate
       const trainingData: ITrainingData[] = [];
       for (let index = 0; index < recommendation.slateItems.length; index++) {
         const actionId = recommendation.slateItems[index].actionId;
@@ -230,6 +236,7 @@ export class SimpleBandit implements ISimpleBandit {
         const context = recommendation.context;
         const features = recommendedAction.features;
         const click = recommendedAction.actionId === selectedActionId ? 1 : 0;
+        const sampleWeight = click === 0 ? this.slateNegativeSampleWeight : 1.0;
         const probability = recommendation.slateItems[index].probability;
         trainingData.push({
           recommendationId: recommendation.recommendationId,
@@ -238,6 +245,7 @@ export class SimpleBandit implements ISimpleBandit {
           context: context,
           click: click,
           probability: probability,
+          sampleWeight: sampleWeight,
         });
       }
       return trainingData;
