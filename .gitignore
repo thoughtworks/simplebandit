@@ -39,7 +39,6 @@ lib/*.js
 test/*.js
 *.map
 dist/*
-examples/dist
 examples/node_modules
 examples/.cache
 .DS_Store
