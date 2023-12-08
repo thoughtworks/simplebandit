@@ -70,12 +70,12 @@ function ContextFruitBandit() {
 
   return (
     <div>
-      <h1>Context dependent recommendations</h1>
+      <h3>Context dependent recommendations</h3>
       <p>
         The recommender is only learning an interaction between the context
         (sunny or rainy) and the fruit or treat preferences.
       </p>
-      <h2>Actions scores and probabilities:</h2>
+      <h3>Actions scores and probabilities:</h3>
       <div>
         <table>
           <thead>
@@ -100,7 +100,7 @@ function ContextFruitBandit() {
           </tbody>
         </table>
       </div>
-      <h2>Context:</h2>
+      <h3>Context:</h3>
       <div>
         <button
           onClick={() => {
@@ -111,7 +111,7 @@ function ContextFruitBandit() {
         </button>{" "}
         <div>{context?.sunny == 1 ? "sunny" : "rainy"}</div>
       </div>
-      <h2>Food recommendation:</h2>
+      <h3>Food recommendation:</h3>
       <div>
         <p>
           You can try only eating fruit when it's sunny and only treats when
@@ -119,12 +119,16 @@ function ContextFruitBandit() {
           dependent preference.
         </p>
       </div>{" "}
-      {recommendation && <div>{recommendation.actionId}</div>}
+      {recommendation && (
+        <div>
+          <b>{recommendation.actionId}</b>
+        </div>
+      )}
       <button onClick={handleAccept}>Eat</button>
       <button onClick={handleReject}>Don't eat</button>
-      <h2>Training Data</h2>
+      <h3>Training Data</h3>
       <div>{JSON.stringify(trainingData)}</div>
-      <h2>JSON serialized bandit</h2>
+      <h3>JSON serialized bandit</h3>
       <div>{serializedBandit}</div>
     </div>
   );

@@ -89,13 +89,13 @@ function WeightedFruitBandit() {
 
   return (
     <div>
-      <h1>Weighted oracles</h1>
+      <h3>Weighted oracles</h3>
       <p>
         This is an example of a bandit that combines two scores: a click score
         and a star rating score.
       </p>
 
-      <h2>Oracle Weights:</h2>
+      <h3>Oracle Weights:</h3>
       <p>
         You can select to put more weight on the predicted number of stars or
         the predicted likelihood of a click.
@@ -114,7 +114,7 @@ function WeightedFruitBandit() {
       />
       <label htmlFor="weightSlider">Clicks</label>
 
-      <h2>Scored Actions Per Oracle:</h2>
+      <h3>Scored Actions Per Oracle:</h3>
       <div>
         <table>
           <thead>
@@ -139,7 +139,7 @@ function WeightedFruitBandit() {
           </tbody>
         </table>
       </div>
-      <h2>Recommended foods:</h2>
+      <h3>Recommended foods:</h3>
       <p>
         You can try to e.g. mostly select fruits and give them low rating, and
         sometimes select treats and give them a high rating. Then play with the
@@ -193,9 +193,9 @@ function WeightedFruitBandit() {
       >
         Don't eat
       </button>
-      <h2>Training Data</h2>
+      <h3>Training Data</h3>
       <div>{JSON.stringify(trainingData)}</div>
-      <h2>JSON serialized bandit</h2>
+      <h3>JSON serialized bandit</h3>
       <div>{serializedBandit}</div>
     </div>
   );

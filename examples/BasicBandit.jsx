@@ -37,7 +37,7 @@ function BasicFruitBandit() {
 
   return (
     <div>
-      <h1>Simple Fruit Bandit</h1>
+      <h3>Simple Fruit Bandit</h3>
       <p>
         This is the simplest example of a bandit that is learning the preference
         among three types of fruit: apple, pear or orange.
@@ -46,7 +46,7 @@ function BasicFruitBandit() {
         When you eat a fruit, the probability of that fruit goes up. When you
         reject a fruit, the probability goes down
       </p>
-      <h2>Fruit probabilities:</h2>
+      <h3>Fruit probabilities:</h3>
       <div>
         {scoredActions.map((scoredAction) => (
           <p key={scoredAction.actionId}>
@@ -55,7 +55,7 @@ function BasicFruitBandit() {
           </p>
         ))}
       </div>
-      <h2>Fruit recommendation:</h2>
+      <h3>Fruit recommendation:</h3>
       <div>
         <p>
           Keep eating apples, and rejecting the other options, and see how

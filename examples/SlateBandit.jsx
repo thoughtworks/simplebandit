@@ -63,10 +63,10 @@ function SlateFruitBandit() {
 
   return (
     <div>
-      <h1>Slate of multiple recommendations</h1>
+      <h3>Slate of multiple recommendations</h3>
       <p>The slate items get sampled one by one from top to bottom.</p>
 
-      <h2>Actions scores and probabilities:</h2>
+      <h3>Actions scores and probabilities:</h3>
       <p>
         This slate recommender is both learning preference for specific items
         and preferences for fruits or treats in general. By choosing a fruit,
@@ -96,7 +96,7 @@ function SlateFruitBandit() {
           </tbody>
         </table>
       </div>
-      <h2>slateSize:</h2>
+      <h3>slateSize:</h3>
       <label htmlFor="weightSlider">1</label>
       <input
         id="slateSizeSlider"
@@ -110,7 +110,7 @@ function SlateFruitBandit() {
         }}
       />
       <label htmlFor="weightSlider">6</label>
-      <h2>Recommended fruits:</h2>
+      <h3>Recommended fruits:</h3>
       <p>
         By selecting one item it will go up in probability, but you also reject
         the others and they will go down in probability.
@@ -130,9 +130,9 @@ function SlateFruitBandit() {
           </div>
         ))}
       <button onClick={handleReject}>Reject all</button>
-      <h2>Training Data</h2>
+      <h3>Training Data</h3>
       <div>{JSON.stringify(trainingData)}</div>
-      <h2>JSON serialized bandit</h2>
+      <h3>JSON serialized bandit</h3>
       <div>{serializedBandit}</div>
     </div>
   );

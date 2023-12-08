@@ -3,11 +3,11 @@ import { createRoot } from "react-dom/client";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 
-import BasicFruitBandit from "./BasicBandit.js";
-import TemperatureFruitBandit from "./TemperatureBandit.js";
-import SlateFruitBandit from "./SlateBandit.js";
-import WeightedFruitBandit from "./WeightedBandit.js";
-import ContextFruitBandit from "./ContextBandit.js";
+import BasicFruitBandit from "./BasicBandit.jsx";
+import TemperatureFruitBandit from "./TemperatureBandit.jsx";
+import SlateFruitBandit from "./SlateBandit.jsx";
+import WeightedFruitBandit from "./WeightedBandit.jsx";
+import ContextFruitBandit from "./ContextBandit.jsx";
 
 const root = document.getElementById("root");
 
