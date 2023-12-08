@@ -20,7 +20,7 @@ lint:
 fix:
 	npm run lint:fix
 
-examples:
+example: build
 	cd examples && parcel index.html
 
 
