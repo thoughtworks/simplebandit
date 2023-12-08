@@ -1,9 +1,6 @@
-<table border="0">
- <tr>
-    <td><img src="https://github.com/thoughtworks/simplebandit/assets/27999937/fb71b387-689d-4fd6-a80f-8eea37278d2c" alt="simplebandit-logo-transparent" width="40"/></td>
-    <td><h1>SimpleBandit</h1></td>
- </tr>
-</table>
+<img src="https://github.com/thoughtworks/simplebandit/assets/27999937/fb71b387-689d-4fd6-a80f-8eea37278d2c" width="50" align="right" alt="simplebandit-logo-transparent"/>
+
+# simplebandit
 
 Simplebandit is a lightweight typescript/javascript library for contextual bandit recommenders, with no external dependencies, transpiling to <700 lines of javascript.
 
