@@ -29,6 +29,12 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v4
+      - run: npm ci
+      - run: mkdir -p dist/browser
+      - run: npm run build --if-present
+      - run: npm test
+      - run: mkdir examples/dist
+      - run: parcel build examples/index.html --out-dir examples/dist --public-url ./
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
