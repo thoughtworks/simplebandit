@@ -145,7 +145,11 @@ function WeightedFruitBandit() {
         sometimes select treats and give them a high rating. Then play with the
         weight slider to see how that affects the recommendations probabilities.
       </p>
-      {recommendation && <div>{recommendation.actionId}</div>}
+      {recommendation && (
+        <div>
+          <b>{recommendation.actionId}</b>
+        </div>
+      )}
       <button
         onClick={() => {
           setSelectedAction(recommendation.actionId);

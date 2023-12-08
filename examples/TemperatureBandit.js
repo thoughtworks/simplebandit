@@ -112,7 +112,11 @@ function TemperatureFruitBandit() {
         </table>
       </div>
       <h2>Recommended fruit:</h2>
-      {recommendation && <div>{recommendation.actionId}</div>}
+      {recommendation && (
+        <div>
+          <b>{recommendation.actionId}</b>
+        </div>
+      )}
       <button onClick={handleAccept}>Accept</button>
       <button onClick={handleReject}>Reject</button>
       <h2>Training Data</h2>
