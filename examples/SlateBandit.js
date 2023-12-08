@@ -22,6 +22,7 @@ function SlateFruitBandit() {
       },
       temperature: 0.2,
       slateSize: 3,
+      slateNegativeSampleWeight: 0.5,
     });
     setBandit(banditInstance);
   }, []);
