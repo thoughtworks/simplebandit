@@ -59,7 +59,11 @@ function BasicFruitBandit() {
       <div>
         <p>
           Keep eating apples, and rejecting the other options, and see how
-          quickly the bandit learns your preference:
+          quickly the bandit learns your preference.{" "}
+        </p>
+        <p>
+          Then switch to preferring oranges, and see how quick the bandit
+          adapts.
         </p>
       </div>
       {recommendation && (

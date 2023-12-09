@@ -95,30 +95,31 @@ function ContextFruitBandit() {
   return (
     <div>
       <h3>Context dependent recommendations</h3>
-      <p>
-        The bandit can learn the interaction between the context (sunny or
-        rainy) and the fruit or treat preferences.
-      </p>
-      <h3>Feature and interaction toggles</h3>
-      <p>
-        If you switch off the context interaction toggles, the recommendations
-        will no longer depend on the weather.
-      </p>
-      <p>
-        If you switch off the actionIdFeatures and contextActionIdInteractions,
-        the recommendations will no longer depend on the specific actionId
-        ('apple, 'pear', etc), but the probabilities will be the same for all
-        fruits and all treats.
-      </p>
-      <p>
-        If you switch off all toggles, all actionIds get the same score and so
-        the same probability.
-      </p>
-      <p>
-        Each time you change a toggle, the bandit gets reinstantiated and
-        retrained on the existing training data. You can see the newly fitted
-        coefficients in the JSON serialized bandit.
-      </p>
+      <ul>
+        <li>
+          The bandit can learn the interaction between the context (sunny or
+          rainy) and the fruit or treat preferences.
+        </li>
+        <li>
+          If you switch off the context interaction toggles, the recommendations
+          will no longer depend on the weather.
+        </li>
+        <li>
+          If you switch off the actionIdFeatures and
+          contextActionIdInteractions, the recommendations will no longer depend
+          on the specific actionId ('apple, 'pear', etc), but the probabilities
+          will be the same for all fruits and all treats.
+        </li>
+        <li>
+          If you switch off all toggles, all actionIds get the same score and so
+          the same probability.
+        </li>
+        <li>
+          Each time you change a toggle, the bandit gets reinstantiated and
+          retrained on the existing training data. You can see the newly fitted
+          coefficients in the JSON serialized bandit.
+        </li>
+      </ul>
       <div>
         <label style={{ display: "block", marginBottom: "10px" }}>
           <input
@@ -200,7 +201,18 @@ function ContextFruitBandit() {
         </table>
       </div>
       <h3>Context</h3>
+      <p>
+        After each recommendation we get a new random context/weather (sunny or
+        rainy).
+      </p>
+      <p>
+        You can also click the button to generate a new random context/weather,
+        and see how that affects the recommendations.
+      </p>
       <div>
+        <div>
+          <b>{context?.sunny == 1 ? "sunny" : "rainy"}</b>
+        </div>
         <button
           onClick={() => {
             generateNewRecommendation();
@@ -208,7 +220,6 @@ function ContextFruitBandit() {
         >
           Randomize Context/Weather
         </button>{" "}
-        <div>{context?.sunny == 1 ? "sunny" : "rainy"}</div>
       </div>
       <h3>Food recommendation</h3>
       <div>
@@ -216,6 +227,10 @@ function ContextFruitBandit() {
           You can try only eating fruit when it's sunny and only treats when
           it's rainy. Then see how fast the algorithm learns your context
           dependent preference.
+        </p>
+        <p>
+          Then switch on and off the toggles to see how that affects the
+          recommendations.
         </p>
       </div>{" "}
       {recommendation && (
