@@ -126,6 +126,8 @@ You can pass slateSize as a parameter to the bandit, or to the slate method itse
 slate = bandit.slate({ rain: 1 }, { slateSize: 3 });
 ```
 
+When you call `bandit.choose(...)` you generate both an accept training data point for the chosen `actionId`, and rejection training data points for the not-chosen `slateItems`. You can set a lower sample weight on the rejected options with e.g. `slateNegativeSampleWeight=0.5`.`
+
 ### Serializing and storing bandits
 
 You can easily serialize/deserialize bandits to/from JSON. So you can store e.g. a personalized bandit for each user and load them on demand.
@@ -147,7 +149,7 @@ bandit2.train(trainingData);
 
 ## Defining custom oracle
 
-For more control over the behaviour of your bandit, you customize the oracle:
+For more control over the behaviour of your bandit, you can customize the oracle:
 
 ```typescript
 oracle = new SimpleOracle({
@@ -233,7 +235,7 @@ slate = bandit.slate(context, { include: ["banana", "pear"] });
 ## Examples
 
 There are several usage examples provided in the `examples/` folder (built with react).
-You can run the examples with e.g. `parcel examples/index.html` or `make example` and then view them on e.g. `http://localhost:1234`.
+You can run the examples with `parcel examples/index.html` or `make example` and then view them on e.g. `http://localhost:1234`.
 
 Or simply visit [https://thoughtworks.github.io/simplebandit/](https://thoughtworks.github.io/simplebandit/).
 
