@@ -1,3 +1,5 @@
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/thoughtworks/simplebandit/node.js.yml)
+
 <img src="https://github.com/thoughtworks/simplebandit/assets/27999937/fb71b387-689d-4fd6-a80f-8eea37278d2c" width="50" align="right" alt="simplebandit-logo-transparent"/>
 
 # simplebandit
