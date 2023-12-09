@@ -1,5 +1,7 @@
 ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/thoughtworks/simplebandit/node.js.yml)
 ![NPM](https://img.shields.io/npm/l/simplebandit)
+![npm](https://img.shields.io/npm/v/simplebandit)
+
 
 
 
