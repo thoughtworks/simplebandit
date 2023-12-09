@@ -34,7 +34,7 @@ jobs:
       - run: npm run build --if-present
       - run: npm test
       - run: mkdir examples/dist
-      - run: parcel build examples/index.html --out-dir examples/dist --public-url ./ --no-minify
+      - run: npx parcel build examples/index.html --out-dir examples/dist --public-url ./ --no-minify
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
