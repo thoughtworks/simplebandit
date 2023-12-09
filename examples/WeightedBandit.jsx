@@ -12,20 +12,16 @@ function WeightedFruitBandit() {
   const [starRating, setStarRating] = useState(null);
 
   useEffect(() => {
-    let oldClickOracleWeights = bandit ? { ...bandit.oracle[0].weights } : {};
     const clickOracle = new SimpleOracle({
       learningRate: 0.1,
       targetLabel: "click",
       oracleWeight: clickWeight,
-      weights: oldClickOracleWeights,
     });
 
-    let oldStarsOracleWeights = bandit ? { ...bandit.oracle[1].weights } : {};
     const starsOracle = new SimpleOracle({
       learningRate: 0.1,
       targetLabel: "stars",
       oracleWeight: 1 - clickWeight,
-      weights: oldStarsOracleWeights,
     });
 
     const banditInstance = new SimpleBandit({
@@ -39,10 +35,10 @@ function WeightedFruitBandit() {
         cake: { treat: 1 },
       },
       temperature: 0.2,
-      slateSize: 3,
     });
+    setSerializedBandit(banditInstance.toJSON());
+    banditInstance.train(trainingData);
     setBandit(banditInstance);
-    setSerializedBandit(bandit ? bandit.toJSON() : "");
   }, [clickWeight]);
 
   useEffect(() => {
@@ -85,6 +81,13 @@ function WeightedFruitBandit() {
 
   const handleWeightChange = (newWeight) => {
     setClickWeight(newWeight);
+  };
+
+  const handleReset = () => {
+    setTrainingData([]);
+    setSelectedAction(null);
+    setStarRating(null);
+    setClickWeight(0.5);
   };
 
   return (
@@ -197,6 +200,7 @@ function WeightedFruitBandit() {
       <div>{JSON.stringify(trainingData)}</div>
       <h3>JSON serialized bandit</h3>
       <div>{serializedBandit}</div>
+      <button onClick={handleReset}>Reset</button>
     </div>
   );
 }

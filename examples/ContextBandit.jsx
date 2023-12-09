@@ -84,6 +84,14 @@ function ContextFruitBandit() {
     generateNewRecommendation();
   };
 
+  const HandleReset = () => {
+    setTrainingData([]);
+    setActionIdFeatures(true);
+    setActionFeatures(true);
+    setContextActionIdInteractions(true);
+    setContextActionFeatureInteractions(true);
+  };
+
   return (
     <div>
       <h3>Context dependent recommendations</h3>
@@ -221,6 +229,7 @@ function ContextFruitBandit() {
       <div>{JSON.stringify(trainingData)}</div>
       <h3>JSON serialized bandit</h3>
       <div>{serializedBandit}</div>
+      <button onClick={HandleReset}>Reset</button>
     </div>
   );
 }

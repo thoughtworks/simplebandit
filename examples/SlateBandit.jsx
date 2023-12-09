@@ -21,11 +21,13 @@ function SlateFruitBandit() {
         cake: { fruit: -1, treat: 1 },
       },
       temperature: 0.2,
-      slateSize: 3,
+      slateSize: slateSize,
       slateNegativeSampleWeight: 0.5,
     });
+    banditInstance.train(trainingData);
+    setSerializedBandit(banditInstance.toJSON());
     setBandit(banditInstance);
-  }, []);
+  }, [slateSize]);
 
   useEffect(() => {
     if (bandit) {
@@ -34,7 +36,7 @@ function SlateFruitBandit() {
   }, [bandit, slateSize]);
 
   const generateNewRecommendation = () => {
-    setSlate(bandit.slate({}, { slateSize: slateSize }));
+    setSlate(bandit.slate());
     const _scoredActions = bandit.getScoredActions();
     _scoredActions.forEach((scoredAction) => {
       const actionFeatures = bandit.actionsMap[scoredAction.actionId].features;
@@ -59,6 +61,11 @@ function SlateFruitBandit() {
     setTrainingData([...trainingData, ...newTrainingData]);
     setSerializedBandit(bandit.toJSON());
     generateNewRecommendation();
+  };
+
+  const handleReset = () => {
+    setTrainingData([]);
+    setSlateSize(3);
   };
 
   return (
@@ -133,6 +140,7 @@ function SlateFruitBandit() {
       <div>{JSON.stringify(trainingData)}</div>
       <h3>JSON serialized bandit</h3>
       <div>{serializedBandit}</div>
+      <button onClick={handleReset}>Reset</button>
     </div>
   );
 }
