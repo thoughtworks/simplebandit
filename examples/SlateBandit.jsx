@@ -13,12 +13,12 @@ function SlateFruitBandit() {
     const banditInstance = new SimpleBandit({
       oracle: new SimpleOracle({ learningRate: 0.05 }),
       actions: {
-        apple: { fruit: 1 },
-        pear: ["fruit"], // equivalent to { fruit:1 }
-        orange: { fruit: 1 },
-        chocolate: { treat: 1 },
-        candy: { treat: 1 },
-        cake: { treat: 1 },
+        apple: { fruit: 1, treat: -1 },
+        pear: { fruit: 1, treat: -1 },
+        orange: { fruit: 1, treat: -1 },
+        chocolate: { fruit: -1, treat: 1 },
+        candy: { fruit: -1, treat: 1 },
+        cake: { fruit: -1, treat: 1 },
       },
       temperature: 0.2,
       slateSize: 3,
@@ -64,14 +64,12 @@ function SlateFruitBandit() {
   return (
     <div>
       <h3>Slate of multiple recommendations</h3>
-      <p>The slate items get sampled one by one from top to bottom.</p>
-
-      <h3>Actions scores and probabilities:</h3>
       <p>
-        This slate recommender is both learning preference for specific items
-        and preferences for fruits or treats in general. By choosing a fruit,
-        all fruits go up in probability.
+        The slate of items gets randomly sampled one by one from top to bottom,
+        according to the oracle probabilties.
       </p>
+
+      <h3>Actions scores and probabilities</h3>
       <div>
         <table>
           <thead>
@@ -96,7 +94,9 @@ function SlateFruitBandit() {
           </tbody>
         </table>
       </div>
-      <h3>slateSize:</h3>
+
+      <h3>Slate</h3>
+      <h4>slateSize</h4>
       <label htmlFor="weightSlider">1</label>
       <input
         id="slateSizeSlider"
@@ -110,10 +110,9 @@ function SlateFruitBandit() {
         }}
       />
       <label htmlFor="weightSlider">6</label>
-      <h3>Recommended fruits:</h3>
       <p>
-        By selecting one item it will go up in probability, but you also reject
-        the others and they will go down in probability.
+        By choosing one item you also reject the other items in the slate. You
+        can see that we generate a trainingData for each item in the slate.
       </p>
       {slate &&
         slate.slateItems.map((action, index) => (

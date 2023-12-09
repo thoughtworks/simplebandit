@@ -46,7 +46,7 @@ function BasicFruitBandit() {
         When you eat a fruit, the probability of that fruit goes up. When you
         reject a fruit, the probability goes down
       </p>
-      <h3>Fruit probabilities:</h3>
+      <h3>Fruit probabilities</h3>
       <div>
         {scoredActions.map((scoredAction) => (
           <p key={scoredAction.actionId}>
@@ -55,7 +55,7 @@ function BasicFruitBandit() {
           </p>
         ))}
       </div>
-      <h3>Fruit recommendation:</h3>
+      <h3>Fruit recommendation</h3>
       <div>
         <p>
           Keep eating apples, and rejecting the other options, and see how

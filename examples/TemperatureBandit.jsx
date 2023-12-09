@@ -11,15 +11,15 @@ function TemperatureFruitBandit() {
   const [temperature, setTemperature] = useState(0.1);
 
   useEffect(() => {
-    let oldWeights = bandit ? { ...bandit.oracle[0].weights } : {};
     const banditInstance = new SimpleBandit({
       oracle: new SimpleOracle({
         learningRate: learningRate,
-        weights: oldWeights,
       }),
       actions: ["apple", "pear", "orange"],
       temperature: temperature,
     });
+    banditInstance.train(trainingData);
+    setSerializedBandit(banditInstance.toJSON());
     setBandit(banditInstance);
   }, [temperature, learningRate]);
 
@@ -53,13 +53,15 @@ function TemperatureFruitBandit() {
       <h3>Adjusting the Fruit Bandit</h3>
       <p>
         In this example you can adjust the learning rate of the oracle, and the
-        temperature of the bandit. The learning rate determines how quickly the
-        weights of the oracle adjust, and so how quickly the bandit learns and
-        forgets. The temperature determines how much the bandit explores versus
-        exploits.
+        temperature of the bandit.
       </p>
 
-      <h3>Learning Rate:</h3>
+      <h3>Learning Rate</h3>
+      <p>
+        The learning rate determines how quickly the weights of the oracle and
+        the resulting score adjust, and so how quickly the bandit learns and
+        forgets.
+      </p>
       <input
         id="learningRateSlider"
         type="range"
@@ -70,7 +72,10 @@ function TemperatureFruitBandit() {
         onChange={(e) => setLearningRate(parseFloat(e.target.value))}
       />
       <label htmlFor="learningRateSlider">{learningRate.toFixed(2)}</label>
-      <h3>Temperature:</h3>
+      <h3>Temperature</h3>
+      <p>
+        The temperature determines how much the bandit explores versus exploits.
+      </p>
       <input
         id="temperatureSlider"
         type="range"
@@ -81,7 +86,7 @@ function TemperatureFruitBandit() {
         onChange={(e) => setTemperature(parseFloat(e.target.value))}
       />
       <label htmlFor="temperatureSlider">{temperature.toFixed(2)}</label>
-      <h3>Actions scores and probabilities:</h3>
+      <h3>Actions scores and probabilities</h3>
       <p>
         Here we see underlying scores per actionId (fruit), and the resulting
         sampling probabilities depending on the temperature.{" "}
@@ -111,7 +116,7 @@ function TemperatureFruitBandit() {
           </tbody>
         </table>
       </div>
-      <h3>Recommended fruit:</h3>
+      <h3>Recommended fruit</h3>
       {recommendation && (
         <div>
           <b>{recommendation.actionId}</b>

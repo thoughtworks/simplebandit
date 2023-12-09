@@ -91,14 +91,13 @@ function WeightedFruitBandit() {
     <div>
       <h3>Weighted oracles</h3>
       <p>
-        This is an example of a bandit that combines two scores: a click score
-        and a star rating score.
+        This is an example of a bandit that combines two oracles: one oracle for
+        click scores and one oracle for star ratings.
       </p>
 
       <h3>Oracle Weights:</h3>
       <p>
-        You can select to put more weight on the predicted number of stars or
-        the predicted likelihood of a click.
+        You can select to put more weight on star oracle or on the click oracle.
       </p>
       <label htmlFor="weightSlider">Stars</label>
       <input
@@ -141,9 +140,10 @@ function WeightedFruitBandit() {
       </div>
       <h3>Recommended foods:</h3>
       <p>
-        You can try to e.g. mostly select fruits and give them low rating, and
-        sometimes select treats and give them a high rating. Then play with the
-        weight slider to see how that affects the recommendations probabilities.
+        You can try to e.g. mostly accept fruits but give them low rating, and
+        mostly reject treats but when you do accept give them a high rating.
+        Then play with the weight slider to see how that affects the
+        recommendations probabilities.
       </p>
       {recommendation && (
         <div>
