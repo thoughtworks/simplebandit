@@ -18,9 +18,12 @@ function TemperatureFruitBandit() {
       actions: ["apple", "pear", "orange"],
       temperature: temperature,
     });
-    banditInstance.train(trainingData);
-    setSerializedBandit(banditInstance.toJSON());
-    setBandit(banditInstance);
+    async function train() {
+      await banditInstance.train(trainingData);
+      setSerializedBandit(banditInstance.toJSON());
+      setBandit(banditInstance);
+    }
+    train();
   }, [temperature, learningRate]);
 
   useEffect(() => {

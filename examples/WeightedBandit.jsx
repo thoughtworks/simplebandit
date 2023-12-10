@@ -36,9 +36,12 @@ function WeightedFruitBandit() {
       },
       temperature: 0.2,
     });
-    setSerializedBandit(banditInstance.toJSON());
-    banditInstance.train(trainingData);
-    setBandit(banditInstance);
+    async function train() {
+      await banditInstance.train(trainingData);
+      setSerializedBandit(banditInstance.toJSON());
+      setBandit(banditInstance);
+    }
+    train();
   }, [clickWeight]);
 
   useEffect(() => {

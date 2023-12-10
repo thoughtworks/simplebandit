@@ -36,9 +36,12 @@ function ContextFruitBandit() {
       },
       temperature: 0.3,
     });
-    banditInstance.train(trainingData);
-    setBandit(banditInstance);
-    setSerializedBandit(banditInstance.toJSON());
+    async function train() {
+      await banditInstance.train(trainingData);
+      setSerializedBandit(banditInstance.toJSON());
+      setBandit(banditInstance);
+    }
+    train();
   }, [
     actionIdFeatures,
     actionFeatures,

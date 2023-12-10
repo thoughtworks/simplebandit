@@ -24,9 +24,12 @@ function SlateFruitBandit() {
       slateSize: slateSize,
       slateNegativeSampleWeight: 0.5,
     });
-    banditInstance.train(trainingData);
-    setSerializedBandit(banditInstance.toJSON());
-    setBandit(banditInstance);
+    async function train() {
+      await banditInstance.train(trainingData);
+      setSerializedBandit(banditInstance.toJSON());
+      setBandit(banditInstance);
+    }
+    train();
   }, [slateSize]);
 
   useEffect(() => {

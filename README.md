@@ -2,9 +2,6 @@
 ![NPM](https://img.shields.io/npm/l/simplebandit)
 ![npm](https://img.shields.io/npm/v/simplebandit)
 
-
-
-
 <img src="https://github.com/thoughtworks/simplebandit/assets/27999937/fb71b387-689d-4fd6-a80f-8eea37278d2c" width="50" align="right" alt="simplebandit-logo-transparent"/>
 
 # simplebandit
@@ -151,7 +148,7 @@ These can be stored so that you can re-train the bandit at a later point (perhap
 ```typescript
 const trainingData = await bandit.accept(recommendation);
 const bandit2 = new SimpleBandit({ actions: ["apple", "pear"] });
-bandit2.train(trainingData);
+await bandit2.train(trainingData);
 ```
 
 ## Defining custom oracle
@@ -211,7 +208,7 @@ For other `targetLabels` there is the `feedback` method. You need to specify the
 
 ```typescript
 recommendation = bandit.recommend();
-bandit.feedback(
+await bandit.feedback(
   recommendation,
   "stars", // targetLabel
   1.0, // value: should be 0 < value < 1
@@ -222,7 +219,7 @@ For a slate you also have to specify which action was chosen:
 
 ```typescript
 slate = bandit.slate();
-bandit.feedback(
+await bandit.feedback(
   slate,
   "stars",
   1.0,

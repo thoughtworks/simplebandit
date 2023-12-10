@@ -277,7 +277,7 @@ describe("Single Oracle Bandit Recommendation", () => {
   });
 
   describe("train", () => {
-    it("training the bandit should change the weights of the oracle", () => {
+    it("training the bandit should change the weights of the oracle", async () => {
       const oldWeights = { ...bandit.oracle[0].weights };
       const trainingData: ITrainingData[] = [
         {
@@ -305,7 +305,7 @@ describe("Single Oracle Bandit Recommendation", () => {
           click: 0,
         },
       ];
-      bandit.train(trainingData);
+      await bandit.train(trainingData);
       expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
     });
   });
@@ -326,16 +326,16 @@ describe("Single Oracle Bandit Recommendation", () => {
       expect(recommendation.probability).toBeDefined();
     });
     describe("accept", () => {
-      it("the weights of the oracle should be changed", () => {
+      it("the weights of the oracle should be changed", async () => {
         const oldWeights = { ...bandit.oracle[0].weights };
-        bandit.accept(recommendation);
+        await bandit.accept(recommendation);
         expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
       });
     });
     describe("reject", () => {
-      it("the weights of the oracle should be changed", () => {
+      it("the weights of the oracle should be changed", async () => {
         const oldWeights = { ...bandit.oracle[0].weights };
-        bandit.reject(recommendation);
+        await bandit.reject(recommendation);
         expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
       });
     });

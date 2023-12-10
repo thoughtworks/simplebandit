@@ -10,8 +10,10 @@ import { ISimpleBanditState } from "./interfaces/IState";
 
 import { SampleFromProbabilityDistribution } from "./Sampling";
 import { SimpleOracle } from "./SimpleOracle";
+import { SimpleMutex } from "./SimpleMutex";
 
 export class SimpleBandit implements ISimpleBandit {
+  private mutex = new SimpleMutex();
   oracle: SimpleOracle[];
   targetLabels: string[];
   temperature: number;
@@ -328,7 +330,7 @@ export class SimpleBandit implements ISimpleBandit {
   }
 
   accept(recommendation: IRecommendation): Promise<ITrainingData[]> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         if (!this.targetLabels.includes("click")) {
           throw new Error(
@@ -339,7 +341,7 @@ export class SimpleBandit implements ISimpleBandit {
           recommendation,
           recommendation.actionId,
         );
-        this.train(trainingData);
+        await this.train(trainingData);
         resolve(trainingData);
       } catch (error) {
         reject(error);
@@ -348,7 +350,7 @@ export class SimpleBandit implements ISimpleBandit {
   }
 
   choose(slate: ISlate, actionId: string): Promise<ITrainingData[]> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         if (!this.targetLabels.includes("click")) {
           throw new Error(
@@ -366,7 +368,7 @@ export class SimpleBandit implements ISimpleBandit {
           slate,
           actionId,
         );
-        this.train(trainingData);
+        await this.train(trainingData);
         resolve(trainingData);
       } catch (error) {
         reject(error);
@@ -375,7 +377,7 @@ export class SimpleBandit implements ISimpleBandit {
   }
 
   reject(recommendation: IRecommendation | ISlate): Promise<ITrainingData[]> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         if (!this.targetLabels.includes("click")) {
           throw new Error(
@@ -386,7 +388,7 @@ export class SimpleBandit implements ISimpleBandit {
           recommendation,
           undefined,
         );
-        this.train(trainingData);
+        await this.train(trainingData);
         resolve(trainingData);
       } catch (error) {
         reject(error);
@@ -400,7 +402,7 @@ export class SimpleBandit implements ISimpleBandit {
     value: number,
     actionId: string | undefined = undefined,
   ): Promise<ITrainingData[]> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         if (!this.targetLabels.includes(label)) {
           throw new Error(`label ${label} not in any of weightedOracles`);
@@ -448,7 +450,7 @@ export class SimpleBandit implements ISimpleBandit {
             probability: probability,
           },
         ];
-        this.train(trainingData);
+        await this.train(trainingData);
         resolve(trainingData);
       } catch (error) {
         reject(error);
@@ -456,16 +458,17 @@ export class SimpleBandit implements ISimpleBandit {
     });
   }
 
-  train(trainingData: ITrainingData[]): Promise<void> {
-    return new Promise((resolve, reject) => {
-      try {
-        for (const oracle of this.oracle) {
-          oracle.fit(trainingData);
-        }
-        resolve();
-      } catch (error) {
-        reject(error);
+  public async train(trainingData: ITrainingData[]): Promise<void> {
+    await this.mutex.run(() => {
+      for (const oracle of this.oracle) {
+        oracle.fit(trainingData);
       }
     });
   }
+
+  // public async increment(): Promise<void> {
+  //   await this.mutex.run(() => {
+  //     this.value += 1;
+  //   });
+  // }
 }

@@ -137,7 +137,7 @@ describe("Multiple Oracles Recomendation", () => {
   });
 
   describe("train", () => {
-    it("training the bandit should change the weights of the oracle", () => {
+    it("training the bandit should change the weights of the oracle", async () => {
       const oldWeights: Array<{ [feature: string]: number }> =
         bandit.oracle.map((oracle) => {
           return { ...oracle.weights };
@@ -184,7 +184,7 @@ describe("Multiple Oracles Recomendation", () => {
           rating: 0,
         },
       ];
-      bandit.train(trainingData);
+      await bandit.train(trainingData);
       for (let i = 0; i < bandit.oracle.length; i++) {
         expect(bandit.oracle[i].weights).not.toEqual(oldWeights[i]);
       }
@@ -207,24 +207,24 @@ describe("Multiple Oracles Recomendation", () => {
       expect(recommendation.probability).toBeDefined();
     });
     describe("accept", () => {
-      it("the weights of the oracle should be changed", () => {
+      it("the weights of the oracle should be changed", async () => {
         const oldWeights = { ...bandit.oracle[0].weights };
-        bandit.accept(recommendation);
+        await bandit.accept(recommendation);
         expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
       });
     });
     describe("reject", () => {
-      it("the weights of the oracle should be changed", () => {
-        bandit.accept(recommendation);
+      it("the weights of the oracle should be changed", async () => {
+        await bandit.accept(recommendation);
         const oldWeights = { ...bandit.oracle[0].weights };
-        bandit.reject(recommendation);
+        await bandit.reject(recommendation);
         expect(bandit.oracle[0].weights).not.toEqual(oldWeights);
       });
     });
     describe("feedback", () => {
-      it("the weights of the oracle should be changed", () => {
+      it("the weights of the oracle should be changed", async () => {
         const oldWeights = { ...bandit.oracle[1].weights };
-        bandit.feedback(recommendation, "rating", 1);
+        await bandit.feedback(recommendation, "rating", 1);
         expect(bandit.oracle[1].weights).not.toEqual(oldWeights);
       });
     });
