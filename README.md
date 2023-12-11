@@ -121,7 +121,7 @@ const bandit = new SimpleBandit({
 });
 let slate = bandit.slate();
 await bandit.choose(slate, slate.slateItems[1].actionId);
-//bandit.reject(slate)
+//await bandit.reject(slate)
 ```
 
 You can pass slateSize as a parameter to the bandit, or to the slate method itself:
